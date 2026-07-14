@@ -14,6 +14,11 @@ export default [
       ecmaVersion: 2022,
       globals: {
         fetch: 'readonly',
+        indexedDB: 'readonly',
+        IDBDatabase: 'readonly',
+        IDBTransactionMode: 'readonly',
+        IDBObjectStore: 'readonly',
+        IDBRequest: 'readonly',
       },
     },
     plugins: {
