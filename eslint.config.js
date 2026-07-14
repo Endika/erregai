@@ -19,6 +19,10 @@ export default [
         IDBTransactionMode: 'readonly',
         IDBObjectStore: 'readonly',
         IDBRequest: 'readonly',
+        navigator: 'readonly',
+        Notification: 'readonly',
+        window: 'readonly',
+        localStorage: 'readonly',
       },
     },
     plugins: {
