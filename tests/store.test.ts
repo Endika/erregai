@@ -46,6 +46,23 @@ describe('store.loadFor', () => {
     expect(calls).toBe(2)
     expect(store.state.dataDate).toBe('f2')
   })
+  it('ensureAround: a province failing with no cache keeps state.error set even when a later sibling province succeeds', async () => {
+    const callOrder: string[] = []
+    const fake = (async (id: string) => {
+      callOrder.push(id)
+      if (callOrder.length === 2) throw new Error('offline')
+      return { fecha: 'x', stations: [stn(`p${id}`), stn('shared')] }
+    })
+    const store = new Store({ fetchProvince: fake as any, kv: memKv(), now: () => 1000 })
+    await store.ensureAround({ lat: 40.4168, lon: -3.7038 }, 2)  // Madrid + 2 neighbours = 3 provinces
+    expect(callOrder.length).toBe(3)
+    expect(store.state.error).toBeTruthy()                        // one province failed with no cache -> batch error surfaced
+    const failedId = callOrder[1]
+    const ids = store.state.stations.map(s => s.id)
+    expect(ids).not.toContain(`p${failedId}`)                     // failed province contributed no stations
+    expect(ids.filter(x => x === 'shared').length).toBe(1)        // dedupe across the 2 successful provinces still holds
+    expect(new Set(ids).size).toBe(ids.length)
+  })
   it('keeps stale cached data visible when a background refetch fails', async () => {
     let calls = 0
     const fake = async () => { calls++; if (calls > 1) throw new Error('offline'); return { fecha: 'f1', stations: [stn('1')] } }
