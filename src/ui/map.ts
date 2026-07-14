@@ -11,6 +11,7 @@ const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 const INITIAL_ZOOM = 12
 const FALLBACK_MARKER_COLOR = '#666666'
+const SELECTED_STROKE = '#111111'
 const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user']
 
 function readMarkerColors(): Record<MarkerKind, string> {
@@ -29,7 +30,7 @@ export class MapView {
 
   constructor(private container: HTMLElement) {}
 
-  render(pos: LatLon, stations: Station[], fuel: FuelId, onSelect: (s: Station) => void, opts: { recenter?: boolean } = {}): void {
+  render(pos: LatLon, stations: Station[], fuel: FuelId, onSelect: (s: Station) => void, opts: { recenter?: boolean; selectedId?: string } = {}): void {
     if (!this.map) this.init(pos)
     if (!this.map || !this.markers) return
 
@@ -46,17 +47,19 @@ export class MapView {
     for (const station of stations) {
       const price = priceOf(station, fuel)
       const kind: MarkerKind = price !== undefined ? bandForThresholds(price, thresholds) : 'unknown'
+      const selected = station.id === opts.selectedId
       const marker = L.circleMarker([station.pos.lat, station.pos.lon], {
-        radius: 8,
-        color: '#ffffff',
-        weight: 2,
+        radius: selected ? 12 : 8,
+        color: selected ? SELECTED_STROKE : '#ffffff',
+        weight: selected ? 4 : 2,
         fillColor: colors[kind],
-        fillOpacity: 0.9,
+        fillOpacity: selected ? 1 : 0.9,
       })
       const priceLabel = price !== undefined ? price.toFixed(3) : '—'
       marker.bindTooltip(`${station.brand} · ${priceLabel}`)
       marker.on('click', () => onSelect(station))
       this.markers.addLayer(marker)
+      if (selected) { marker.bringToFront(); marker.openTooltip() }
     }
   }
 
@@ -66,6 +69,10 @@ export class MapView {
 
   focus(pos: LatLon, zoom: number): void {
     this.map?.setView([pos.lat, pos.lon], zoom, { animate: false })
+  }
+
+  panTo(pos: LatLon): void {
+    this.map?.panTo([pos.lat, pos.lon], { animate: true })
   }
 
   destroy(): void {
