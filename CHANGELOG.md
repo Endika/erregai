@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/Endika/erregai/compare/v1.8.0...v1.9.0) (2026-07-14)
+
+
+### Features
+
+* **trip:** make the trip list tappable and sortable, defaulting to distance ([ceef542](https://github.com/Endika/erregai/commit/ceef542b0032380cbb89b53da16b6c39d6576fbc))
+
 ## [1.8.0](https://github.com/Endika/erregai/compare/v1.7.0...v1.8.0) (2026-07-14)
 
 
