@@ -13,6 +13,10 @@ export function setLocale(l: Locale): void {
   currentLocale = l
 }
 
+export function getLocale(): Locale {
+  return currentLocale
+}
+
 export function detectLocale(): Locale {
   const lang = navigator.language?.slice(0, 2)
   return lang === 'en' ? 'en' : DEFAULT_LOCALE

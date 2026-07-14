@@ -1,7 +1,8 @@
 import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import { haversineKm, type LatLon } from '../core/geo'
-import { bandFor, priceOf } from '../core/pricing'
+import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
+import { t } from '../i18n'
 
 export function renderList(
   container: HTMLElement,
@@ -13,6 +14,7 @@ export function renderList(
   const knownPrices = stations
     .map(s => priceOf(s, fuel))
     .filter((p): p is number => p !== undefined)
+  const thresholds = bandThresholds(knownPrices)
 
   const list = document.createElement('div')
   list.className = 'station-list'
@@ -24,7 +26,6 @@ export function renderList(
     row.type = 'button'
     row.className = 'station-row'
     row.dataset.station = station.id
-    if (price !== undefined) row.dataset.band = bandFor(price, knownPrices)
 
     const brand = document.createElement('span')
     brand.className = 'station-row__brand'
@@ -41,6 +42,14 @@ export function renderList(
     const priceEl = document.createElement('span')
     priceEl.className = 'station-row__price'
     priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
+
+    if (price !== undefined) {
+      const band = bandForThresholds(price, thresholds)
+      row.dataset.band = band
+      const bandLabel = t(`band.${band}`)
+      priceEl.title = bandLabel
+      priceEl.setAttribute('aria-label', bandLabel)
+    }
 
     row.append(brand, town, distance, priceEl)
     row.addEventListener('click', () => onSelect(station))

@@ -3,17 +3,23 @@ import * as L from 'leaflet'
 import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import type { LatLon } from '../core/geo'
-import { bandFor, priceOf, type PriceBand } from '../core/pricing'
+import { bandForThresholds, bandThresholds, priceOf, type PriceBand } from '../core/pricing'
 
 type MarkerKind = PriceBand | 'unknown' | 'user'
 
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 const INITIAL_ZOOM = 12
+const FALLBACK_MARKER_COLOR = '#666666'
+const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user']
 
-function markerColor(kind: MarkerKind): string {
-  const value = getComputedStyle(document.documentElement).getPropertyValue(`--map-marker-${kind}`).trim()
-  return value || '#666666'
+function readMarkerColors(): Record<MarkerKind, string> {
+  const style = getComputedStyle(document.documentElement)
+  const colors = {} as Record<MarkerKind, string>
+  for (const kind of MARKER_KINDS) {
+    colors[kind] = style.getPropertyValue(`--map-marker-${kind}`).trim() || FALLBACK_MARKER_COLOR
+  }
+  return colors
 }
 
 export class MapView {
@@ -33,15 +39,17 @@ export class MapView {
     const knownPrices = stations
       .map(s => priceOf(s, fuel))
       .filter((p): p is number => p !== undefined)
+    const thresholds = bandThresholds(knownPrices)
+    const colors = readMarkerColors()
 
     for (const station of stations) {
       const price = priceOf(station, fuel)
-      const kind: MarkerKind = price !== undefined ? bandFor(price, knownPrices) : 'unknown'
+      const kind: MarkerKind = price !== undefined ? bandForThresholds(price, thresholds) : 'unknown'
       const marker = L.circleMarker([station.pos.lat, station.pos.lon], {
         radius: 8,
         color: '#ffffff',
         weight: 2,
-        fillColor: markerColor(kind),
+        fillColor: colors[kind],
         fillOpacity: 0.9,
       })
       const priceLabel = price !== undefined ? price.toFixed(3) : '—'
@@ -66,11 +74,12 @@ export class MapView {
     const map = L.map(this.container).setView([pos.lat, pos.lon], INITIAL_ZOOM)
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map)
     this.markers = L.layerGroup().addTo(map)
+    const colors = readMarkerColors()
     this.userMarker = L.circleMarker([pos.lat, pos.lon], {
       radius: 7,
       color: '#ffffff',
       weight: 2,
-      fillColor: markerColor('user'),
+      fillColor: colors.user,
       fillOpacity: 1,
     }).addTo(map)
     this.map = map

@@ -13,12 +13,6 @@ export function peekProvince(id: string, kv: Kv): Promise<CacheEntry | undefined
   return kv.get(id)
 }
 
-export async function getCachedProvince(id: string, now: number, kv: Kv): Promise<CacheEntry | undefined> {
-  const e = await kv.get(id)
-  if (!e) return undefined
-  return isFresh(e, now) ? e : undefined
-}
-
 export async function putProvince(id: string, res: ProvinceResult, now: number, kv: Kv): Promise<CacheEntry> {
   const e: CacheEntry = { id, fecha: res.fecha, stations: res.stations, storedAt: now }
   await kv.put(e)

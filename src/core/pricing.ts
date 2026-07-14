@@ -15,12 +15,21 @@ function percentile(sorted: number[], p: number): number {
   return sorted[idx]
 }
 
-export function bandFor(price: number, all: number[]): PriceBand {
-  const sorted = [...all].sort((a, b) => a - b)
-  const low = percentile(sorted, 0.33), high = percentile(sorted, 0.66)
-  if (price <= low) return 'cheap'
-  if (price >= high) return 'expensive'
+export interface BandThresholds { low: number; high: number }
+
+export function bandThresholds(prices: number[]): BandThresholds {
+  const sorted = [...prices].sort((a, b) => a - b)
+  return { low: percentile(sorted, 0.33), high: percentile(sorted, 0.66) }
+}
+
+export function bandForThresholds(price: number, t: BandThresholds): PriceBand {
+  if (price <= t.low) return 'cheap'
+  if (price >= t.high) return 'expensive'
   return 'mid'
+}
+
+export function bandFor(price: number, all: number[]): PriceBand {
+  return bandForThresholds(price, bandThresholds(all))
 }
 
 export function sortStations(stations: Station[], fuel: FuelId, origin: LatLon, key: SortKey): Station[] {

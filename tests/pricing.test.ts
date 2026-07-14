@@ -1,4 +1,4 @@
-import { priceOf, bandFor, sortStations } from '../src/core/pricing'
+import { priceOf, bandFor, bandThresholds, bandForThresholds, sortStations } from '../src/core/pricing'
 import type { Station } from '../src/core/station'
 
 const mk = (id: string, lat: number, price?: number): Station => ({
@@ -17,6 +17,16 @@ describe('pricing', () => {
     expect(bandFor(1.0, all)).toBe('cheap')
     expect(bandFor(1.5, all)).toBe('expensive')
     expect(bandFor(1.25, all)).toBe('mid')
+  })
+  it('bandThresholds + bandForThresholds match bandFor on the same set', () => {
+    const all = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    const thresholds = bandThresholds(all)
+    for (const price of [1.0, 1.25, 1.5]) {
+      expect(bandForThresholds(price, thresholds)).toBe(bandFor(price, all))
+    }
+    expect(bandForThresholds(1.0, thresholds)).toBe('cheap')
+    expect(bandForThresholds(1.5, thresholds)).toBe('expensive')
+    expect(bandForThresholds(1.25, thresholds)).toBe('mid')
   })
   it('sort by price ascending, missing-fuel last', () => {
     const out = sortStations([mk('a', 0, 1.5), mk('b', 0, 1.2), mk('c', 0)], 'gasoleoA', { lat: 0, lon: 0 }, 'price')
