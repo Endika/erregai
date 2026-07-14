@@ -11,6 +11,10 @@ export default [
       parserOptions: {
         project: './tsconfig.json',
       },
+      ecmaVersion: 2022,
+      globals: {
+        fetch: 'readonly',
+      },
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
