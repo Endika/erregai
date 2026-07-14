@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/Endika/erregai/compare/v1.4.0...v1.5.0) (2026-07-14)
+
+
+### Features
+
+* **pwa:** add fuel-pump favicon and regenerate app icons to match ([e42d3a3](https://github.com/Endika/erregai/commit/e42d3a35fff20a870834133ecdbe6fa9369e6f1a))
+
 ## [1.4.0](https://github.com/Endika/erregai/compare/v1.3.0...v1.4.0) (2026-07-14)
 
 
