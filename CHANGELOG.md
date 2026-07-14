@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/Endika/erregai/compare/v1.1.0...v1.1.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **ui:** bound app-shell to 100dvh so header and tab bar stay visible ([cd51947](https://github.com/Endika/erregai/commit/cd51947cc27579ebf9792dfd3669f456da374f6c))
+
 ## [1.1.0](https://github.com/Endika/erregai/compare/v1.0.0...v1.1.0) (2026-07-14)
 
 
