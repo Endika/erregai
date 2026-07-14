@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+    # Major bumps have broken the build before (eslint 10 / typescript 6 /
+    # vite 8 / vitest 4); only patch & minor are proposed — do majors manually.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: chore
