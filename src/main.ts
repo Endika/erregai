@@ -9,7 +9,7 @@ import { renderDetail } from './ui/detail'
 import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
-import { sortStations } from './core/pricing'
+import { sortStations, type SortKey } from './core/pricing'
 import { haversineKm, type LatLon } from './core/geo'
 import type { Station } from './core/station'
 import type { Settings } from './app/settings'
@@ -124,6 +124,31 @@ function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): St
   return stations.filter(s => haversineKm(origin, s.pos) <= radiusKm)
 }
 
+const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
+
+function sortToggle(current: SortKey): HTMLElement {
+  const bar = document.createElement('div')
+  bar.className = 'sort-bar'
+  for (const key of SORT_KEYS) {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'sort-bar__btn'
+    btn.classList.toggle('is-active', key === current)
+    btn.setAttribute('aria-pressed', String(key === current))
+    btn.textContent = t(`sort.${key}`)
+    btn.addEventListener('click', () => store.setSettings({ sort: key }))
+    bar.appendChild(btn)
+  }
+  return bar
+}
+
+function renderStationList(container: HTMLElement, sorted: Station[], fuel: Settings['fuel'], origin: LatLon, sort: SortKey, selectedId?: string): void {
+  container.appendChild(sortToggle(sort))
+  const listContainer = document.createElement('div')
+  container.appendChild(listContainer)
+  renderList(listContainer, sorted, fuel, origin, selectStation, selectedId)
+}
+
 function applyTheme(theme: Settings['theme']): void {
   if (theme === 'system') delete document.documentElement.dataset.theme
   else document.documentElement.dataset.theme = theme
@@ -174,7 +199,7 @@ function render(): void {
         renderEmptyState(state.settings.radiusKm)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation, selectedId)
+        renderStationList(viewEl, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
       }
     } else {
       renderPositionPlaceholder()
@@ -198,7 +223,7 @@ function render(): void {
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
         mapView.invalidateSize()
         if (selectedStation) mapView.panTo(selectedStation.pos)
-        renderList(listWrap, sorted, state.settings.fuel, state.pos, selectStation, selectedId)
+        renderStationList(listWrap, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
       }
     } else {
       renderPositionPlaceholder()
