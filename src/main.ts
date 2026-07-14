@@ -27,6 +27,7 @@ applyTheme(store.state.settings.theme)
 let activeTab: Tab = 'list'
 let selectedStation: Station | undefined
 let locationError: string | undefined
+let locating = false
 
 const root: HTMLElement = document.getElementById('app') ??
   (() => { throw new Error('missing #app root element') })()
@@ -107,11 +108,28 @@ function renderCard(): void {
   cardEl.hidden = false
 }
 
+function locate(): void {
+  locating = true
+  render()
+  getOnce()
+    .then(pos => { locationError = undefined; return store.loadFor(pos) })
+    .catch(() => { locationError = t('error.location') })
+    .finally(() => { locating = false; render() })
+}
+
 function renderPositionPlaceholder(): void {
   const placeholder = document.createElement('p')
   placeholder.className = 'placeholder'
-  placeholder.textContent = locationError ?? t('app.loading')
+  placeholder.textContent = locating ? t('app.loading') : (locationError ?? t('app.loading'))
   viewEl.appendChild(placeholder)
+  if (locationError && !locating) {
+    const retry = document.createElement('button')
+    retry.type = 'button'
+    retry.className = 'placeholder-retry'
+    retry.textContent = t('action.retry')
+    retry.addEventListener('click', locate)
+    viewEl.appendChild(retry)
+  }
 }
 
 function renderEmptyState(radiusKm: number): void {
@@ -164,7 +182,12 @@ function render(): void {
     button.setAttribute('aria-selected', String(isActive))
   }
 
-  freshnessEl.textContent = state.dataDate ? `${t('app.updated')} ${state.dataDate}` : t('app.loading')
+  const busy = state.loading || locating
+  freshnessEl.textContent = busy
+    ? t('app.refreshing')
+    : (state.dataDate ? `${t('app.updated')} ${state.dataDate}` : t('app.loading'))
+  refreshButton.classList.toggle('is-busy', busy)
+  refreshButton.disabled = busy
 
   const errorMessage = locationError ?? (state.error ? `${t('error.network')}: ${state.error}` : undefined)
   errorEl.textContent = errorMessage ?? ''
@@ -234,13 +257,4 @@ function render(): void {
 
 store.subscribe(render)
 render()
-
-getOnce()
-  .then(pos => {
-    locationError = undefined
-    return store.loadFor(pos)
-  })
-  .catch(() => {
-    locationError = t('error.location')
-    render()
-  })
+locate()

@@ -116,5 +116,28 @@ export function renderSettings(
   themeField.append(themeCaption, themeSelect)
   form.appendChild(themeField)
 
+  const about = document.createElement('section')
+  about.className = 'settings-about'
+  const aboutTitle = document.createElement('h2')
+  aboutTitle.className = 'settings-about__title'
+  aboutTitle.textContent = t('settings.about')
+  const legend = document.createElement('div')
+  legend.className = 'legend'
+  for (const band of ['cheap', 'expensive'] as const) {
+    const item = document.createElement('span')
+    item.className = 'legend__item'
+    item.dataset.band = band
+    item.textContent = t(`band.${band}`)
+    legend.appendChild(item)
+  }
+  const dataCredit = document.createElement('p')
+  dataCredit.className = 'settings-about__credit'
+  dataCredit.textContent = t('about.data')
+  const mapCredit = document.createElement('p')
+  mapCredit.className = 'settings-about__credit'
+  mapCredit.textContent = t('about.map')
+  about.append(aboutTitle, legend, dataCredit, mapCredit)
+  form.appendChild(about)
+
   container.replaceChildren(form)
 }

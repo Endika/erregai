@@ -12,6 +12,8 @@ export const eu: Record<string, string> = {
   'app.updated': 'Eguneratua',
   'app.refresh': 'Eguneratu',
   'app.loading': 'Kargatzen…',
+  'app.refreshing': 'Eguneratzen…',
+  'action.retry': 'Berriro saiatu',
 
   'nav.list': 'Zerrenda',
   'nav.map': 'Mapa',
@@ -46,6 +48,9 @@ export const eu: Record<string, string> = {
   'theme.light': 'Argia',
   'theme.system': 'Sistema',
   'theme.dark': 'Iluna',
+  'settings.about': 'Honi buruz',
+  'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',
+  'about.map': 'Mapa: OpenStreetMap',
 
   'error.location': 'Ezin izan da kokapena lortu',
   'error.network': 'Sareko errorea',

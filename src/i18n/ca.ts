@@ -12,6 +12,8 @@ export const ca: Record<string, string> = {
   'app.updated': 'Actualitzat',
   'app.refresh': 'Actualitzar',
   'app.loading': 'Carregant…',
+  'app.refreshing': 'Actualitzant…',
+  'action.retry': 'Reintentar',
 
   'nav.list': 'Llista',
   'nav.map': 'Mapa',
@@ -46,6 +48,9 @@ export const ca: Record<string, string> = {
   'theme.light': 'Clar',
   'theme.system': 'Sistema',
   'theme.dark': 'Fosc',
+  'settings.about': 'Quant a',
+  'about.data': 'Preus: Ministeri de Transició Ecològica',
+  'about.map': 'Mapa: OpenStreetMap',
 
   'error.location': "No s'ha pogut obtenir la ubicació",
   'error.network': 'Error de xarxa',
