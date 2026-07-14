@@ -10,14 +10,16 @@ import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
 import { sortStations } from './core/pricing'
+import { haversineKm, type LatLon } from './core/geo'
 import type { Station } from './core/station'
+import type { Settings } from './app/settings'
 
 type Tab = 'list' | 'map' | 'trip' | 'settings'
 const TABS: readonly Tab[] = ['list', 'map', 'trip', 'settings']
 
-setLocale(detectLocale())
-
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
+
+setLocale(store.state.settings.locale ?? detectLocale())
 
 let activeTab: Tab = 'list'
 let selectedStation: Station | undefined
@@ -28,13 +30,14 @@ const root: HTMLElement = document.getElementById('app') ??
 
 root.innerHTML = `
   <header class="app-header">
+    <span class="app-header__title" data-title></span>
     <span class="app-header__freshness" data-freshness></span>
-    <button type="button" class="app-header__refresh" data-refresh>${t('app.refresh')}</button>
+    <button type="button" class="app-header__refresh" data-refresh></button>
   </header>
   <p class="app-error" data-error hidden></p>
   <main class="app-main" data-view></main>
   <nav class="tab-bar" role="tablist">
-    ${TABS.map(tab => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}">${t(`nav.${tab}`)}</button>`).join('')}
+    ${TABS.map(tab => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}"></button>`).join('')}
   </nav>
 `
 
@@ -44,9 +47,11 @@ function requireEl<T extends Element>(selector: string): T {
   return el
 }
 
+const titleEl = requireEl<HTMLElement>('[data-title]')
 const freshnessEl = requireEl<HTMLElement>('[data-freshness]')
 const errorEl = requireEl<HTMLElement>('[data-error]')
 const viewEl = requireEl<HTMLElement>('[data-view]')
+const refreshButton = requireEl<HTMLButtonElement>('[data-refresh]')
 const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 
 const mapContainer = document.createElement('div')
@@ -94,8 +99,36 @@ function renderPositionPlaceholder(): void {
   viewEl.appendChild(placeholder)
 }
 
+function renderEmptyState(radiusKm: number): void {
+  const placeholder = document.createElement('p')
+  placeholder.className = 'placeholder'
+  placeholder.textContent = t('list.empty').replace('{radius}', String(radiusKm))
+  viewEl.appendChild(placeholder)
+}
+
+function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): Station[] {
+  return stations.filter(s => haversineKm(origin, s.pos) <= radiusKm)
+}
+
+function handleSettingsChange(partial: Partial<Settings>): void {
+  if (partial.locale) setLocale(partial.locale)
+  store.setSettings(partial)
+}
+
+function refreshStaticCopy(): void {
+  document.title = t('app.title')
+  titleEl.textContent = t('app.title')
+  refreshButton.textContent = t('app.refresh')
+  for (const button of tabButtons) {
+    const tab = button.dataset.tab as Tab
+    button.textContent = t(`nav.${tab}`)
+  }
+}
+
 function render(): void {
   const state = store.state
+
+  refreshStaticCopy()
 
   for (const button of tabButtons) {
     const isActive = button.dataset.tab === activeTab
@@ -116,8 +149,13 @@ function render(): void {
     if (selectedStation) {
       renderStationDetail(selectedStation)
     } else if (state.pos) {
-      const sorted = sortStations(state.stations, state.settings.fuel, state.pos, state.settings.sort)
-      renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation)
+      const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
+      if (nearby.length === 0) {
+        renderEmptyState(state.settings.radiusKm)
+      } else {
+        const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
+        renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation)
+      }
     } else {
       renderPositionPlaceholder()
     }
@@ -125,15 +163,21 @@ function render(): void {
     if (selectedStation) {
       renderStationDetail(selectedStation)
     } else if (state.pos) {
-      viewEl.appendChild(mapContainer)
-      mapView.render(state.pos, state.stations, state.settings.fuel, selectStation)
+      const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
+      if (nearby.length === 0) {
+        renderEmptyState(state.settings.radiusKm)
+      } else {
+        viewEl.appendChild(mapContainer)
+        mapView.render(state.pos, nearby, state.settings.fuel, selectStation)
+        mapView.invalidateSize()
+      }
     } else {
       renderPositionPlaceholder()
     }
   } else if (activeTab === 'trip') {
     tripController.render(viewEl, tripController.currentUpdate)
   } else if (activeTab === 'settings') {
-    renderSettings(viewEl, state.settings, partial => store.setSettings(partial))
+    renderSettings(viewEl, state.settings, handleSettingsChange)
   }
 }
 

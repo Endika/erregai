@@ -86,7 +86,14 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+.app-header__title {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
 .app-header__freshness {
+  flex: 1;
+  min-width: 0;
   color: var(--color-muted);
   font-size: 0.875rem;
   overflow: hidden;

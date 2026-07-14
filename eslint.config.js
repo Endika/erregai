@@ -15,10 +15,6 @@ export default [
       globals: {
         fetch: 'readonly',
         indexedDB: 'readonly',
-        IDBDatabase: 'readonly',
-        IDBTransactionMode: 'readonly',
-        IDBObjectStore: 'readonly',
-        IDBRequest: 'readonly',
         navigator: 'readonly',
         Notification: 'readonly',
         window: 'readonly',

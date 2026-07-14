@@ -22,6 +22,8 @@ export const es: Record<string, string> = {
   'sort.price': 'Precio',
   'sort.distance': 'Distancia',
 
+  'list.empty': 'No hay gasolineras a menos de {radius} km — prueba con un radio mayor',
+
   'band.cheap': 'Barata',
   'band.mid': 'Media',
   'band.expensive': 'Cara',

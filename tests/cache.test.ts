@@ -1,4 +1,4 @@
-import { getCachedProvince, peekProvince, putProvince, TTL_MS, type Kv, type CacheEntry } from '../src/adapters/cache'
+import { peekProvince, putProvince, isFresh, TTL_MS, type Kv, type CacheEntry } from '../src/adapters/cache'
 
 const memKv = (): Kv => {
   const m = new Map<string, CacheEntry>()
@@ -7,21 +7,17 @@ const memKv = (): Kv => {
 const res = { fecha: '14/07/2026', stations: [] }
 
 describe('cache', () => {
-  it('returns a fresh entry within TTL', async () => {
+  it('peekProvince returns a stored entry', async () => {
     const kv = memKv()
     await putProvince('28', res, 1000, kv)
-    expect((await getCachedProvince('28', 1000 + TTL_MS - 1, kv))?.id).toBe('28')
+    expect((await peekProvince('28', kv))?.id).toBe('28')
   })
-  it('drops a stale entry past TTL', async () => {
-    const kv = memKv()
-    await putProvince('28', res, 1000, kv)
-    expect(await getCachedProvince('28', 1000 + TTL_MS + 1, kv)).toBeUndefined()
-  })
-  it('peekProvince returns a stale entry regardless of age', async () => {
+  it('peekProvince returns a stale entry regardless of age; isFresh reflects the TTL boundary', async () => {
     const kv = memKv()
     await putProvince('28', res, 1000, kv)
     const e = await peekProvince('28', kv)
-    expect(e?.id).toBe('28')                                   // present even though stale
-    expect(await getCachedProvince('28', 1000 + TTL_MS + 1, kv)).toBeUndefined()
+    expect(e?.id).toBe('28')                        // present even though stale
+    expect(isFresh(e!, 1000 + TTL_MS - 1)).toBe(true)
+    expect(isFresh(e!, 1000 + TTL_MS + 1)).toBe(false)
   })
 })

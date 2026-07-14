@@ -1,9 +1,14 @@
 import { FUELS } from '../core/fuels'
 import type { Settings } from '../app/settings'
 import type { SortKey } from '../core/pricing'
-import { t } from '../i18n'
+import { getLocale, t, type Locale } from '../i18n'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
+// Language endonyms are shown in their own language regardless of the
+// current UI locale (standard language-picker convention), so these are
+// not routed through t().
+const LOCALE_LABELS: Record<Locale, string> = { es: 'Español', en: 'English' }
+const LOCALES: readonly Locale[] = ['es', 'en']
 
 export function renderSettings(
   container: HTMLElement,
@@ -66,6 +71,25 @@ export function renderSettings(
   })
   radiusField.append(radiusCaption, radiusInput)
   form.appendChild(radiusField)
+
+  const localeField = document.createElement('label')
+  localeField.className = 'settings-form__field'
+  const localeCaption = document.createElement('span')
+  localeCaption.className = 'settings-form__label'
+  localeCaption.textContent = t('settings.locale')
+  const localeSelect = document.createElement('select')
+  localeSelect.dataset.field = 'locale'
+  const activeLocale = settings.locale ?? getLocale()
+  for (const locale of LOCALES) {
+    const option = document.createElement('option')
+    option.value = locale
+    option.textContent = LOCALE_LABELS[locale]
+    option.selected = locale === activeLocale
+    localeSelect.appendChild(option)
+  }
+  localeSelect.addEventListener('change', () => onChange({ locale: localeSelect.value as Locale }))
+  localeField.append(localeCaption, localeSelect)
+  form.appendChild(localeField)
 
   container.replaceChildren(form)
 }
