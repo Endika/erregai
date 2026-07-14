@@ -23,6 +23,7 @@ export default [
         Notification: 'readonly',
         window: 'readonly',
         localStorage: 'readonly',
+        document: 'readonly',
       },
     },
     plugins: {

@@ -11,6 +11,13 @@ export const es: Record<string, string> = {
   'app.title': 'Erregai',
   'app.updated': 'Actualizado',
   'app.refresh': 'Actualizar',
+  'app.loading': 'Cargando…',
+
+  'nav.list': 'Lista',
+  'nav.map': 'Mapa',
+  'nav.trip': 'Viaje',
+  'nav.settings': 'Ajustes',
+  'nav.back': 'Volver',
 
   'sort.price': 'Precio',
   'sort.distance': 'Distancia',
