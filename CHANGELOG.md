@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/Endika/erregai/compare/v1.6.1...v1.7.0) (2026-07-14)
+
+
+### Features
+
+* **ui:** map+list split view, trip list distances, and light/system/dark theme ([4a66b4f](https://github.com/Endika/erregai/commit/4a66b4f43205b446254a25394bfc7292396b663e))
+
 ## [1.6.1](https://github.com/Endika/erregai/compare/v1.6.0...v1.6.1) (2026-07-14)
 
 
