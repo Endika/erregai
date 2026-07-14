@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Endika/erregai/compare/v1.2.0...v1.3.0) (2026-07-14)
+
+
+### Features
+
+* **trip:** zoom the map to street level on entering trip mode ([79a1e93](https://github.com/Endika/erregai/commit/79a1e9344ee7bef10df7924e6a87d2dbff22bbd6))
+
 ## [1.2.0](https://github.com/Endika/erregai/compare/v1.1.1...v1.2.0) (2026-07-14)
 
 
