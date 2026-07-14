@@ -4,9 +4,10 @@ import { haversineKm } from '../core/geo'
 import { newTripState, updateTrip, type TripConfig, type TripState, type TripUpdate } from '../core/trip'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
-import { priceOf } from '../core/pricing'
+import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
+import { renderSortBar } from './sortBar'
 import type { Store } from '../app/store'
 
 const DEFAULT_CORRIDOR_DEG = 45
@@ -20,7 +21,11 @@ export class TripController {
   private active = false
   private banner: Station | undefined
 
-  constructor(private store: Store, private onChange: () => void) {}
+  constructor(
+    private store: Store,
+    private onChange: () => void,
+    private onSelect: (station: Station) => void,
+  ) {}
 
   get isActive(): boolean {
     return this.active
@@ -82,7 +87,7 @@ export class TripController {
     this.onChange()
   }
 
-  render(container: HTMLElement, update: TripUpdate | undefined): void {
+  render(container: HTMLElement, update: TripUpdate | undefined, selectedId?: string): void {
     const wrapper = document.createElement('div')
     wrapper.className = 'trip-view'
 
@@ -107,15 +112,20 @@ export class TripController {
     }
 
     if (this.active) {
-      wrapper.appendChild(this.renderAhead(update))
+      const sort = this.store.state.settings.tripSort
+      wrapper.appendChild(renderSortBar(sort, key => this.store.setSettings({ tripSort: key })))
+      wrapper.appendChild(this.renderAhead(update, selectedId))
     }
 
     container.replaceChildren(wrapper)
   }
 
-  private renderAhead(update: TripUpdate | undefined): HTMLElement {
+  private renderAhead(update: TripUpdate | undefined, selectedId?: string): HTMLElement {
     const fuel = this.store.state.settings.fuel
+    // update.ahead is price-sorted by the selector, so its head is the cheapest
+    // regardless of the display order the user picks below.
     const ahead = update?.ahead ?? []
+    const cheapestId = ahead[0]?.id
     const origin = update?.state.lastPos
     const list = document.createElement('div')
     list.className = 'trip-view__list'
@@ -128,11 +138,15 @@ export class TripController {
       return list
     }
 
-    ahead.forEach((station, index) => {
+    const display = origin ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort) : ahead
+
+    for (const station of display) {
       const price = priceOf(station, fuel)
-      const row = document.createElement('div')
+      const row = document.createElement('button')
+      row.type = 'button'
       row.className = 'trip-view__row'
-      if (index === 0) row.classList.add('trip-view__row--best')
+      if (station.id === cheapestId) row.classList.add('trip-view__row--best')
+      if (station.id === selectedId) row.classList.add('is-selected')
 
       const brand = document.createElement('span')
       brand.className = 'trip-view__row-brand'
@@ -147,8 +161,9 @@ export class TripController {
       priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
 
       row.append(brand, distance, priceEl)
+      row.addEventListener('click', () => this.onSelect(station))
       list.appendChild(row)
-    })
+    }
 
     return list
   }
