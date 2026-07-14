@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/Endika/erregai/compare/v1.10.0...v1.10.1) (2026-07-14)
+
+
+### Chores
+
+* bump actions/setup-node from 6 to 7 in the actions group ([1220519](https://github.com/Endika/erregai/commit/1220519f754cd4ad7df6640530cfb45deb1f7145))
+
 ## [1.10.0](https://github.com/Endika/erregai/compare/v1.9.0...v1.10.0) (2026-07-14)
 
 
