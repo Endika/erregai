@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/Endika/erregai/compare/v1.6.0...v1.6.1) (2026-07-14)
+
+
+### Chores
+
+* license under MIT to match sister apps ([f72a8c9](https://github.com/Endika/erregai/commit/f72a8c9a0ebddddf3da8ded70e3f0bbd7dd39695))
+
 ## [1.6.0](https://github.com/Endika/erregai/compare/v1.5.0...v1.6.0) (2026-07-14)
 
 
