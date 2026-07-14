@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/Endika/erregai/compare/v1.9.0...v1.10.0) (2026-07-14)
+
+
+### Features
+
+* **ui:** GPS retry, refresh spinner, colour legend + data attribution, native maps deep-link ([02f9e45](https://github.com/Endika/erregai/commit/02f9e4511d517551ba9cc47ce8f37ff96ce7a833))
+
 ## [1.9.0](https://github.com/Endika/erregai/compare/v1.8.0...v1.9.0) (2026-07-14)
 
 
