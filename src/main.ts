@@ -21,6 +21,7 @@ const TRIP_ZOOM = 15
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
 
 setLocale(store.state.settings.locale ?? detectLocale())
+applyTheme(store.state.settings.theme)
 
 let activeTab: Tab = 'list'
 let selectedStation: Station | undefined
@@ -123,8 +124,14 @@ function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): St
   return stations.filter(s => haversineKm(origin, s.pos) <= radiusKm)
 }
 
+function applyTheme(theme: Settings['theme']): void {
+  if (theme === 'system') delete document.documentElement.dataset.theme
+  else document.documentElement.dataset.theme = theme
+}
+
 function handleSettingsChange(partial: Partial<Settings>): void {
   if (partial.locale) setLocale(partial.locale)
+  if (partial.theme) applyTheme(partial.theme)
   store.setSettings(partial)
 }
 
@@ -178,10 +185,20 @@ function render(): void {
       if (nearby.length === 0) {
         renderEmptyState(state.settings.radiusKm)
       } else {
-        viewEl.appendChild(mapContainer)
-        mapView.render(state.pos, nearby, state.settings.fuel, selectStation, { selectedId })
+        const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
+        const split = document.createElement('div')
+        split.className = 'map-split'
+        const mapWrap = document.createElement('div')
+        mapWrap.className = 'map-split__map'
+        mapWrap.appendChild(mapContainer)
+        const listWrap = document.createElement('div')
+        listWrap.className = 'map-split__list'
+        split.append(mapWrap, listWrap)
+        viewEl.appendChild(split)
+        mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
         mapView.invalidateSize()
         if (selectedStation) mapView.panTo(selectedStation.pos)
+        renderList(listWrap, sorted, state.settings.fuel, state.pos, selectStation, selectedId)
       }
     } else {
       renderPositionPlaceholder()

@@ -116,6 +116,7 @@ export class TripController {
   private renderAhead(update: TripUpdate | undefined): HTMLElement {
     const fuel = this.store.state.settings.fuel
     const ahead = update?.ahead ?? []
+    const origin = update?.state.lastPos
     const list = document.createElement('div')
     list.className = 'trip-view__list'
 
@@ -137,11 +138,15 @@ export class TripController {
       brand.className = 'trip-view__row-brand'
       brand.textContent = station.brand
 
+      const distance = document.createElement('span')
+      distance.className = 'trip-view__row-distance'
+      if (origin) distance.textContent = `${haversineKm(origin, station.pos).toFixed(1)} km`
+
       const priceEl = document.createElement('span')
       priceEl.className = 'trip-view__row-price'
       priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
 
-      row.append(brand, priceEl)
+      row.append(brand, distance, priceEl)
       list.appendChild(row)
     })
 

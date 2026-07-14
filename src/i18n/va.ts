@@ -42,6 +42,10 @@ export const va: Record<string, string> = {
   'settings.sort': 'Ordenar per',
   'settings.radius': 'Radi',
   'settings.locale': 'Idioma',
+  'settings.theme': 'Tema',
+  'theme.light': 'Clar',
+  'theme.system': 'Sistema',
+  'theme.dark': 'Fosc',
 
   'error.location': "No s'ha pogut obtindre la ubicació",
   'error.network': 'Error de xarxa',

@@ -42,6 +42,10 @@ export const es: Record<string, string> = {
   'settings.sort': 'Ordenar por',
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',
+  'settings.theme': 'Tema',
+  'theme.light': 'Claro',
+  'theme.system': 'Sistema',
+  'theme.dark': 'Oscuro',
 
   'error.location': 'No se pudo obtener la ubicación',
   'error.network': 'Error de red',
