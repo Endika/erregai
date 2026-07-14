@@ -11,6 +11,13 @@ export const en: Record<string, string> = {
   'app.title': 'Erregai',
   'app.updated': 'Updated',
   'app.refresh': 'Refresh',
+  'app.loading': 'Loading…',
+
+  'nav.list': 'List',
+  'nav.map': 'Map',
+  'nav.trip': 'Trip',
+  'nav.settings': 'Settings',
+  'nav.back': 'Back',
 
   'sort.price': 'Price',
   'sort.distance': 'Distance',
