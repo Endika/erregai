@@ -30,6 +30,7 @@ export const es: Record<string, string> = {
   'trip.stop': 'Detener viaje',
   'trip.foregroundOnly': 'Solo en primer plano',
   'trip.cheapestAhead': 'Más barata por delante',
+  'trip.noneAhead': 'Aún no hay gasolineras por delante',
 
   'detail.openInMaps': 'Abrir en Maps',
   'detail.schedule': 'Horario',

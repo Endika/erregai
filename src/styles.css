@@ -294,6 +294,89 @@ body {
   font-weight: 600;
 }
 
+.trip-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.trip-view__note {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--color-bg-raised);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.trip-view__toggle {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.5rem;
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trip-view__banner {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--band-cheap-bg);
+  color: var(--band-cheap-fg);
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.trip-view__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trip-view__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg);
+  max-width: 100%;
+}
+
+.trip-view__row--best {
+  border-color: var(--band-cheap-fg);
+  background: var(--band-cheap-bg);
+  color: var(--band-cheap-fg);
+}
+
+.trip-view__row-brand {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.trip-view__row-price {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.trip-view__empty {
+  margin: 0;
+  color: var(--color-muted);
+}
+
 .settings-form {
   display: flex;
   flex-direction: column;
