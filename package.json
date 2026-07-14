@@ -11,8 +11,8 @@
     "test": "vitest run"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Endika Iglesias",
+  "license": "MIT",
   "dependencies": {
     "leaflet": "^1.9.4"
   },
