@@ -9,6 +9,7 @@ import { renderDetail } from './ui/detail'
 import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
+import { renderSortBar } from './ui/sortBar'
 import { sortStations, type SortKey } from './core/pricing'
 import { haversineKm, type LatLon } from './core/geo'
 import type { Station } from './core/station'
@@ -61,7 +62,7 @@ const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
 const mapView = new MapView(mapContainer)
-const tripController = new TripController(store, () => { if (activeTab === 'trip') render() })
+const tripController = new TripController(store, () => { if (activeTab === 'trip') render() }, selectStation)
 
 root.addEventListener('click', e => {
   const target = e.target as HTMLElement
@@ -124,26 +125,8 @@ function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): St
   return stations.filter(s => haversineKm(origin, s.pos) <= radiusKm)
 }
 
-const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
-
-function sortToggle(current: SortKey): HTMLElement {
-  const bar = document.createElement('div')
-  bar.className = 'sort-bar'
-  for (const key of SORT_KEYS) {
-    const btn = document.createElement('button')
-    btn.type = 'button'
-    btn.className = 'sort-bar__btn'
-    btn.classList.toggle('is-active', key === current)
-    btn.setAttribute('aria-pressed', String(key === current))
-    btn.textContent = t(`sort.${key}`)
-    btn.addEventListener('click', () => store.setSettings({ sort: key }))
-    bar.appendChild(btn)
-  }
-  return bar
-}
-
 function renderStationList(container: HTMLElement, sorted: Station[], fuel: Settings['fuel'], origin: LatLon, sort: SortKey, selectedId?: string): void {
-  container.appendChild(sortToggle(sort))
+  container.appendChild(renderSortBar(sort, key => store.setSettings({ sort: key })))
   const listContainer = document.createElement('div')
   container.appendChild(listContainer)
   renderList(listContainer, sorted, fuel, origin, selectStation, selectedId)
@@ -241,7 +224,7 @@ function render(): void {
     }
     const readout = document.createElement('div')
     viewEl.appendChild(readout)
-    tripController.render(readout, tripController.currentUpdate)
+    tripController.render(readout, tripController.currentUpdate, selectedId)
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
   }
