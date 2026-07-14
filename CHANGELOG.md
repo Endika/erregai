@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/Endika/erregai/compare/v1.7.0...v1.8.0) (2026-07-14)
+
+
+### Features
+
+* **ui:** surface a price/distance sort toggle above the station list ([6c6ddb7](https://github.com/Endika/erregai/commit/6c6ddb7c1879166748dc76070836fac1d6fec555))
+
 ## [1.7.0](https://github.com/Endika/erregai/compare/v1.6.1...v1.7.0) (2026-07-14)
 
 
