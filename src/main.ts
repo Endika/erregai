@@ -7,6 +7,7 @@ import { detectLocale, setLocale, t } from './i18n'
 import { renderList } from './ui/list'
 import { renderDetail } from './ui/detail'
 import { renderSettings } from './ui/settings'
+import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
 import { sortStations } from './core/pricing'
 import type { Station } from './core/station'
@@ -51,6 +52,7 @@ const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
 const mapView = new MapView(mapContainer)
+const tripController = new TripController(store, () => { if (activeTab === 'trip') render() })
 
 root.addEventListener('click', e => {
   const target = e.target as HTMLElement
@@ -128,13 +130,10 @@ function render(): void {
     } else {
       renderPositionPlaceholder()
     }
+  } else if (activeTab === 'trip') {
+    tripController.render(viewEl, tripController.currentUpdate)
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, partial => store.setSettings(partial))
-  } else {
-    const placeholder = document.createElement('p')
-    placeholder.className = 'placeholder'
-    placeholder.textContent = t(`nav.${activeTab}`)
-    viewEl.appendChild(placeholder)
   }
 }
 
