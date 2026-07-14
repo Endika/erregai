@@ -217,6 +217,36 @@ body {
   color: var(--color-muted);
 }
 
+.sort-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sort-bar__btn {
+  flex: 1 1 0;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sort-bar__btn.is-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-weight: 600;
+}
+
 .station-list {
   display: flex;
   flex-direction: column;
