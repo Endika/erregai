@@ -67,7 +67,7 @@ root.addEventListener('click', e => {
     activeTab = tabButton.dataset.tab as Tab
     selectedStation = undefined
     render()
-    if (activeTab === 'map') mapView.invalidateSize()
+    if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
   }
 })
 
@@ -175,7 +175,23 @@ function render(): void {
       renderPositionPlaceholder()
     }
   } else if (activeTab === 'trip') {
-    tripController.render(viewEl, tripController.currentUpdate)
+    if (selectedStation) {
+      renderStationDetail(selectedStation)
+    } else {
+      const tripPos = tripController.currentUpdate?.state.lastPos ?? state.pos
+      if (tripPos) {
+        const nearby = withinRadius(state.stations, tripPos, state.settings.radiusKm)
+        const mapWrap = document.createElement('div')
+        mapWrap.className = 'trip-map'
+        mapWrap.appendChild(mapContainer)
+        viewEl.appendChild(mapWrap)
+        mapView.render(tripPos, nearby, state.settings.fuel, selectStation, { recenter: true })
+        mapView.invalidateSize()
+      }
+      const readout = document.createElement('div')
+      viewEl.appendChild(readout)
+      tripController.render(readout, tripController.currentUpdate)
+    }
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
   }

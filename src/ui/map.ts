@@ -29,10 +29,11 @@ export class MapView {
 
   constructor(private container: HTMLElement) {}
 
-  render(pos: LatLon, stations: Station[], fuel: FuelId, onSelect: (s: Station) => void): void {
+  render(pos: LatLon, stations: Station[], fuel: FuelId, onSelect: (s: Station) => void, opts: { recenter?: boolean } = {}): void {
     if (!this.map) this.init(pos)
     if (!this.map || !this.markers) return
 
+    if (opts.recenter) this.map.setView([pos.lat, pos.lon], this.map.getZoom(), { animate: false })
     this.userMarker?.setLatLng([pos.lat, pos.lon])
     this.markers.clearLayers()
 
