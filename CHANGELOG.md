@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/Endika/erregai/compare/v1.5.0...v1.6.0) (2026-07-14)
+
+
+### Features
+
+* **i18n:** add catalan, basque, valencian and galician locales ([3f1d246](https://github.com/Endika/erregai/commit/3f1d2461587aa8da6949fbbaf872b6d483ebbb39))
+
 ## [1.5.0](https://github.com/Endika/erregai/compare/v1.4.0...v1.5.0) (2026-07-14)
 
 
