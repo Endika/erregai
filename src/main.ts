@@ -7,6 +7,7 @@ import { detectLocale, setLocale, t } from './i18n'
 import { renderList } from './ui/list'
 import { renderDetail } from './ui/detail'
 import { renderSettings } from './ui/settings'
+import { MapView } from './ui/map'
 import { sortStations } from './core/pricing'
 import type { Station } from './core/station'
 
@@ -47,6 +48,10 @@ const errorEl = requireEl<HTMLElement>('[data-error]')
 const viewEl = requireEl<HTMLElement>('[data-view]')
 const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 
+const mapContainer = document.createElement('div')
+mapContainer.className = 'map-view'
+const mapView = new MapView(mapContainer)
+
 root.addEventListener('click', e => {
   const target = e.target as HTMLElement
   if (target.closest('[data-refresh]')) { void store.refresh(); return }
@@ -55,6 +60,7 @@ root.addEventListener('click', e => {
     activeTab = tabButton.dataset.tab as Tab
     selectedStation = undefined
     render()
+    if (activeTab === 'map') mapView.invalidateSize()
   }
 })
 
@@ -66,6 +72,24 @@ function selectStation(station: Station): void {
 function backToList(): void {
   selectedStation = undefined
   render()
+}
+
+function renderStationDetail(station: Station): void {
+  const backButton = document.createElement('button')
+  backButton.type = 'button'
+  backButton.className = 'detail-back'
+  backButton.textContent = `< ${t('nav.back')}`
+  backButton.addEventListener('click', backToList)
+  const detailContainer = document.createElement('div')
+  viewEl.append(backButton, detailContainer)
+  renderDetail(detailContainer, station)
+}
+
+function renderPositionPlaceholder(): void {
+  const placeholder = document.createElement('p')
+  placeholder.className = 'placeholder'
+  placeholder.textContent = locationError ?? t('app.loading')
+  viewEl.appendChild(placeholder)
 }
 
 function render(): void {
@@ -88,22 +112,21 @@ function render(): void {
 
   if (activeTab === 'list') {
     if (selectedStation) {
-      const backButton = document.createElement('button')
-      backButton.type = 'button'
-      backButton.className = 'detail-back'
-      backButton.textContent = `< ${t('nav.back')}`
-      backButton.addEventListener('click', backToList)
-      const detailContainer = document.createElement('div')
-      viewEl.append(backButton, detailContainer)
-      renderDetail(detailContainer, selectedStation)
+      renderStationDetail(selectedStation)
     } else if (state.pos) {
       const sorted = sortStations(state.stations, state.settings.fuel, state.pos, state.settings.sort)
       renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation)
     } else {
-      const placeholder = document.createElement('p')
-      placeholder.className = 'placeholder'
-      placeholder.textContent = locationError ?? t('app.loading')
-      viewEl.appendChild(placeholder)
+      renderPositionPlaceholder()
+    }
+  } else if (activeTab === 'map') {
+    if (selectedStation) {
+      renderStationDetail(selectedStation)
+    } else if (state.pos) {
+      viewEl.appendChild(mapContainer)
+      mapView.render(state.pos, state.stations, state.settings.fuel, selectStation)
+    } else {
+      renderPositionPlaceholder()
     }
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, partial => store.setSettings(partial))
