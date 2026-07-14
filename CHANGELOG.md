@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Endika/erregai/compare/v1.1.1...v1.2.0) (2026-07-14)
+
+
+### Features
+
+* **trip:** show a follow-me map in trip mode to guide navigation ([24f0ee6](https://github.com/Endika/erregai/commit/24f0ee61439bb46d7493cafbcd252419173850a2))
+
 ## [1.1.1](https://github.com/Endika/erregai/compare/v1.1.0...v1.1.1) (2026-07-14)
 
 
