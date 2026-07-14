@@ -42,6 +42,10 @@ export const eu: Record<string, string> = {
   'settings.sort': 'Ordenatu honela',
   'settings.radius': 'Erradioa',
   'settings.locale': 'Hizkuntza',
+  'settings.theme': 'Itxura',
+  'theme.light': 'Argia',
+  'theme.system': 'Sistema',
+  'theme.dark': 'Iluna',
 
   'error.location': 'Ezin izan da kokapena lortu',
   'error.network': 'Sareko errorea',

@@ -2,10 +2,12 @@ import { DEFAULT_FUEL, type FuelId } from '../core/fuels'
 import type { SortKey } from '../core/pricing'
 import type { Locale } from '../i18n'
 
+export type Theme = 'light' | 'system' | 'dark'
+
 // locale is left unset by default: the app falls back to browser-detected
 // locale until the user explicitly picks one in settings (see main.ts).
-export interface Settings { fuel: FuelId; sort: SortKey; radiusKm: number; locale?: Locale }
-export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', radiusKm: 15 }
+export interface Settings { fuel: FuelId; sort: SortKey; radiusKm: number; locale?: Locale; theme: Theme }
+export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', radiusKm: 15, theme: 'system' }
 const KEY = 'erregai.settings'
 
 export function loadSettings(store: Storage = localStorage): Settings {

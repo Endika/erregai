@@ -1,9 +1,10 @@
 import { FUELS } from '../core/fuels'
-import type { Settings } from '../app/settings'
+import type { Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
+const THEMES: readonly Theme[] = ['light', 'system', 'dark']
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
@@ -96,6 +97,24 @@ export function renderSettings(
   localeSelect.addEventListener('change', () => onChange({ locale: localeSelect.value as Locale }))
   localeField.append(localeCaption, localeSelect)
   form.appendChild(localeField)
+
+  const themeField = document.createElement('label')
+  themeField.className = 'settings-form__field'
+  const themeCaption = document.createElement('span')
+  themeCaption.className = 'settings-form__label'
+  themeCaption.textContent = t('settings.theme')
+  const themeSelect = document.createElement('select')
+  themeSelect.dataset.field = 'theme'
+  for (const theme of THEMES) {
+    const option = document.createElement('option')
+    option.value = theme
+    option.textContent = t(`theme.${theme}`)
+    option.selected = theme === settings.theme
+    themeSelect.appendChild(option)
+  }
+  themeSelect.addEventListener('change', () => onChange({ theme: themeSelect.value as Theme }))
+  themeField.append(themeCaption, themeSelect)
+  form.appendChild(themeField)
 
   container.replaceChildren(form)
 }

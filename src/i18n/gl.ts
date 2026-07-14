@@ -42,6 +42,10 @@ export const gl: Record<string, string> = {
   'settings.sort': 'Ordenar por',
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',
+  'settings.theme': 'Tema',
+  'theme.light': 'Claro',
+  'theme.system': 'Sistema',
+  'theme.dark': 'Escuro',
 
   'error.location': 'Non se puido obter a localización',
   'error.network': 'Erro de rede',

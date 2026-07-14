@@ -25,8 +25,10 @@
   --map-marker-user: #0b57d0;
 }
 
+/* Dark palette shared by system-dark (unless the user forced light) and by an
+   explicit dark override. Kept in two selectors because one is media-gated. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --color-bg: #121212;
     --color-bg-raised: #1c1c1e;
     --color-fg: #eaeaea;
@@ -43,6 +45,24 @@
     --band-expensive-bg: #3a1414;
     --band-expensive-fg: #f4a29b;
   }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #121212;
+  --color-bg-raised: #1c1c1e;
+  --color-fg: #eaeaea;
+  --color-muted: #a3a3a3;
+  --color-border: #333333;
+  --color-accent: #4dd0e1;
+  --color-accent-fg: #062327;
+  --color-danger: #f28b82;
+
+  --band-cheap-bg: #12351d;
+  --band-cheap-fg: #7fd996;
+  --band-mid-bg: #3a2c05;
+  --band-mid-fg: #e6bf5a;
+  --band-expensive-bg: #3a1414;
+  --band-expensive-fg: #f4a29b;
 }
 
 * {
@@ -149,6 +169,23 @@ body {
   width: 100%;
   height: 45vh;
   min-height: 16rem;
+}
+
+.map-split {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.map-split__map {
+  flex: 0 0 45%;
+  min-height: 12rem;
+}
+
+.map-split__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .tab-bar {
@@ -408,11 +445,18 @@ body {
 }
 
 .trip-view__row-brand {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+}
+
+.trip-view__row-distance {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
 }
 
 .trip-view__row-price {
