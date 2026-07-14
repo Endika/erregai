@@ -12,6 +12,8 @@ export const es: Record<string, string> = {
   'app.updated': 'Actualizado',
   'app.refresh': 'Actualizar',
   'app.loading': 'Cargando…',
+  'app.refreshing': 'Actualizando…',
+  'action.retry': 'Reintentar',
 
   'nav.list': 'Lista',
   'nav.map': 'Mapa',
@@ -46,6 +48,9 @@ export const es: Record<string, string> = {
   'theme.light': 'Claro',
   'theme.system': 'Sistema',
   'theme.dark': 'Oscuro',
+  'settings.about': 'Acerca de',
+  'about.data': 'Precios: Ministerio de Transición Ecológica',
+  'about.map': 'Mapa: OpenStreetMap',
 
   'error.location': 'No se pudo obtener la ubicación',
   'error.network': 'Error de red',

@@ -2,6 +2,18 @@ import type { Station } from '../core/station'
 import { FUELS } from '../core/fuels'
 import { t } from '../i18n'
 
+// Deep-link that respects the device's default maps app: Apple Maps on iOS
+// (which does not handle geo:), the OS chooser via geo: elsewhere (Android
+// respects the user's default; desktop browsers offer their handler).
+function mapsUrl(station: Station): string {
+  const { lat, lon } = station.pos
+  const label = encodeURIComponent(station.brand)
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+  return isIOS
+    ? `https://maps.apple.com/?ll=${lat},${lon}&q=${label}`
+    : `geo:${lat},${lon}?q=${lat},${lon}(${label})`
+}
+
 export function renderDetail(container: HTMLElement, station: Station): void {
   const wrapper = document.createElement('div')
   wrapper.className = 'station-detail'
@@ -43,7 +55,7 @@ export function renderDetail(container: HTMLElement, station: Station): void {
 
   const mapsLink = document.createElement('a')
   mapsLink.className = 'station-detail__maps-link'
-  mapsLink.href = `https://www.google.com/maps?q=${station.pos.lat},${station.pos.lon}`
+  mapsLink.href = mapsUrl(station)
   mapsLink.target = '_blank'
   mapsLink.rel = 'noopener noreferrer'
   mapsLink.textContent = t('detail.openInMaps')

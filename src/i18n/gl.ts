@@ -12,6 +12,8 @@ export const gl: Record<string, string> = {
   'app.updated': 'Actualizado',
   'app.refresh': 'Actualizar',
   'app.loading': 'Cargando…',
+  'app.refreshing': 'Actualizando…',
+  'action.retry': 'Reintentar',
 
   'nav.list': 'Lista',
   'nav.map': 'Mapa',
@@ -46,6 +48,9 @@ export const gl: Record<string, string> = {
   'theme.light': 'Claro',
   'theme.system': 'Sistema',
   'theme.dark': 'Escuro',
+  'settings.about': 'Acerca de',
+  'about.data': 'Prezos: Ministerio de Transición Ecolóxica',
+  'about.map': 'Mapa: OpenStreetMap',
 
   'error.location': 'Non se puido obter a localización',
   'error.network': 'Erro de rede',

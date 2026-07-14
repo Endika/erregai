@@ -12,6 +12,8 @@ export const en: Record<string, string> = {
   'app.updated': 'Updated',
   'app.refresh': 'Refresh',
   'app.loading': 'Loading…',
+  'app.refreshing': 'Refreshing…',
+  'action.retry': 'Retry',
 
   'nav.list': 'List',
   'nav.map': 'Map',
@@ -46,6 +48,9 @@ export const en: Record<string, string> = {
   'theme.light': 'Light',
   'theme.system': 'System',
   'theme.dark': 'Dark',
+  'settings.about': 'About',
+  'about.data': 'Prices: Spanish Ecological Transition Ministry',
+  'about.map': 'Map: OpenStreetMap',
 
   'error.location': 'Could not get location',
   'error.network': 'Network error',
