@@ -58,7 +58,9 @@ body {
 }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: hidden;
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -69,7 +71,7 @@ body {
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
   max-width: 100%;
 }
 
