@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/Endika/erregai/compare/v1.3.0...v1.4.0) (2026-07-14)
+
+
+### Features
+
+* **ui:** highlight selected station in list and map with a detail card ([36b8c4a](https://github.com/Endika/erregai/commit/36b8c4a2510173b09dc05c004feeb9cecea52604))
+
 ## [1.3.0](https://github.com/Endika/erregai/compare/v1.2.0...v1.3.0) (2026-07-14)
 
 
