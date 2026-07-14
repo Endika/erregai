@@ -1,0 +1,48 @@
+export const eu: Record<string, string> = {
+  'fuel.gasoleoA': 'Gasolio A',
+  'fuel.gasoleoPremium': 'Gasolio Premium',
+  'fuel.gasoleoB': 'Gasolio B',
+  'fuel.gasolina95': 'Gasolina 95',
+  'fuel.gasolina98': 'Gasolina 98',
+  'fuel.glp': 'GLP',
+  'fuel.gnc': 'Gas Natural Konprimitua',
+  'fuel.gnl': 'Gas Natural Likidotua',
+
+  'app.title': 'Erregai',
+  'app.updated': 'Eguneratua',
+  'app.refresh': 'Eguneratu',
+  'app.loading': 'Kargatzen…',
+
+  'nav.list': 'Zerrenda',
+  'nav.map': 'Mapa',
+  'nav.trip': 'Bidaia',
+  'nav.settings': 'Ezarpenak',
+  'nav.back': 'Atzera',
+
+  'sort.price': 'Prezioa',
+  'sort.distance': 'Distantzia',
+
+  'list.empty': '{radius} km-ko erradioan ez dago gasolindegirik — saiatu erradio handiago batekin',
+
+  'band.cheap': 'Merkea',
+  'band.mid': 'Ertaina',
+  'band.expensive': 'Garestia',
+
+  'trip.start': 'Hasi bidaia',
+  'trip.stop': 'Gelditu bidaia',
+  'trip.foregroundOnly': 'Lehen planoan soilik',
+  'trip.cheapestAhead': 'Merkeena aurrean',
+  'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
+
+  'detail.openInMaps': 'Ireki Maps-en',
+  'detail.schedule': 'Ordutegia',
+  'detail.address': 'Helbidea',
+
+  'settings.fuel': 'Erregaia',
+  'settings.sort': 'Ordenatu honela',
+  'settings.radius': 'Erradioa',
+  'settings.locale': 'Hizkuntza',
+
+  'error.location': 'Ezin izan da kokapena lortu',
+  'error.network': 'Sareko errorea',
+}

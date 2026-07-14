@@ -1,14 +1,20 @@
 import { FUELS } from '../core/fuels'
 import type { Settings } from '../app/settings'
 import type { SortKey } from '../core/pricing'
-import { getLocale, t, type Locale } from '../i18n'
+import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
-const LOCALE_LABELS: Record<Locale, string> = { es: 'Español', en: 'English' }
-const LOCALES: readonly Locale[] = ['es', 'en']
+const LOCALE_LABELS: Record<Locale, string> = {
+  es: 'Español',
+  en: 'English',
+  ca: 'Català',
+  eu: 'Euskara',
+  va: 'Valencià',
+  gl: 'Galego',
+}
 
 export function renderSettings(
   container: HTMLElement,
@@ -80,7 +86,7 @@ export function renderSettings(
   const localeSelect = document.createElement('select')
   localeSelect.dataset.field = 'locale'
   const activeLocale = settings.locale ?? getLocale()
-  for (const locale of LOCALES) {
+  for (const locale of LOCALE_ORDER) {
     const option = document.createElement('option')
     option.value = locale
     option.textContent = LOCALE_LABELS[locale]
