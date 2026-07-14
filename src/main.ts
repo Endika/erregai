@@ -37,6 +37,7 @@ root.innerHTML = `
   </header>
   <p class="app-error" data-error hidden></p>
   <main class="app-main" data-view></main>
+  <aside class="detail-card" data-card hidden></aside>
   <nav class="tab-bar" role="tablist">
     ${TABS.map(tab => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}"></button>`).join('')}
   </nav>
@@ -52,6 +53,7 @@ const titleEl = requireEl<HTMLElement>('[data-title]')
 const freshnessEl = requireEl<HTMLElement>('[data-freshness]')
 const errorEl = requireEl<HTMLElement>('[data-error]')
 const viewEl = requireEl<HTMLElement>('[data-view]')
+const cardEl = requireEl<HTMLElement>('[data-card]')
 const refreshButton = requireEl<HTMLButtonElement>('[data-refresh]')
 const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 
@@ -66,7 +68,6 @@ root.addEventListener('click', e => {
   const tabButton = target.closest<HTMLElement>('[data-tab]')
   if (tabButton) {
     activeTab = tabButton.dataset.tab as Tab
-    selectedStation = undefined
     render()
     if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
     if (activeTab === 'trip') {
@@ -81,20 +82,27 @@ function selectStation(station: Station): void {
   render()
 }
 
-function backToList(): void {
+function closeCard(): void {
   selectedStation = undefined
   render()
 }
 
-function renderStationDetail(station: Station): void {
-  const backButton = document.createElement('button')
-  backButton.type = 'button'
-  backButton.className = 'detail-back'
-  backButton.textContent = `< ${t('nav.back')}`
-  backButton.addEventListener('click', backToList)
+function renderCard(): void {
+  if (!selectedStation) {
+    cardEl.hidden = true
+    cardEl.replaceChildren()
+    return
+  }
+  const close = document.createElement('button')
+  close.type = 'button'
+  close.className = 'detail-card__close'
+  close.setAttribute('aria-label', t('nav.back'))
+  close.textContent = '×'
+  close.addEventListener('click', closeCard)
   const detailContainer = document.createElement('div')
-  viewEl.append(backButton, detailContainer)
-  renderDetail(detailContainer, station)
+  renderDetail(detailContainer, selectedStation)
+  cardEl.replaceChildren(close, detailContainer)
+  cardEl.hidden = false
 }
 
 function renderPositionPlaceholder(): void {
@@ -150,56 +158,53 @@ function render(): void {
   viewEl.classList.toggle('is-loading', state.loading)
   viewEl.replaceChildren()
 
+  const selectedId = selectedStation?.id
+
   if (activeTab === 'list') {
-    if (selectedStation) {
-      renderStationDetail(selectedStation)
-    } else if (state.pos) {
+    if (state.pos) {
       const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
       if (nearby.length === 0) {
         renderEmptyState(state.settings.radiusKm)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation)
+        renderList(viewEl, sorted, state.settings.fuel, state.pos, selectStation, selectedId)
       }
     } else {
       renderPositionPlaceholder()
     }
   } else if (activeTab === 'map') {
-    if (selectedStation) {
-      renderStationDetail(selectedStation)
-    } else if (state.pos) {
+    if (state.pos) {
       const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
       if (nearby.length === 0) {
         renderEmptyState(state.settings.radiusKm)
       } else {
         viewEl.appendChild(mapContainer)
-        mapView.render(state.pos, nearby, state.settings.fuel, selectStation)
+        mapView.render(state.pos, nearby, state.settings.fuel, selectStation, { selectedId })
         mapView.invalidateSize()
+        if (selectedStation) mapView.panTo(selectedStation.pos)
       }
     } else {
       renderPositionPlaceholder()
     }
   } else if (activeTab === 'trip') {
-    if (selectedStation) {
-      renderStationDetail(selectedStation)
-    } else {
-      const tripPos = tripController.currentUpdate?.state.lastPos ?? state.pos
-      if (tripPos) {
-        const nearby = withinRadius(state.stations, tripPos, state.settings.radiusKm)
-        const mapWrap = document.createElement('div')
-        mapWrap.className = 'trip-map'
-        mapWrap.appendChild(mapContainer)
-        viewEl.appendChild(mapWrap)
-        mapView.render(tripPos, nearby, state.settings.fuel, selectStation, { recenter: true })
-        mapView.invalidateSize()
-      }
-      const readout = document.createElement('div')
-      viewEl.appendChild(readout)
-      tripController.render(readout, tripController.currentUpdate)
+    const tripPos = tripController.currentUpdate?.state.lastPos ?? state.pos
+    if (tripPos) {
+      const nearby = withinRadius(state.stations, tripPos, state.settings.radiusKm)
+      const mapWrap = document.createElement('div')
+      mapWrap.className = 'trip-map'
+      mapWrap.appendChild(mapContainer)
+      viewEl.appendChild(mapWrap)
+      mapView.render(tripPos, nearby, state.settings.fuel, selectStation, { recenter: true, selectedId })
+      mapView.invalidateSize()
     }
+    const readout = document.createElement('div')
+    viewEl.appendChild(readout)
+    tripController.render(readout, tripController.currentUpdate)
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
   }
+
+  renderCard()
 }
 
 store.subscribe(render)

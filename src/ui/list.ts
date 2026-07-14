@@ -10,6 +10,7 @@ export function renderList(
   fuel: FuelId,
   origin: LatLon,
   onSelect: (s: Station) => void,
+  selectedId?: string,
 ): void {
   const knownPrices = stations
     .map(s => priceOf(s, fuel))
@@ -18,6 +19,7 @@ export function renderList(
 
   const list = document.createElement('div')
   list.className = 'station-list'
+  let selectedRow: HTMLElement | undefined
 
   for (const station of stations) {
     const price = priceOf(station, fuel)
@@ -26,6 +28,10 @@ export function renderList(
     row.type = 'button'
     row.className = 'station-row'
     row.dataset.station = station.id
+    if (station.id === selectedId) {
+      row.classList.add('is-selected')
+      selectedRow = row
+    }
 
     const brand = document.createElement('span')
     brand.className = 'station-row__brand'
@@ -57,4 +63,5 @@ export function renderList(
   }
 
   container.replaceChildren(list)
+  selectedRow?.scrollIntoView({ block: 'nearest' })
 }
