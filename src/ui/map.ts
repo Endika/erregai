@@ -64,6 +64,10 @@ export class MapView {
     this.map?.invalidateSize()
   }
 
+  focus(pos: LatLon, zoom: number): void {
+    this.map?.setView([pos.lat, pos.lon], zoom, { animate: false })
+  }
+
   destroy(): void {
     this.map?.remove()
     this.map = undefined

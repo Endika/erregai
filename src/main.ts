@@ -16,6 +16,7 @@ import type { Settings } from './app/settings'
 
 type Tab = 'list' | 'map' | 'trip' | 'settings'
 const TABS: readonly Tab[] = ['list', 'map', 'trip', 'settings']
+const TRIP_ZOOM = 15
 
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
 
@@ -68,6 +69,10 @@ root.addEventListener('click', e => {
     selectedStation = undefined
     render()
     if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
+    if (activeTab === 'trip') {
+      const tp = tripController.currentUpdate?.state.lastPos ?? store.state.pos
+      if (tp) mapView.focus(tp, TRIP_ZOOM)
+    }
   }
 })
 
