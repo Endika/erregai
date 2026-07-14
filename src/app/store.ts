@@ -54,7 +54,7 @@ export class Store {
     const box = provinceFor(pos)
     this.current = { ...this.current, pos }
     this.currentProvinceId = box.id
-    await this.ensureProvince(box.id)
+    await this.runBatch([box.id])
     this.updateDataDate()
     this.notify()
   }
@@ -64,19 +64,27 @@ export class Store {
     this.current = { ...this.current, pos }
     this.currentProvinceId = box.id
     const ids = [box.id, ...adjacentProvinces(box.id, adjacent).map(b => b.id)]
-    for (const id of ids) {
-      await this.ensureProvince(id)
-    }
+    await this.runBatch(ids)
     this.updateDataDate()
     this.notify()
   }
 
   async refresh(): Promise<void> {
-    for (const id of [...this.provinces.keys()]) {
-      await this.ensureProvince(id, true)
-    }
+    await this.runBatch([...this.provinces.keys()], true)
     this.updateDataDate()
     this.notify()
+  }
+
+  // Runs ensureProvince for each id and derives a single batch-level error:
+  // truthy iff at least one requested province ended the batch with no
+  // cached/loaded data (a sibling province's success must not mask that).
+  private async runBatch(ids: string[], force = false): Promise<void> {
+    let error: string | undefined
+    for (const id of ids) {
+      const failure = await this.ensureProvince(id, force)
+      if (failure && !this.provinces.has(id)) error = failure
+    }
+    this.current = { ...this.current, error }
   }
 
   private updateDataDate(): void {
@@ -85,7 +93,12 @@ export class Store {
     this.current = { ...this.current, dataDate: entry?.fecha }
   }
 
-  private async ensureProvince(id: string, force = false): Promise<void> {
+  // Loads a single province (cache-then-network). Returns the fetch error
+  // message when the network call fails, or undefined on success/no-fetch.
+  // Does NOT touch state.error itself — batch callers decide, at the end of
+  // the whole batch, whether the failure actually left this province with
+  // no data (see runBatch).
+  private async ensureProvince(id: string, force = false): Promise<string | undefined> {
     this.current = { ...this.current, loading: true }
     this.notify()
     try {
@@ -101,13 +114,11 @@ export class Store {
           const entry = await putProvince(id, result, this.deps.now(), this.deps.kv)
           this.provinces.set(id, entry)
           this.rebuildStations()
-          this.current = { ...this.current, error: undefined }
         } catch (err) {
-          if (!cached) {
-            this.current = { ...this.current, error: err instanceof Error ? err.message : String(err) }
-          }
+          return err instanceof Error ? err.message : String(err)
         }
       }
+      return undefined
     } finally {
       this.current = { ...this.current, loading: false }
       this.notify()
