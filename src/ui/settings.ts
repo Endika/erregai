@@ -5,6 +5,7 @@ import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
+const RADAR_DISTANCES_M: readonly number[] = [300, 500, 800, 1000, 1500]
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
@@ -115,6 +116,50 @@ export function renderSettings(
   themeSelect.addEventListener('change', () => onChange({ theme: themeSelect.value as Theme }))
   themeField.append(themeCaption, themeSelect)
   form.appendChild(themeField)
+
+  const radarEnabledField = document.createElement('label')
+  radarEnabledField.className = 'settings-form__field'
+  const radarEnabledCaption = document.createElement('span')
+  radarEnabledCaption.className = 'settings-form__label'
+  radarEnabledCaption.textContent = t('radar.settings.enabled')
+  const radarEnabledInput = document.createElement('input')
+  radarEnabledInput.type = 'checkbox'
+  radarEnabledInput.dataset.field = 'radarAlertsEnabled'
+  radarEnabledInput.checked = settings.radarAlertsEnabled
+  radarEnabledInput.addEventListener('change', () => onChange({ radarAlertsEnabled: radarEnabledInput.checked }))
+  radarEnabledField.append(radarEnabledCaption, radarEnabledInput)
+  form.appendChild(radarEnabledField)
+
+  const radarDistanceField = document.createElement('label')
+  radarDistanceField.className = 'settings-form__field'
+  const radarDistanceCaption = document.createElement('span')
+  radarDistanceCaption.className = 'settings-form__label'
+  radarDistanceCaption.textContent = t('radar.settings.distance')
+  const radarDistanceSelect = document.createElement('select')
+  radarDistanceSelect.dataset.field = 'radarAlertDistanceM'
+  for (const meters of RADAR_DISTANCES_M) {
+    const option = document.createElement('option')
+    option.value = String(meters)
+    option.textContent = `${meters} m`
+    option.selected = meters === settings.radarAlertDistanceM
+    radarDistanceSelect.appendChild(option)
+  }
+  radarDistanceSelect.addEventListener('change', () => onChange({ radarAlertDistanceM: Number(radarDistanceSelect.value) }))
+  radarDistanceField.append(radarDistanceCaption, radarDistanceSelect)
+  form.appendChild(radarDistanceField)
+
+  const radarSoundField = document.createElement('label')
+  radarSoundField.className = 'settings-form__field'
+  const radarSoundCaption = document.createElement('span')
+  radarSoundCaption.className = 'settings-form__label'
+  radarSoundCaption.textContent = t('radar.settings.sound')
+  const radarSoundInput = document.createElement('input')
+  radarSoundInput.type = 'checkbox'
+  radarSoundInput.dataset.field = 'radarSound'
+  radarSoundInput.checked = settings.radarSound
+  radarSoundInput.addEventListener('change', () => onChange({ radarSound: radarSoundInput.checked }))
+  radarSoundField.append(radarSoundCaption, radarSoundInput)
+  form.appendChild(radarSoundField)
 
   const about = document.createElement('section')
   about.className = 'settings-about'
