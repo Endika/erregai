@@ -54,6 +54,7 @@ export const eu: Record<string, string> = {
   'radar.alert.title': 'Radarra aurrean',
   'radar.alert.body': '{via} errepidean radar finkoa',
   'radar.alert.banner': 'Radarra {m} m-ra',
+  'radar.list.title': 'Aurrean dauden radarrak',
   'settings.about': 'Honi buruz',
   'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',
   'about.map': 'Mapa: OpenStreetMap',
