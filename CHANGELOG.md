@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.2](https://github.com/Endika/erregai/compare/v1.11.1...v1.11.2) (2026-07-15)
+
+
+### Refactor
+
+* **settings:** group controls into general, radar and fuel sections ([ce7b9dc](https://github.com/Endika/erregai/commit/ce7b9dc97e857b2514a93d0dfebca37813210e4e))
+
 ## [1.11.1](https://github.com/Endika/erregai/compare/v1.11.0...v1.11.1) (2026-07-15)
 
 
