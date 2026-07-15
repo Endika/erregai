@@ -1,13 +1,40 @@
-import { utmToWgs84, dedupeRadars, normalizeDgt } from '../scripts/lib/radar-normalize.mjs'
+import {
+  utmToWgs84,
+  dedupeRadars,
+  normalizeDgt,
+  normalizeEuskadi,
+} from '../scripts/lib/radar-normalize.mjs'
 
 describe('utmToWgs84 (EPSG:25831)', () => {
   it('converts a Barcelona-area UTM 31N point to plausible WGS84', () => {
     // ~ Barcelona: easting 431000, northing 4582000 -> ~41.38 N, ~2.17 E
-    const { lat, lon } = utmToWgs84(431000, 4582000)
+    const { lat, lon } = utmToWgs84(431000, 4582000, 'EPSG:25831')
     expect(lat).toBeGreaterThan(41.2)
     expect(lat).toBeLessThan(41.6)
     expect(lon).toBeGreaterThan(1.9)
     expect(lon).toBeLessThan(2.4)
+  })
+})
+
+describe('utmToWgs84 (EPSG:25830)', () => {
+  it('converts a Euskadi UTM 30N point to plausible WGS84', () => {
+    // ~ Araba (Kuartango, AP-68): easting 508609.65, northing 4740689.1
+    const { lat, lon } = utmToWgs84(508609.65, 4740689.1, 'EPSG:25830')
+    expect(lat).toBeGreaterThan(42.8)
+    expect(lat).toBeLessThan(43.2)
+    expect(lon).toBeGreaterThan(-3.0)
+    expect(lon).toBeLessThan(-2.6)
+  })
+})
+
+describe('normalizeEuskadi', () => {
+  it('maps a UTM 30N row to a Radar in the Basque Country', () => {
+    const out = normalizeEuskadi([{ x: 508609.65, y: 4740689.1, via: 'AP-68' }])
+    expect(out[0]).toMatchObject({ id: 'euskadi-0', via: 'AP-68', source: 'euskadi' })
+    expect(out[0].lat).toBeGreaterThan(42.8)
+    expect(out[0].lat).toBeLessThan(43.2)
+    expect(out[0].lon).toBeGreaterThan(-3.0)
+    expect(out[0].lon).toBeLessThan(-2.6)
   })
 })
 

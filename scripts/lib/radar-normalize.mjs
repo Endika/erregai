@@ -1,10 +1,12 @@
 import proj4 from 'proj4'
 
-// EPSG:25831 - ETRS89 / UTM zone 31N (Catalonia open-data CRS).
+// ETRS89 / UTM zones used by the regional sources: 30N for Euskadi, 31N for
+// Catalonia. The CRS differs per source, so utmToWgs84 takes it explicitly.
+proj4.defs('EPSG:25830', '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
 proj4.defs('EPSG:25831', '+proj=utm +zone=31 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
 
-export function utmToWgs84(easting, northing) {
-  const [lon, lat] = proj4('EPSG:25831', 'EPSG:4326', [easting, northing])
+export function utmToWgs84(easting, northing, epsg = 'EPSG:25831') {
+  const [lon, lat] = proj4(epsg, 'EPSG:4326', [easting, northing])
   return { lat, lon }
 }
 
@@ -23,14 +25,14 @@ export function normalizeDgt(rows) {
   }))
 }
 
-// Euskadi (Trafikoa) fixed-radar cabins. Manual dataset: rows carry WGS84
-// lat/lon; UTM columns are converted only if lat/lon are absent.
+// Euskadi (Trafikoa) fixed-radar cabins. Rows carry UTM 30N easting/northing
+// (ETRS89, EPSG:25830); converted to WGS84. Falls back to lat/lon if present.
 export function normalizeEuskadi(rows) {
   return rows.map((row, i) => {
     const hasLatLon = row.lat != null || row.latitud != null || row.LATITUD != null
     const coords = hasLatLon
       ? { lat: num(row.lat ?? row.latitud ?? row.LATITUD), lon: num(row.lon ?? row.longitud ?? row.LONGITUD) }
-      : utmToWgs84(num(row.x ?? row.utm_x), num(row.y ?? row.utm_y))
+      : utmToWgs84(num(row.x ?? row.utm_x), num(row.y ?? row.utm_y), 'EPSG:25830')
     return {
       id: `euskadi-${i}`,
       lat: coords.lat,
