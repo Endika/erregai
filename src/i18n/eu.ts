@@ -41,6 +41,9 @@ export const eu: Record<string, string> = {
   'detail.address': 'Helbidea',
 
   'settings.fuel': 'Erregaia',
+  'settings.section.general': 'Orokorra',
+  'settings.section.radar': 'Radar-abisuak',
+  'settings.section.fuel': 'Gasolindegi-abisuak',
   'settings.sort': 'Ordenatu honela',
   'settings.radius': 'Erradioa',
   'settings.locale': 'Hizkuntza',

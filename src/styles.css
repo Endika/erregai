@@ -647,6 +647,21 @@ body {
   cursor: pointer;
 }
 
+/* --- Settings: grouped sections --- */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 100%;
+}
+
+.settings-section__title {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 /* --- Settings: about, colour legend, data attribution --- */
 .settings-about {
   margin-top: 0.5rem;
