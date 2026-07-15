@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/Endika/erregai/compare/v1.11.0...v1.11.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **trip:** unlock shared audio context on start so alerts sound on mobile ([4124e13](https://github.com/Endika/erregai/commit/4124e13545f3947f4a4c6a8ca52f49432c8034e4))
+
 ## [1.11.0](https://github.com/Endika/erregai/compare/v1.10.1...v1.11.0) (2026-07-15)
 
 
