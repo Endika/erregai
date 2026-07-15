@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.3](https://github.com/Endika/erregai/compare/v1.11.2...v1.11.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* **ui:** pin app shell to viewport so header and tab bar stay fixed on mobile ([bfe5f8f](https://github.com/Endika/erregai/commit/bfe5f8f17385f6bb91bcc81fd5ec35f614f49eac))
+
 ## [1.11.2](https://github.com/Endika/erregai/compare/v1.11.1...v1.11.2) (2026-07-15)
 
 
