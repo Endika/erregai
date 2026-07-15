@@ -452,6 +452,11 @@ body {
   overflow-wrap: break-word;
 }
 
+.trip-view__banner--fuel {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
 .trip-view__list {
   display: flex;
   flex-direction: column;
