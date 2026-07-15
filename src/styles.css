@@ -562,6 +562,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.trip-view__radar-notice {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 .settings-form {
   display: flex;
   flex-direction: column;
