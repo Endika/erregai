@@ -1,11 +1,13 @@
 import { FUELS } from '../core/fuels'
-import type { Settings, Theme } from '../app/settings'
+import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
 const RADAR_DISTANCES_M: readonly number[] = [300, 500, 800, 1000, 1500]
+const FUEL_ALERT_MODES: readonly FuelAlertMode[] = ['cheap', 'any', 'off']
+const FUEL_DISTANCES_M: readonly number[] = [1000, 2000, 3000, 5000]
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
@@ -160,6 +162,55 @@ export function renderSettings(
   radarSoundInput.addEventListener('change', () => onChange({ radarSound: radarSoundInput.checked }))
   radarSoundField.append(radarSoundCaption, radarSoundInput)
   form.appendChild(radarSoundField)
+
+  const fuelModeField = document.createElement('label')
+  fuelModeField.className = 'settings-form__field'
+  const fuelModeCaption = document.createElement('span')
+  fuelModeCaption.className = 'settings-form__label'
+  fuelModeCaption.textContent = t('fuel.settings.mode')
+  const fuelModeSelect = document.createElement('select')
+  fuelModeSelect.dataset.field = 'fuelAlertMode'
+  for (const mode of FUEL_ALERT_MODES) {
+    const option = document.createElement('option')
+    option.value = mode
+    option.textContent = t(`fuel.settings.mode.${mode}`)
+    option.selected = mode === settings.fuelAlertMode
+    fuelModeSelect.appendChild(option)
+  }
+  fuelModeSelect.addEventListener('change', () => onChange({ fuelAlertMode: fuelModeSelect.value as FuelAlertMode }))
+  fuelModeField.append(fuelModeCaption, fuelModeSelect)
+  form.appendChild(fuelModeField)
+
+  const fuelDistanceField = document.createElement('label')
+  fuelDistanceField.className = 'settings-form__field'
+  const fuelDistanceCaption = document.createElement('span')
+  fuelDistanceCaption.className = 'settings-form__label'
+  fuelDistanceCaption.textContent = t('fuel.settings.distance')
+  const fuelDistanceSelect = document.createElement('select')
+  fuelDistanceSelect.dataset.field = 'fuelAlertDistanceM'
+  for (const meters of FUEL_DISTANCES_M) {
+    const option = document.createElement('option')
+    option.value = String(meters)
+    option.textContent = `${meters} m`
+    option.selected = meters === settings.fuelAlertDistanceM
+    fuelDistanceSelect.appendChild(option)
+  }
+  fuelDistanceSelect.addEventListener('change', () => onChange({ fuelAlertDistanceM: Number(fuelDistanceSelect.value) }))
+  fuelDistanceField.append(fuelDistanceCaption, fuelDistanceSelect)
+  form.appendChild(fuelDistanceField)
+
+  const fuelSoundField = document.createElement('label')
+  fuelSoundField.className = 'settings-form__field'
+  const fuelSoundCaption = document.createElement('span')
+  fuelSoundCaption.className = 'settings-form__label'
+  fuelSoundCaption.textContent = t('fuel.settings.sound')
+  const fuelSoundInput = document.createElement('input')
+  fuelSoundInput.type = 'checkbox'
+  fuelSoundInput.dataset.field = 'fuelSound'
+  fuelSoundInput.checked = settings.fuelSound
+  fuelSoundInput.addEventListener('change', () => onChange({ fuelSound: fuelSoundInput.checked }))
+  fuelSoundField.append(fuelSoundCaption, fuelSoundInput)
+  form.appendChild(fuelSoundField)
 
   const about = document.createElement('section')
   about.className = 'settings-about'

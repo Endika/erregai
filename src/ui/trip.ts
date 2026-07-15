@@ -3,10 +3,12 @@ import type { LatLon } from '../core/geo'
 import { haversineKm } from '../core/geo'
 import { newTripState, updateTrip, type TripConfig, type TripState, type TripUpdate } from '../core/trip'
 import { radarsAhead, nextRadarAlerts, type RadarHit } from '../core/radars'
+import { nextProximityAlerts } from '../core/proximity'
+import { cheapAhead } from '../core/fuel-alert'
 import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
-import { playRadarBeep } from '../adapters/audio'
+import { playRadarBeep, playFuelChime } from '../adapters/audio'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
@@ -28,6 +30,8 @@ export class TripController {
   private radarBanner: string | undefined
   private alertedRadarIds = new Set<string>()
   private radarHits: RadarHit[] = []
+  private fuelBanner: string | undefined
+  private alertedFuelIds = new Set<string>()
 
   constructor(
     private store: Store,
@@ -54,6 +58,8 @@ export class TripController {
     this.radarBanner = undefined
     this.alertedRadarIds = new Set<string>()
     this.radarHits = []
+    this.fuelBanner = undefined
+    this.alertedFuelIds = new Set<string>()
     this.map.clearRadars()
 
     await ensureNotifyPermission()
@@ -76,6 +82,8 @@ export class TripController {
     this.radarBanner = undefined
     this.alertedRadarIds = new Set<string>()
     this.radarHits = []
+    this.fuelBanner = undefined
+    this.alertedFuelIds = new Set<string>()
     this.map.clearRadars()
     this.onChange()
   }
@@ -120,6 +128,30 @@ export class TripController {
       this.map.clearRadars()
     }
 
+    if (settings.fuelAlertMode !== 'off') {
+      const alertDistanceKm = settings.fuelAlertDistanceM / 1000
+      const hits = cheapAhead(pos, this.tripState.headingDeg, this.store.state.stations, {
+        fuel: settings.fuel,
+        radiusKm: settings.radiusKm,
+        corridorDeg: DEFAULT_CORRIDOR_DEG,
+        alertDistanceKm,
+        mode: settings.fuelAlertMode,
+      })
+      const { alertedIds, newlyAlerted } = nextProximityAlerts(
+        this.alertedFuelIds,
+        hits.map(h => ({ id: h.station.id, distanceKm: h.distanceKm })),
+        alertDistanceKm,
+      )
+      this.alertedFuelIds = alertedIds
+      if (newlyAlerted.length > 0) {
+        const nearest = hits.find(h => h.station.id === newlyAlerted[0].id)!
+        const meters = Math.round(nearest.distanceKm * 1000)
+        this.fuelBanner = t('fuel.alert.banner').replace('{brand}', nearest.station.brand).replace('{m}', String(meters))
+        notify(t('fuel.alert.title'), t('fuel.alert.body').replace('{brand}', nearest.station.brand))
+        if (settings.fuelSound) playFuelChime()
+      }
+    }
+
     this.onChange()
   }
 
@@ -152,6 +184,13 @@ export class TripController {
       radarBanner.className = 'trip-view__banner trip-view__banner--radar'
       radarBanner.textContent = this.radarBanner
       wrapper.appendChild(radarBanner)
+    }
+
+    if (this.fuelBanner) {
+      const fuelBanner = document.createElement('div')
+      fuelBanner.className = 'trip-view__banner trip-view__banner--fuel'
+      fuelBanner.textContent = this.fuelBanner
+      wrapper.appendChild(fuelBanner)
     }
 
     if (this.active) {
