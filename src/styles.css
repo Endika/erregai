@@ -23,6 +23,9 @@
   --map-marker-expensive: #b3261e;
   --map-marker-unknown: #6b6b6b;
   --map-marker-user: #0b57d0;
+  /* Radar hazard hue — a distinct violet so it never collides with the price
+     bands (green/orange/red), unknown grey or the blue user dot. */
+  --map-marker-radar: #8e24aa;
 }
 
 /* Dark palette shared by system-dark (unless the user forced light) and by an
@@ -508,6 +511,55 @@ body {
 .trip-view__empty {
   margin: 0;
   color: var(--color-muted);
+}
+
+.trip-view__radars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.trip-view__radars-title {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.trip-view__radar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.trip-view__radar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--map-marker-radar);
+  border-radius: 0.5rem;
+  background: var(--color-bg-raised);
+  max-width: 100%;
+}
+
+.trip-view__radar-via {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-view__radar-distance {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .settings-form {

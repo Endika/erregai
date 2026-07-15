@@ -3,16 +3,17 @@ import * as L from 'leaflet'
 import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import type { LatLon } from '../core/geo'
+import type { Radar } from '../core/radars'
 import { bandForThresholds, bandThresholds, priceOf, type PriceBand } from '../core/pricing'
 
-type MarkerKind = PriceBand | 'unknown' | 'user'
+type MarkerKind = PriceBand | 'unknown' | 'user' | 'radar'
 
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 const INITIAL_ZOOM = 12
 const FALLBACK_MARKER_COLOR = '#666666'
 const SELECTED_STROKE = '#111111'
-const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user']
+const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user', 'radar']
 
 function readMarkerColors(): Record<MarkerKind, string> {
   const style = getComputedStyle(document.documentElement)
@@ -26,6 +27,7 @@ function readMarkerColors(): Record<MarkerKind, string> {
 export class MapView {
   private map?: L.Map
   private markers?: L.LayerGroup
+  private radarMarkers?: L.LayerGroup
   private userMarker?: L.CircleMarker
 
   constructor(private container: HTMLElement) {}
@@ -63,6 +65,27 @@ export class MapView {
     }
   }
 
+  renderRadars(radars: readonly Radar[]): void {
+    if (!this.map || !this.radarMarkers) return
+    this.radarMarkers.clearLayers()
+    const color = readMarkerColors().radar
+    for (const radar of radars) {
+      const marker = L.circleMarker([radar.lat, radar.lon], {
+        radius: 6,
+        color,
+        weight: 3,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
+      })
+      if (radar.via) marker.bindTooltip(radar.via)
+      this.radarMarkers.addLayer(marker)
+    }
+  }
+
+  clearRadars(): void {
+    this.radarMarkers?.clearLayers()
+  }
+
   invalidateSize(): void {
     this.map?.invalidateSize()
   }
@@ -79,6 +102,7 @@ export class MapView {
     this.map?.remove()
     this.map = undefined
     this.markers = undefined
+    this.radarMarkers = undefined
     this.userMarker = undefined
   }
 
@@ -86,6 +110,7 @@ export class MapView {
     const map = L.map(this.container).setView([pos.lat, pos.lon], INITIAL_ZOOM)
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map)
     this.markers = L.layerGroup().addTo(map)
+    this.radarMarkers = L.layerGroup().addTo(map)
     const colors = readMarkerColors()
     this.userMarker = L.circleMarker([pos.lat, pos.lon], {
       radius: 7,

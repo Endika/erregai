@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, afterEach } from 'vitest'
 import { TripController } from '../src/ui/trip'
+import type { MapView } from '../src/ui/map'
 import { Store } from '../src/app/store'
 import type { Kv, CacheEntry } from '../src/adapters/cache'
 import type { LatLon } from '../src/core/geo'
@@ -26,9 +27,21 @@ const behind: LatLon = { lat: RADAR.lat - 0.01326, lon: RADAR.lon } // ~1.47 km 
 const near: LatLon = { lat: RADAR.lat - 0.00326, lon: RADAR.lon }   // ~0.36 km south (in range, ahead)
 const nearer: LatLon = { lat: RADAR.lat - 0.00226, lon: RADAR.lon } // ~0.25 km south (still in range)
 
-function makeController(): TripController {
+// In-memory fake of MapView recording the radars it was asked to render, so the
+// map-layer wiring can be asserted without a real Leaflet/DOM map.
+const fakeMap = (): MapView & { rendered: readonly { id: string }[]; cleared: number } => {
+  const view = {
+    rendered: [] as readonly { id: string }[],
+    cleared: 0,
+    renderRadars(radars: readonly { id: string }[]) { view.rendered = radars },
+    clearRadars() { view.cleared += 1 },
+  }
+  return view as unknown as MapView & { rendered: readonly { id: string }[]; cleared: number }
+}
+
+function makeController(map: MapView = fakeMap()): TripController {
   const store = new Store({ fetchProvince: emptyProvince as never, kv: memKv(), now: () => 1000 })
-  return new TripController(store, () => {}, () => {})
+  return new TripController(store, map, () => {}, () => {})
 }
 
 // onFix is private; the geolocation adapter is the production caller, so drive it directly here.
@@ -68,5 +81,26 @@ describe('TripController radar alerting', () => {
     await fix(c, near)
     await fix(c, nearer)
     expect(FakeNotification.instances).toHaveLength(0)
+  })
+
+  it('renders the radar ahead onto the map layer when enabled', async () => {
+    const map = fakeMap()
+    const c = makeController(map)
+    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true })
+
+    await fix(c, behind) // seed heading; radar out of range
+    await fix(c, near)    // radar within range and ahead
+    expect(map.rendered.map(r => r.id)).toContain(RADAR.id)
+  })
+
+  it('clears the radar map layer when alerts are disabled', async () => {
+    const map = fakeMap()
+    const c = makeController(map)
+    const store = (c as unknown as { store: Store }).store
+    store.setSettings({ radarAlertsEnabled: false })
+
+    await fix(c, near)
+    expect(map.cleared).toBeGreaterThan(0)
+    expect(map.rendered).toHaveLength(0)
   })
 })

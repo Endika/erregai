@@ -54,6 +54,7 @@ export const va: Record<string, string> = {
   'radar.alert.title': 'Radar al davant',
   'radar.alert.body': 'Radar fix a {via}',
   'radar.alert.banner': 'Radar a {m} m',
+  'radar.list.title': 'Radars davant',
   'settings.about': 'Quant a',
   'about.data': 'Preus: Ministeri de Transició Ecològica',
   'about.map': 'Mapa: OpenStreetMap',

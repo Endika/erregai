@@ -63,7 +63,7 @@ const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
 const mapView = new MapView(mapContainer)
-const tripController = new TripController(store, () => { if (activeTab === 'trip') render() }, selectStation)
+const tripController = new TripController(store, mapView, () => { if (activeTab === 'trip') render() }, selectStation)
 
 root.addEventListener('click', e => {
   const target = e.target as HTMLElement
