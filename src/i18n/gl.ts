@@ -41,6 +41,9 @@ export const gl: Record<string, string> = {
   'detail.address': 'Enderezo',
 
   'settings.fuel': 'Combustible',
+  'settings.section.general': 'Xeral',
+  'settings.section.radar': 'Avisos de radar',
+  'settings.section.fuel': 'Avisos de gasolineira',
   'settings.sort': 'Ordenar por',
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',

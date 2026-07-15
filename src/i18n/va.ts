@@ -41,6 +41,9 @@ export const va: Record<string, string> = {
   'detail.address': 'Adreça',
 
   'settings.fuel': 'Combustible',
+  'settings.section.general': 'General',
+  'settings.section.radar': 'Avisos de radar',
+  'settings.section.fuel': 'Avisos de gasolinera',
   'settings.sort': 'Ordenar per',
   'settings.radius': 'Radi',
   'settings.locale': 'Idioma',

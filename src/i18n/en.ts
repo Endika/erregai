@@ -41,6 +41,9 @@ export const en: Record<string, string> = {
   'detail.address': 'Address',
 
   'settings.fuel': 'Fuel',
+  'settings.section.general': 'General',
+  'settings.section.radar': 'Radar alerts',
+  'settings.section.fuel': 'Fuel alerts',
   'settings.sort': 'Sort by',
   'settings.radius': 'Radius',
   'settings.locale': 'Language',

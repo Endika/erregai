@@ -41,6 +41,9 @@ export const es: Record<string, string> = {
   'detail.address': 'Dirección',
 
   'settings.fuel': 'Combustible',
+  'settings.section.general': 'General',
+  'settings.section.radar': 'Avisos de radar',
+  'settings.section.fuel': 'Avisos de gasolinera',
   'settings.sort': 'Ordenar por',
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',
