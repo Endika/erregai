@@ -56,7 +56,10 @@ function parseDgtXml(buf) {
   const xml = buf.toString('utf8')
   const start = xml.indexOf('GUID_Inventario_CabinasCinemometro')
   if (start < 0) return []
-  const section = xml.slice(start)
+  // Bound the section to the next inventory set (if any) so tramo radars never
+  // leak in should DATEX2 reorder its sets — do not slice blindly to EOF.
+  const nextSet = xml.indexOf('GUID_Inventario_', start + 1)
+  const section = nextSet < 0 ? xml.slice(start) : xml.slice(start, nextSet)
   const rows = []
   const pointRe =
     /<_0:latitude>([-0-9.]+)<\/_0:latitude>\s*<_0:longitude>([-0-9.]+)<\/_0:longitude>([\s\S]*?)<\/_0:point>/g
