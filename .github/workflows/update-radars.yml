@@ -1,0 +1,55 @@
+name: Update radars
+
+on:
+  schedule:
+    - cron: '0 4 1,15 * *' # twice a month at 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout with the PAT so the branch push is authored by it and the
+      # opened PR triggers the required CI checks (a GITHUB_TOKEN push does not).
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The generator fetches DGT, Euskadi and Catalunya sources server-side.
+      - run: npm run data:radars
+      - run: npm run typecheck
+      - name: Open PR if the dataset changed
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if git diff --quiet -- src/core/radars.data.ts; then
+            echo "Radar dataset unchanged; nothing to do."
+            exit 0
+          fi
+          # Sanity floor: a partial-fetch failure can still write a valid but
+          # near-empty dataset. Refuse to commit anything implausibly small.
+          count=$(grep -c 'source:' src/core/radars.data.ts || true)
+          if [ "${count:-0}" -lt 500 ]; then
+            echo "Only ${count:-0} radars generated (<500); refusing to overwrite the dataset." >&2
+            exit 1
+          fi
+          echo "Generated $count radars."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="chore/update-radars-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git add src/core/radars.data.ts
+          git commit -m "chore(radars): refresh fixed-radar dataset"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(radars): refresh fixed-radar dataset" \
+            --body "Automated refresh of the fixed-radar dataset from the official DGT, Euskadi and Catalunya open-data sources."
+          gh pr merge --rebase --auto "$branch"
