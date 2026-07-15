@@ -4,8 +4,8 @@
 //
 //   DGT       DATEX2 XML, fixed-radar cabins (CabinasCinemometro set), WGS84.
 //   Catalunya Servei Catala de Transit plain-text export, UTM 31N (ETRS89).
-//   Euskadi   Trafikoa fixed-radar cabins - no machine-readable open-data
-//             endpoint found; supply a local euskadi.json (see README).
+//   Euskadi   Trafikoa cabinas-de-radar-fijo HTML page; each cabin is inlined
+//             as JS (var x/y in UTM 30N ETRS89, road in popupValores[4]).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import {
   normalizeDgt,
@@ -20,20 +20,20 @@ const OUT = new URL('../src/core/radars.data.ts', import.meta.url)
 const URLS = {
   dgt: 'http://infocar.dgt.es/datex2/dgt/PredefinedLocationsPublication/radares/content.xml',
   catalunya: 'http://transit.gencat.cat/web/.content/documents/seguretat_viaria/radars.txt',
-  // No downloadable JSON/CSV located for Euskadi fixed radars: the Trafikoa
-  // page is client-rendered and the traffic API exposes no radar endpoint.
-  // Drop a manual euskadi.json into ../erregai-notes/radar-sources/ (README).
-  euskadi: '',
+  euskadi: 'https://apps.trafikoa.euskadi.eus/lfr/web/trafikoa/cabinas-de-radar-fijo',
 }
+
+// Trafikoa serves the radar page only to browser-like clients.
+const UA = { 'User-Agent': 'Mozilla/5.0' }
 
 // Coarse mainland+islands+Canary bounding box, used to discard corrupt rows.
 const inSpain = (lat, lon) => lat > 27 && lat < 44 && lon > -19 && lon < 5
 
 // Fetch a URL server-side; on failure fall back to a local raw file (dev).
-async function fetchOrLocal(url, localName) {
+async function fetchOrLocal(url, localName, headers) {
   try {
     if (url) {
-      const res = await fetch(url)
+      const res = await fetch(url, headers ? { headers } : undefined)
       if (res.ok) return Buffer.from(await res.arrayBuffer())
       console.warn(`fetch ${localName}: HTTP ${res.status}`)
     }
@@ -90,18 +90,40 @@ function parseCatalunyaTxt(buf) {
   return rows
 }
 
-const rowsFromJson = (buf) => (buf ? JSON.parse(buf.toString('utf8')) : [])
+// Parse the Trafikoa HTML: each fixed cabin is inlined as a JS block holding
+// "var x"/"var y" (UTM 30N easting/northing) and, before the per-language
+// switch, a Spanish "popupValores" array whose index 4 is the road name.
+// The lazy match stops at the first popupValores in each block (the Spanish
+// one), so the eu_ES duplicate inside the switch is ignored.
+function parseTrafikoaHtml(buf) {
+  if (!buf) return []
+  const html = buf.toString('utf8')
+  const rows = []
+  const blockRe =
+    /var x = ([-0-9.]+);[\s\S]*?var y = ([-0-9.]+);[\s\S]*?var popupValores = (\[[\s\S]*?\]);/g
+  let m
+  while ((m = blockRe.exec(html)) !== null) {
+    let via = ''
+    try {
+      via = JSON.parse(m[3])[4] ?? ''
+    } catch {
+      via = ''
+    }
+    rows.push({ x: m[1], y: m[2], via })
+  }
+  return rows
+}
 
 const [dgtBuf, catBuf, euskBuf] = await Promise.all([
   fetchOrLocal(URLS.dgt, 'dgt.xml'),
   fetchOrLocal(URLS.catalunya, 'catalunya.txt'),
-  fetchOrLocal(URLS.euskadi, 'euskadi.json'),
+  fetchOrLocal(URLS.euskadi, 'euskadi.html', UA),
 ])
 
 const bySource = {
   dgt: normalizeDgt(parseDgtXml(dgtBuf)),
   catalunya: normalizeCatalunya(parseCatalunyaTxt(catBuf)),
-  euskadi: normalizeEuskadi(rowsFromJson(euskBuf)),
+  euskadi: normalizeEuskadi(parseTrafikoaHtml(euskBuf)),
 }
 for (const [name, list] of Object.entries(bySource)) {
   console.log(`  ${name}: ${list.length} rows`)
