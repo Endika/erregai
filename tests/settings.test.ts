@@ -20,4 +20,12 @@ describe('settings', () => {
     const s = memStore(); s.setItem('erregai.settings', '{bad')
     expect(loadSettings(s)).toEqual(DEFAULT_SETTINGS)
   })
+  it('provides radar defaults and preserves them across a partial merge', () => {
+    const s = memStore(); s.setItem('erregai.settings', JSON.stringify({ radiusKm: 20 }))
+    const merged = loadSettings(s)
+    expect(merged.radiusKm).toBe(20)
+    expect(merged.radarAlertsEnabled).toBe(true)
+    expect(merged.radarAlertDistanceM).toBe(800)
+    expect(merged.radarSound).toBe(true)
+  })
 })
