@@ -8,6 +8,7 @@ import { cheapAhead } from '../core/fuel-alert'
 import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
+import { keepScreenAwake } from '../adapters/wakeLock'
 import { playRadarBeep, playFuelChime } from '../adapters/audio'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
@@ -32,6 +33,7 @@ export class TripController {
   private radarHits: RadarHit[] = []
   private fuelBanner: string | undefined
   private alertedFuelIds = new Set<string>()
+  private releaseWakeLock: (() => void) | undefined
 
   constructor(
     private store: Store,
@@ -61,6 +63,7 @@ export class TripController {
     this.fuelBanner = undefined
     this.alertedFuelIds = new Set<string>()
     this.map.clearRadars()
+    this.releaseWakeLock = keepScreenAwake()
 
     await ensureNotifyPermission()
 
@@ -75,6 +78,8 @@ export class TripController {
     this.active = false
     this.stopFn?.()
     this.stopFn = undefined
+    this.releaseWakeLock?.()
+    this.releaseWakeLock = undefined
     this.tripState = newTripState()
     this.lastUpdate = undefined
     this.lastProvinceId = undefined
