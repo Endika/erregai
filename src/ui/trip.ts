@@ -2,8 +2,11 @@ import type { Station } from '../core/station'
 import type { LatLon } from '../core/geo'
 import { haversineKm } from '../core/geo'
 import { newTripState, updateTrip, type TripConfig, type TripState, type TripUpdate } from '../core/trip'
+import { radarsAhead, nextRadarAlerts } from '../core/radars'
+import { RADARS } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
+import { playRadarBeep } from '../adapters/audio'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
@@ -20,6 +23,8 @@ export class TripController {
   private stopFn: (() => void) | undefined
   private active = false
   private banner: Station | undefined
+  private radarBanner: string | undefined
+  private alertedRadarIds = new Set<string>()
 
   constructor(
     private store: Store,
@@ -42,6 +47,8 @@ export class TripController {
     this.lastUpdate = undefined
     this.lastProvinceId = undefined
     this.banner = undefined
+    this.radarBanner = undefined
+    this.alertedRadarIds = new Set<string>()
 
     await ensureNotifyPermission()
 
@@ -60,6 +67,8 @@ export class TripController {
     this.lastUpdate = undefined
     this.lastProvinceId = undefined
     this.banner = undefined
+    this.radarBanner = undefined
+    this.alertedRadarIds = new Set<string>()
     this.onChange()
   }
 
@@ -82,6 +91,20 @@ export class TripController {
       const priceLabel = price !== undefined ? price.toFixed(3) : '—'
       notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${distanceKm} km`)
       this.banner = update.alert
+    }
+
+    if (settings.radarAlertsEnabled) {
+      const alertDistanceKm = settings.radarAlertDistanceM / 1000
+      const hits = radarsAhead(pos, this.tripState.headingDeg, RADARS, { radiusKm: alertDistanceKm, corridorDeg: DEFAULT_CORRIDOR_DEG })
+      const { alertedIds, newlyAlerted } = nextRadarAlerts(this.alertedRadarIds, hits, alertDistanceKm)
+      this.alertedRadarIds = alertedIds
+      if (newlyAlerted.length > 0) {
+        const nearest = newlyAlerted[0]
+        const meters = Math.round(nearest.distanceKm * 1000)
+        this.radarBanner = t('radar.alert.banner').replace('{m}', String(meters))
+        notify(t('radar.alert.title'), t('radar.alert.body').replace('{via}', nearest.radar.via))
+        if (settings.radarSound) playRadarBeep()
+      }
     }
 
     this.onChange()
@@ -109,6 +132,13 @@ export class TripController {
       const price = priceOf(this.banner, this.store.state.settings.fuel)
       banner.textContent = `${t('trip.cheapestAhead')}: ${this.banner.brand} · ${price !== undefined ? price.toFixed(3) : '—'}`
       wrapper.appendChild(banner)
+    }
+
+    if (this.radarBanner) {
+      const radarBanner = document.createElement('div')
+      radarBanner.className = 'trip-view__banner trip-view__banner--radar'
+      radarBanner.textContent = this.radarBanner
+      wrapper.appendChild(radarBanner)
     }
 
     if (this.active) {
