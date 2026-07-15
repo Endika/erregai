@@ -9,7 +9,7 @@ import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
 import { keepScreenAwake } from '../adapters/wakeLock'
-import { playRadarBeep, playFuelChime } from '../adapters/audio'
+import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
@@ -51,6 +51,10 @@ export class TripController {
   }
 
   async start(): Promise<void> {
+    // Runs within the toggle button's click handler, so this synchronous
+    // prefix is still a user gesture — unlock audio before any await, or the
+    // gesture context is lost and mobile cues stay silent.
+    unlockAudio()
     if (this.active) return
     this.active = true
     this.tripState = newTripState()
