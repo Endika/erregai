@@ -55,6 +55,8 @@ export const gl: Record<string, string> = {
   'radar.alert.body': 'Radar fixo en {via}',
   'radar.alert.banner': 'Radar a {m} m',
   'radar.list.title': 'Radares diante',
+  'radar.notice.fixedOnly': 'Só radares fixos oficiais (sen móbiles nin de tramo).',
+  'radar.notice.dataset': 'Datos actualizados o {date}.',
   'settings.about': 'Acerca de',
   'about.data': 'Prezos: Ministerio de Transición Ecolóxica',
   'about.map': 'Mapa: OpenStreetMap',

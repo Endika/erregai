@@ -3,7 +3,7 @@ import type { LatLon } from '../core/geo'
 import { haversineKm } from '../core/geo'
 import { newTripState, updateTrip, type TripConfig, type TripState, type TripUpdate } from '../core/trip'
 import { radarsAhead, nextRadarAlerts, type RadarHit } from '../core/radars'
-import { RADARS } from '../core/radars.data'
+import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
 import { playRadarBeep } from '../adapters/audio'
@@ -158,8 +158,9 @@ export class TripController {
       const sort = this.store.state.settings.tripSort
       wrapper.appendChild(renderSortBar(sort, key => this.store.setSettings({ tripSort: key })))
       wrapper.appendChild(this.renderAhead(update, selectedId))
-      if (this.store.state.settings.radarAlertsEnabled && this.radarHits.length > 0) {
-        wrapper.appendChild(this.renderRadarList())
+      if (this.store.state.settings.radarAlertsEnabled) {
+        if (this.radarHits.length > 0) wrapper.appendChild(this.renderRadarList())
+        wrapper.appendChild(this.renderRadarNotice())
       }
     }
 
@@ -244,5 +245,13 @@ export class TripController {
 
     section.appendChild(list)
     return section
+  }
+
+  private renderRadarNotice(): HTMLElement {
+    const notice = document.createElement('p')
+    notice.className = 'trip-view__radar-notice'
+    const dataset = t('radar.notice.dataset').replace('{date}', RADARS_DATASET_DATE)
+    notice.textContent = `${t('radar.notice.fixedOnly')} ${dataset}`
+    return notice
   }
 }
