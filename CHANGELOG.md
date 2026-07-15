@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.11.0](https://github.com/Endika/erregai/compare/v1.10.1...v1.11.0) (2026-07-15)
+
+
+### Features
+
+* **radars:** add Euskadi (Trafikoa) radar source ([b1c099f](https://github.com/Endika/erregai/commit/b1c099f7e1f9a56ca6ea7665a90c2082d1166315))
+* **radars:** add radar alert preferences to settings ([af1fed6](https://github.com/Endika/erregai/commit/af1fed61c08af82e754d410bcaf3fc94f4a96679))
+* **radars:** add radar i18n notice and README data sources ([fcdf7a4](https://github.com/Endika/erregai/commit/fcdf7a47249c234500dd56668f1a9003bfb255bf))
+* **radars:** add radar selection and alert-once logic ([c55d92b](https://github.com/Endika/erregai/commit/c55d92ba7efbe5b72659ebd9f074147145ad3181))
+* **radars:** add synthesized audio beep adapter for alerts ([4cae52c](https://github.com/Endika/erregai/commit/4cae52c62b6e02eed18fbc354f7737e8654783ee))
+* **radars:** alert on fixed radars ahead during trip mode ([db4170f](https://github.com/Endika/erregai/commit/db4170f21ba5c9e5b900bbe2af2de4b682dcb285))
+* **radars:** build-time generator merging DGT, Euskadi and Catalonia datasets ([665c3fd](https://github.com/Endika/erregai/commit/665c3fd44af5939bd719530066036e6687e820a4))
+* **radars:** show fixed radars on the trip map and nearby list ([f014936](https://github.com/Endika/erregai/commit/f0149363f7acc8b95620d182a33556016aa9fd35))
+* **trip:** audible proximity alert for cheap fuel stations ahead ([1c3c6d9](https://github.com/Endika/erregai/commit/1c3c6d9f627f3fedabf45ffea574db9b6a63d19e))
+* **trip:** keep screen awake while trip mode is active ([50c6b34](https://github.com/Endika/erregai/commit/50c6b3498c5475a7fe7eaaee07cedc5b471c2b9e))
+
+
+### Chores
+
+* **radars:** remove unused xlsx dep and bound DGT XML section slice ([d991705](https://github.com/Endika/erregai/commit/d9917051e971cebfbe75e26b43fa67dadf06a5c6))
+
 ## [1.10.1](https://github.com/Endika/erregai/compare/v1.10.0...v1.10.1) (2026-07-14)
 
 
