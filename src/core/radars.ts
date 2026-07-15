@@ -1,4 +1,5 @@
 import { type LatLon, haversineKm, isAhead } from './geo'
+import { nextProximityAlerts } from './proximity'
 
 export type RadarSource = 'dgt' | 'euskadi' | 'catalunya'
 export type Radar = { id: string; lat: number; lon: number; via: string; source: RadarSource }
@@ -26,19 +27,8 @@ export function nextRadarAlerts(
   alertDistanceKm: number,
   hysteresisKm = 0.2,
 ): { alertedIds: Set<string>; newlyAlerted: RadarHit[] } {
-  const alertedIds = new Set(prevAlertedIds)
   const byId = new Map(hits.map(h => [h.radar.id, h]))
-  // forget ids that are now clearly out of range (or absent), to allow re-alert later
-  for (const id of prevAlertedIds) {
-    const h = byId.get(id)
-    if (!h || h.distanceKm > alertDistanceKm + hysteresisKm) alertedIds.delete(id)
-  }
-  const newlyAlerted: RadarHit[] = []
-  for (const h of hits) {
-    if (h.distanceKm <= alertDistanceKm && !alertedIds.has(h.radar.id)) {
-      alertedIds.add(h.radar.id)
-      newlyAlerted.push(h)
-    }
-  }
-  return { alertedIds, newlyAlerted }
+  const items = hits.map(h => ({ id: h.radar.id, distanceKm: h.distanceKm }))
+  const { alertedIds, newlyAlerted } = nextProximityAlerts(prevAlertedIds, items, alertDistanceKm, hysteresisKm)
+  return { alertedIds, newlyAlerted: newlyAlerted.map(i => byId.get(i.id)!) }
 }
