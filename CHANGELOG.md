@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/Endika/erregai/compare/v1.11.3...v1.12.0) (2026-07-16)
+
+
+### Features
+
+* **settings:** add radar test-sound button to verify audio on device ([6ae3312](https://github.com/Endika/erregai/commit/6ae3312d26a65fc527258fd008aa2f8f3f4e6513))
+
 ## [1.11.3](https://github.com/Endika/erregai/compare/v1.11.2...v1.11.3) (2026-07-15)
 
 
