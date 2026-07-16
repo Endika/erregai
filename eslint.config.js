@@ -21,6 +21,7 @@ export default [
         localStorage: 'readonly',
         document: 'readonly',
         getComputedStyle: 'readonly',
+        __APP_VERSION__: 'readonly',
       },
     },
     plugins: {

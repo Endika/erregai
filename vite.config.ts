@@ -1,8 +1,14 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Surfaced in the UI (Settings → About). release-please bumps package.json, so
+// this stays in sync with the released version without a second source of truth.
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as { version: string }
+
 export default defineConfig({
   base: '/erregai/',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   test: { globals: true, environment: 'node' },
   plugins: [
     VitePWA({

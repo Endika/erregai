@@ -726,3 +726,10 @@ body {
   color: var(--color-muted);
   font-size: 0.8125rem;
 }
+
+.settings-about__version {
+  margin: 0.75rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
