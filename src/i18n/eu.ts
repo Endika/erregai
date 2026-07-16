@@ -64,6 +64,7 @@ export const eu: Record<string, string> = {
   'fuel.settings.mode.off': 'Desaktibatuta',
   'fuel.settings.distance': 'Abisu distantzia',
   'fuel.settings.sound': 'Abisu soinua',
+  'fuel.settings.testSound': 'Probatu soinua',
   'fuel.alert.title': 'Gasolindegia aurrean',
   'fuel.alert.body': '{brand} zure ibilbidean',
   'fuel.alert.banner': '{brand} {m} m-ra',

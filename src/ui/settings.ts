@@ -2,7 +2,7 @@ import { FUELS } from '../core/fuels'
 import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
-import { playRadarBeep, unlockAudio } from '../adapters/audio'
+import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
@@ -196,6 +196,7 @@ export function renderSettings(
     toggleField(t('fuel.settings.sound'), 'fuelSound', settings.fuelSound, checked =>
       onChange({ fuelSound: checked }),
     ),
+    buttonField(t('fuel.settings.testSound'), () => { unlockAudio(); playFuelChime() }),
   ])
 
   const about = document.createElement('section')

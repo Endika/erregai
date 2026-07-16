@@ -64,6 +64,7 @@ export const ca: Record<string, string> = {
   'fuel.settings.mode.off': 'Desactivat',
   'fuel.settings.distance': "Distància d'avís",
   'fuel.settings.sound': "So d'avís",
+  'fuel.settings.testSound': 'Provar el so',
   'fuel.alert.title': 'Benzinera a prop',
   'fuel.alert.body': '{brand} a la teva ruta',
   'fuel.alert.banner': '{brand} a {m} m',

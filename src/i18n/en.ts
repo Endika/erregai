@@ -64,6 +64,7 @@ export const en: Record<string, string> = {
   'fuel.settings.mode.off': 'Off',
   'fuel.settings.distance': 'Alert distance',
   'fuel.settings.sound': 'Alert sound',
+  'fuel.settings.testSound': 'Test sound',
   'fuel.alert.title': 'Fuel station ahead',
   'fuel.alert.body': '{brand} on your route',
   'fuel.alert.banner': '{brand} in {m} m',
