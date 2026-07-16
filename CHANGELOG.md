@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/Endika/erregai/compare/v1.14.0...v1.15.0) (2026-07-16)
+
+
+### Features
+
+* **settings:** show app version in the About section ([9362455](https://github.com/Endika/erregai/commit/9362455cf4368ab3c2719221e5d770a560afcd81))
+
 ## [1.14.0](https://github.com/Endika/erregai/compare/v1.13.1...v1.14.0) (2026-07-16)
 
 
