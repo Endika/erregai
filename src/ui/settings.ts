@@ -219,7 +219,10 @@ export function renderSettings(
   const mapCredit = document.createElement('p')
   mapCredit.className = 'settings-about__credit'
   mapCredit.textContent = t('about.map')
-  about.append(aboutTitle, legend, dataCredit, mapCredit)
+  const version = document.createElement('p')
+  version.className = 'settings-about__version'
+  version.textContent = `v${__APP_VERSION__}`
+  about.append(aboutTitle, legend, dataCredit, mapCredit, version)
 
   form.append(general, radar, fuel, about)
   container.replaceChildren(form)
