@@ -7,8 +7,8 @@ export type FuelAlertMode = 'cheap' | 'any' | 'off'
 
 // locale is left unset by default: the app falls back to browser-detected
 // locale until the user explicitly picks one in settings (see main.ts).
-export interface Settings { fuel: FuelId; sort: SortKey; tripSort: SortKey; radiusKm: number; locale?: Locale; theme: Theme; radarAlertsEnabled: boolean; radarAlertDistanceM: number; radarSound: boolean; fuelAlertMode: FuelAlertMode; fuelAlertDistanceM: number; fuelSound: boolean }
-export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', tripSort: 'distance', radiusKm: 15, theme: 'system', radarAlertsEnabled: true, radarAlertDistanceM: 800, radarSound: true, fuelAlertMode: 'cheap', fuelAlertDistanceM: 2000, fuelSound: true }
+export interface Settings { fuel: FuelId; sort: SortKey; tripSort: SortKey; radiusKm: number; locale?: Locale; theme: Theme; radarLayerEnabled: boolean; radarAlertsEnabled: boolean; radarAlertDistanceM: number; radarSound: boolean; fuelAlertMode: FuelAlertMode; fuelAlertDistanceM: number; fuelSound: boolean }
+export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', tripSort: 'distance', radiusKm: 15, theme: 'system', radarLayerEnabled: true, radarAlertsEnabled: true, radarAlertDistanceM: 800, radarSound: true, fuelAlertMode: 'cheap', fuelAlertDistanceM: 2000, fuelSound: true }
 const KEY = 'erregai.settings'
 
 export function loadSettings(store: Storage = localStorage): Settings {

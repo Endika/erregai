@@ -83,24 +83,38 @@ describe('TripController radar alerting', () => {
     expect(FakeNotification.instances).toHaveLength(0)
   })
 
-  it('renders the radar ahead onto the map layer when enabled', async () => {
+  it('renders nearby radars onto the map layer when the radar layer is enabled', async () => {
     const map = fakeMap()
     const c = makeController(map)
-    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true })
+    ;(c as unknown as { store: Store }).store.setSettings({ radarLayerEnabled: true })
 
-    await fix(c, behind) // seed heading; radar out of range
-    await fix(c, near)    // radar within range and ahead
+    await fix(c, behind) // seed heading
+    await fix(c, near)    // radar within the map radius
     expect(map.rendered.map(r => r.id)).toContain(RADAR.id)
   })
 
-  it('clears the radar map layer when alerts are disabled', async () => {
+  it('clears the radar map layer when the radar layer is disabled', async () => {
     const map = fakeMap()
     const c = makeController(map)
     const store = (c as unknown as { store: Store }).store
-    store.setSettings({ radarAlertsEnabled: false })
+    store.setSettings({ radarLayerEnabled: false })
 
     await fix(c, near)
     expect(map.cleared).toBeGreaterThan(0)
     expect(map.rendered).toHaveLength(0)
+  })
+
+  // The two toggles are orthogonal: the map layer stays visible even with audio
+  // alerts off — the core of the "radars visible outside the trip alert" change.
+  it('keeps drawing the radar layer even when audio alerts are disabled', async () => {
+    const map = fakeMap()
+    const c = makeController(map)
+    const store = (c as unknown as { store: Store }).store
+    store.setSettings({ radarAlertsEnabled: false, radarLayerEnabled: true })
+
+    await fix(c, behind)
+    await fix(c, near)
+    expect(map.rendered.map(r => r.id)).toContain(RADAR.id)
+    expect(FakeNotification.instances).toHaveLength(0)
   })
 })

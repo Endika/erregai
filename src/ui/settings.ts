@@ -158,6 +158,12 @@ export function renderSettings(
 
   const radar = section(t('settings.section.radar'), [
     toggleField(
+      t('radar.settings.showOnMap'),
+      'radarLayerEnabled',
+      settings.radarLayerEnabled,
+      checked => onChange({ radarLayerEnabled: checked }),
+    ),
+    toggleField(
       t('radar.settings.enabled'),
       'radarAlertsEnabled',
       settings.radarAlertsEnabled,
