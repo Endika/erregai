@@ -64,6 +64,7 @@ export const es: Record<string, string> = {
   'fuel.settings.mode.off': 'Desactivado',
   'fuel.settings.distance': 'Distancia de aviso',
   'fuel.settings.sound': 'Sonido de aviso',
+  'fuel.settings.testSound': 'Probar sonido',
   'fuel.alert.title': 'Gasolinera cerca',
   'fuel.alert.body': '{brand} en tu ruta',
   'fuel.alert.banner': '{brand} a {m} m',
