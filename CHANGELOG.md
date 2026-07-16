@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/Endika/erregai/compare/v1.13.0...v1.13.1) (2026-07-16)
+
+
+### Chores
+
+* **radars:** refresh fixed-radar dataset ([16d2161](https://github.com/Endika/erregai/commit/16d2161b9249946fb4354c5a185f334ab6b2fb02))
+
 ## [1.13.0](https://github.com/Endika/erregai/compare/v1.12.0...v1.13.0) (2026-07-16)
 
 
