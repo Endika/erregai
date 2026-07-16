@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/Endika/erregai/compare/v1.13.1...v1.14.0) (2026-07-16)
+
+
+### Features
+
+* **radar:** show radars on map and browsable list outside trip alert ([177a3e1](https://github.com/Endika/erregai/commit/177a3e153156a0f5e1bf6b3faff258ac4cbce917))
+
 ## [1.13.1](https://github.com/Endika/erregai/compare/v1.13.0...v1.13.1) (2026-07-16)
 
 
