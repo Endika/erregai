@@ -10,6 +10,9 @@ import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
 import { renderSortBar } from './ui/sortBar'
+import { renderRadarList } from './ui/radar-list'
+import { nearbyRadars } from './core/radars'
+import { RADARS } from './core/radars.data'
 import { sortStations, type SortKey } from './core/pricing'
 import { haversineKm, type LatLon } from './core/geo'
 import type { Station } from './core/station'
@@ -18,6 +21,10 @@ import type { Settings } from './app/settings'
 type Tab = 'list' | 'map' | 'trip' | 'settings'
 const TABS: readonly Tab[] = ['list', 'map', 'trip', 'settings']
 const TRIP_ZOOM = 15
+// Bound radars drawn/listed on the map tab: filter by the active radius, then cap
+// icons and list rows so a dense urban area can't flood Leaflet or the DOM.
+const RADAR_MARKER_CAP = 60
+const RADAR_LIST_CAP = 10
 
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
 
@@ -213,7 +220,10 @@ function render(): void {
   } else if (activeTab === 'map') {
     if (state.pos) {
       const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
-      if (nearby.length === 0) {
+      const radarHits = state.settings.radarLayerEnabled
+        ? nearbyRadars(state.pos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP)
+        : []
+      if (nearby.length === 0 && radarHits.length === 0) {
         renderEmptyState(state.settings.radiusKm)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
@@ -227,9 +237,12 @@ function render(): void {
         split.append(mapWrap, listWrap)
         viewEl.appendChild(split)
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
+        if (radarHits.length > 0) mapView.renderRadars(radarHits.map(h => h.radar))
+        else mapView.clearRadars()
         mapView.invalidateSize()
         if (selectedStation) mapView.panTo(selectedStation.pos)
-        renderStationList(listWrap, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
+        if (sorted.length > 0) renderStationList(listWrap, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
+        if (radarHits.length > 0) listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
       }
     } else {
       renderPositionPlaceholder()
@@ -243,6 +256,16 @@ function render(): void {
       mapWrap.appendChild(mapContainer)
       viewEl.appendChild(mapWrap)
       mapView.render(tripPos, nearby, state.settings.fuel, selectStation, { recenter: true, selectedId })
+      // While a trip is active, onFix owns the radar layer (per GPS fix); when it
+      // is not, keep the preview map's radar layer in sync with the toggle so
+      // markers drawn on the map tab don't linger here after it's turned off.
+      if (!tripController.isActive) {
+        if (state.settings.radarLayerEnabled) {
+          mapView.renderRadars(nearbyRadars(tripPos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP).map(h => h.radar))
+        } else {
+          mapView.clearRadars()
+        }
+      }
       mapView.invalidateSize()
     }
     const readout = document.createElement('div')

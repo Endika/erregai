@@ -35,8 +35,12 @@ independent client and is not affiliated with or endorsed by the Ministerio.
 ## Radar data
 
 Trip mode can also warn you about **official fixed speed radars** ahead in your direction
-of travel. The dataset is built from three public open-data sources and bundled at build
-time (there is no runtime radar fetch — the layer works fully offline):
+of travel. Beyond that alert, nearby radars are shown as icons on the map and as a
+browsable "nearby radars" list on the **Map** tab (and on the trip map), so you can see
+them without an active trip. Visibility is governed by its own **"Show radars on the map"**
+toggle in Settings, independent of the audio/notification alert toggle. The dataset is
+built from three public open-data sources and bundled at build time (there is no runtime
+radar fetch — the layer works fully offline):
 
 - **[Dirección General de Tráfico (DGT)](https://nap.dgt.es/)** — national access point
   (`nap.dgt.es`, infocar DATEX2 feeds).

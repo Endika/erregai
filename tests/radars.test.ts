@@ -1,4 +1,4 @@
-import { radarsAhead, nextRadarAlerts, type Radar } from '../src/core/radars'
+import { radarsAhead, nearbyRadars, nextRadarAlerts, type Radar } from '../src/core/radars'
 
 const r = (id: string, lat: number, lon: number): Radar =>
   ({ id, lat, lon, via: 'A-1', source: 'dgt' })
@@ -26,6 +26,26 @@ describe('radarsAhead', () => {
     const hits = radarsAhead(pos, undefined, [r('a', 40.05, -3.0), r('b', 39.95, -3.0)],
       { radiusKm: 20, corridorDeg: 45 })
     expect(hits).toHaveLength(2)
+  })
+})
+
+describe('nearbyRadars', () => {
+  const pos = { lat: 40.0, lon: -3.0 }
+
+  it('keeps only radars within radius, nearest first, ignoring heading', () => {
+    const near = r('n', 40.02, -3.0)   // ~2.2 km north
+    const mid = r('m', 40.05, -3.0)    // ~5.6 km north
+    const far = r('f', 41.0, -3.0)     // ~111 km north
+    const behind = r('b', 39.97, -3.0) // ~3.3 km south (still kept: no cone)
+    const hits = nearbyRadars(pos, [far, mid, near, behind], 10, 10)
+    expect(hits.map(h => h.radar.id)).toEqual(['n', 'b', 'm'])
+  })
+
+  it('caps the result to the given limit', () => {
+    const radars = Array.from({ length: 5 }, (_, i) => r(`r${i}`, 40.0 + (i + 1) * 0.01, -3.0))
+    const hits = nearbyRadars(pos, radars, 50, 2)
+    expect(hits).toHaveLength(2)
+    expect(hits.map(h => h.radar.id)).toEqual(['r0', 'r1'])
   })
 })
 
