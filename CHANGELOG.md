@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/Endika/erregai/compare/v1.12.0...v1.13.0) (2026-07-16)
+
+
+### Features
+
+* **settings:** add fuel test-sound button for parity with radar ([f281863](https://github.com/Endika/erregai/commit/f2818638452bf4e54c322812cdffbe2df229648c))
+
 ## [1.12.0](https://github.com/Endika/erregai/compare/v1.11.3...v1.12.0) (2026-07-16)
 
 
