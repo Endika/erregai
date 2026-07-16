@@ -54,6 +54,7 @@ export const eu: Record<string, string> = {
   'radar.settings.enabled': 'Radar abisuak',
   'radar.settings.distance': 'Abisu distantzia',
   'radar.settings.sound': 'Abisu soinua',
+  'radar.settings.testSound': 'Probatu soinua',
   'radar.alert.title': 'Radarra aurrean',
   'radar.alert.body': '{via} errepidean radar finkoa',
   'radar.alert.banner': 'Radarra {m} m-ra',

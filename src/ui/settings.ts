@@ -2,6 +2,7 @@ import { FUELS } from '../core/fuels'
 import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
+import { playRadarBeep, unlockAudio } from '../adapters/audio'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
@@ -67,6 +68,15 @@ function toggleField(
   input.checked = checked
   input.addEventListener('change', () => onToggle(input.checked))
   return field(labelText, input)
+}
+
+function buttonField(labelText: string, onClick: () => void): HTMLElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'settings-form__button'
+  button.textContent = labelText
+  button.addEventListener('click', onClick)
+  return button
 }
 
 function numberField(
@@ -163,6 +173,9 @@ export function renderSettings(
     toggleField(t('radar.settings.sound'), 'radarSound', settings.radarSound, checked =>
       onChange({ radarSound: checked }),
     ),
+    // Plays the radar beep from a real tap, which also unlocks audio: the only
+    // way to verify sound works without driving up to a fixed radar in a trip.
+    buttonField(t('radar.settings.testSound'), () => { unlockAudio(); playRadarBeep() }),
   ])
 
   const fuel = section(t('settings.section.fuel'), [
