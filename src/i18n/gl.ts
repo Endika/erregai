@@ -54,6 +54,7 @@ export const gl: Record<string, string> = {
   'radar.settings.enabled': 'Avisos de radar',
   'radar.settings.distance': 'Distancia de aviso',
   'radar.settings.sound': 'Son de aviso',
+  'radar.settings.testSound': 'Probar o son',
   'radar.alert.title': 'Radar diante',
   'radar.alert.body': 'Radar fixo en {via}',
   'radar.alert.banner': 'Radar a {m} m',

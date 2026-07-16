@@ -614,6 +614,19 @@ body {
   max-width: 100%;
 }
 
+.settings-form__button {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* --- Refresh busy spinner --- */
 .app-header__refresh:disabled {
   opacity: 0.7;

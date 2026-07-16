@@ -54,6 +54,7 @@ export const en: Record<string, string> = {
   'radar.settings.enabled': 'Radar alerts',
   'radar.settings.distance': 'Alert distance',
   'radar.settings.sound': 'Alert sound',
+  'radar.settings.testSound': 'Test sound',
   'radar.alert.title': 'Radar ahead',
   'radar.alert.body': 'Fixed radar on {via}',
   'radar.alert.banner': 'Radar in {m} m',
