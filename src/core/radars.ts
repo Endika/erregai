@@ -21,6 +21,18 @@ export function radarsAhead(
     .sort((a, b) => a.distanceKm - b.distanceKm)
 }
 
+// Radars within radiusKm of pos, nearest first, capped to `limit`. Used by the
+// map layer and the browsable list, where there is no heading to filter by — so
+// it reuses radarsAhead with an undefined heading (which bypasses the cone).
+export function nearbyRadars(
+  pos: LatLon,
+  radars: readonly Radar[],
+  radiusKm: number,
+  limit: number,
+): RadarHit[] {
+  return radarsAhead(pos, undefined, radars, { radiusKm, corridorDeg: 0 }).slice(0, limit)
+}
+
 export function nextRadarAlerts(
   prevAlertedIds: ReadonlySet<string>,
   hits: readonly RadarHit[],

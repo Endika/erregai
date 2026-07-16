@@ -22,7 +22,7 @@ describe('renderSettings', () => {
     const fields = [...el.querySelectorAll('[data-field]')].map(n => (n as HTMLElement).dataset.field)
     expect(fields).toEqual([
       'fuel', 'sort', 'radiusKm', 'locale', 'theme',
-      'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
+      'radarLayerEnabled', 'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
       'fuelAlertMode', 'fuelAlertDistanceM', 'fuelSound',
     ])
     const sound = el.querySelector<HTMLInputElement>('[data-field="radarSound"]')!
