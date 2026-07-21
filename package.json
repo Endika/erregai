@@ -22,7 +22,7 @@
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^10.0.1",
     "@types/leaflet": "^1.9.21",
-    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
     "eslint": "^10.7.0",
     "jsdom": "^29.1.1",
