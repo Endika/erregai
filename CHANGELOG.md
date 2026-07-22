@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.15.1](https://github.com/Endika/erregai/compare/v1.15.0...v1.15.1) (2026-07-22)
+
+
+### Chores
+
+* bump @typescript-eslint/eslint-plugin from 8.64.0 to 8.65.0 ([#33](https://github.com/Endika/erregai/issues/33)) ([72e9811](https://github.com/Endika/erregai/commit/72e9811f2dc8e0dc003dfdec07a34e57d8a7f57a))
+* bump @typescript-eslint/parser from 8.64.0 to 8.65.0 ([#32](https://github.com/Endika/erregai/issues/32)) ([512e1e6](https://github.com/Endika/erregai/commit/512e1e61ec1090cad4813d9a3a76125b967d40d1))
+* bump actions/setup-node from 6 to 7 in the actions group ([d229b7d](https://github.com/Endika/erregai/commit/d229b7d9c002dadbac5b34fbb82c46b602d9c19b))
+* bump vite from 8.1.4 to 8.1.5 ([#34](https://github.com/Endika/erregai/issues/34)) ([81e1bb8](https://github.com/Endika/erregai/commit/81e1bb8c44a98d89180298ba56753c9da1d18f2c))
+
 ## [1.15.0](https://github.com/Endika/erregai/compare/v1.14.0...v1.15.0) (2026-07-16)
 
 
