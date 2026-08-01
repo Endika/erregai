@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.2](https://github.com/Endika/erregai/compare/v1.15.1...v1.15.2) (2026-08-01)
+
+
+### Chores
+
+* bump eslint from 10.7.0 to 10.8.0 ([#38](https://github.com/Endika/erregai/issues/38)) ([b931d0c](https://github.com/Endika/erregai/commit/b931d0c15f31645c8ab46b2b1d1b55a676328a01))
+* bump proj4 from 2.20.9 to 2.21.0 ([#37](https://github.com/Endika/erregai/issues/37)) ([6f19cd2](https://github.com/Endika/erregai/commit/6f19cd2d236dbc336252169d69c54d17c81c25dc))
+* **radars:** refresh fixed-radar dataset ([e9511f9](https://github.com/Endika/erregai/commit/e9511f981c12dd0fce7d42125bed33e4cc56c74a))
+
 ## [1.15.1](https://github.com/Endika/erregai/compare/v1.15.0...v1.15.1) (2026-07-22)
 
 
