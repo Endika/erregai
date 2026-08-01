@@ -28,6 +28,16 @@ describe('settings', () => {
     expect(merged.radarAlertDistanceM).toBe(800)
     expect(merged.radarSound).toBe(true)
   })
+  it('defaults alerts to full volume with vibration on', () => {
+    expect(DEFAULT_SETTINGS.alertVolume).toBe(1)
+    expect(DEFAULT_SETTINGS.alertVibrate).toBe(true)
+  })
+  it('provides alert volume and vibration defaults for settings saved before they existed', () => {
+    const s = memStore(); s.setItem('erregai.settings', JSON.stringify({ radiusKm: 20, radarSound: true }))
+    const merged = loadSettings(s)
+    expect(merged.alertVolume).toBe(1)
+    expect(merged.alertVibrate).toBe(true)
+  })
   it('defaults fuel alerts to cheap mode with 2 km distance and sound on', () => {
     expect(DEFAULT_SETTINGS.fuelAlertMode).toBe('cheap')
     expect(DEFAULT_SETTINGS.fuelAlertDistanceM).toBe(2000)

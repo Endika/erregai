@@ -10,6 +10,7 @@ import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
 import { keepScreenAwake } from '../adapters/wakeLock'
 import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
+import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
@@ -132,7 +133,8 @@ export class TripController {
         const meters = Math.round(nearest.distanceKm * 1000)
         this.radarBanner = t('radar.alert.banner').replace('{m}', String(meters))
         notify(t('radar.alert.title'), t('radar.alert.body').replace('{via}', nearest.radar.via))
-        if (settings.radarSound) playRadarBeep()
+        if (settings.radarSound) playRadarBeep({ volume: settings.alertVolume })
+        if (settings.alertVibrate) vibrateRadar()
       }
     } else {
       this.radarHits = []
@@ -167,7 +169,8 @@ export class TripController {
         const meters = Math.round(nearest.distanceKm * 1000)
         this.fuelBanner = t('fuel.alert.banner').replace('{brand}', nearest.station.brand).replace('{m}', String(meters))
         notify(t('fuel.alert.title'), t('fuel.alert.body').replace('{brand}', nearest.station.brand))
-        if (settings.fuelSound) playFuelChime()
+        if (settings.fuelSound) playFuelChime({ volume: settings.alertVolume })
+        if (settings.alertVibrate) vibrateFuel()
       }
     }
 

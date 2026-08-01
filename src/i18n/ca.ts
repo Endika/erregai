@@ -48,6 +48,8 @@ export const ca: Record<string, string> = {
   'settings.radius': 'Radi',
   'settings.locale': 'Idioma',
   'settings.theme': 'Tema',
+  'settings.alertVolume': 'Volum dels avisos',
+  'settings.alertVibrate': 'Vibració en els avisos',
   'theme.light': 'Clar',
   'theme.system': 'Sistema',
   'theme.dark': 'Fosc',

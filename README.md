@@ -70,6 +70,21 @@ list plus a dataset date. The raw source files are not committed. A scheduled Gi
 Action, `.github/workflows/update-radars.yml`, re-runs this generator twice a month and
 opens a PR when the dataset changes.
 
+## Alert cues
+
+Radar and fuel alerts each have their own sound toggle, plus two shared controls in
+Settings: an **alert volume** slider and a **vibration** toggle. The cues are synthesized
+with the Web Audio API (no audio files): a double beep for radars, an ascending two-note
+chime for stations, so the two are distinguishable without looking at the screen. The
+"Test sound" buttons play the real cue at the configured volume, and also unlock audio —
+mobile browsers only allow sound after a user gesture.
+
+**If you cannot hear the alerts:** the cues play on the **media** channel, so they follow
+media volume and compete with whatever the car stereo is playing. On **iOS, the hardware
+mute switch silences Web Audio entirely**, whatever the in-app volume says. Vibration is a
+fallback for exactly those cases, but the Vibration API is Android-only — iOS Safari does
+not implement it, so on iPhone audio is the only cue.
+
 ## Trip mode caveat
 
 Trip mode only works **while Erregai is open in the foreground**. Mobile browsers

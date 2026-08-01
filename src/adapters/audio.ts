@@ -71,18 +71,35 @@ function scheduleTone(ctx: AudioContextLike, freq: number, at: number, duration:
   osc.stop(at + duration)
 }
 
+export interface CueOptions {
+  // 0..1 multiplier over the cue's own peak level. Out-of-range and
+  // non-numeric values fall back to full volume rather than distorting.
+  volume?: number
+  // Injectable for testing; production callers omit it.
+  makeCtx?: () => AudioContextLike
+}
+
+function levelFrom(volume: number | undefined): number {
+  if (volume === undefined || !Number.isFinite(volume)) return 1
+  return Math.min(1, Math.max(0, volume))
+}
+
 // Plays a sequence of tones on the shared AudioContext. Shared low-level
 // helper so radar and fuel cues stay a single source of truth. Silent no-op
 // when audio is unavailable; ctx factory is injectable for testing.
-function playTones(tones: readonly Tone[], makeCtx: () => AudioContextLike): void {
+function playTones(tones: readonly Tone[], opts: CueOptions): void {
+  const level = levelFrom(opts.volume)
+  // Nothing to schedule at zero, and exponential ramps reject a 0 target.
+  if (level === 0) return
   try {
-    const ctx = ensureCtx(makeCtx)
+    const ctx = ensureCtx(opts.makeCtx ?? defaultCtx)
     resumeIfSuspended(ctx)
     const t0 = ctx.currentTime
     for (const tone of tones) {
       const at = t0 + tone.start
-      scheduleTone(ctx, tone.freq, at, tone.duration, tone.peak)
-      scheduleTone(ctx, tone.freq * 2, at, tone.duration, tone.peak * PARTIAL_GAIN)
+      const peak = tone.peak * level
+      scheduleTone(ctx, tone.freq, at, tone.duration, peak)
+      scheduleTone(ctx, tone.freq * 2, at, tone.duration, peak * PARTIAL_GAIN)
     }
   } catch {
     /* audio unavailable — silent no-op */
@@ -92,20 +109,20 @@ function playTones(tones: readonly Tone[], makeCtx: () => AudioContextLike): voi
 // Sharp, attention-grabbing double beep at 880 Hz. Two pulses rather than one:
 // a single short cue is lost to a passing truck or a gear change, and the
 // repeat costs a quarter of a second.
-export function playRadarBeep(makeCtx: () => AudioContextLike = defaultCtx): void {
+export function playRadarBeep(opts: CueOptions = {}): void {
   playTones([
     { freq: 880, start: 0, duration: 0.2, peak: 0.9 },
     { freq: 880, start: 0.26, duration: 0.2, peak: 0.9 },
-  ], makeCtx)
+  ], opts)
 }
 
 // Pleasant ascending two-note chime (523 Hz -> 784 Hz), clearly distinct in
 // pitch, character and duration from the radar beep so the two are trivially
 // distinguishable by ear. The notes do not overlap, so their peaks never sum
 // into clipping.
-export function playFuelChime(makeCtx: () => AudioContextLike = defaultCtx): void {
+export function playFuelChime(opts: CueOptions = {}): void {
   playTones([
     { freq: 523, start: 0, duration: 0.18, peak: 0.85 },
     { freq: 784, start: 0.19, duration: 0.3, peak: 0.85 },
-  ], makeCtx)
+  ], opts)
 }

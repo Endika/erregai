@@ -48,6 +48,8 @@ export const gl: Record<string, string> = {
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',
   'settings.theme': 'Tema',
+  'settings.alertVolume': 'Volume dos avisos',
+  'settings.alertVibrate': 'Vibración nos avisos',
   'theme.light': 'Claro',
   'theme.system': 'Sistema',
   'theme.dark': 'Escuro',
