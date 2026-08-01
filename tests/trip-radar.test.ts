@@ -51,6 +51,10 @@ const fix = (c: TripController, pos: LatLon): Promise<void> =>
 beforeEach(() => {
   FakeNotification.instances = []
   ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification = FakeNotification
+  // Store.setSettings persists to localStorage, which jsdom shares across every
+  // test in this file, so a test that disables an alert would otherwise leak
+  // that into the ones after it. Start each test from the real defaults.
+  localStorage.clear()
 })
 
 afterEach(() => {
@@ -97,10 +101,7 @@ describe('TripController radar alerting', () => {
 
   it('vibrates once when a radar alert fires', async () => {
     const patterns = recordVibrations()
-    const c = makeController()
-    // Settings persist to localStorage, which jsdom shares across tests in this
-    // file, so state this test's preconditions rather than inheriting them.
-    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true, alertVibrate: true })
+    const c = makeController() // radar alerts and vibration are both on by default
 
     await fix(c, behind)
     expect(patterns).toHaveLength(0)
@@ -115,7 +116,7 @@ describe('TripController radar alerting', () => {
   it('does not vibrate when the haptic fallback is disabled', async () => {
     const patterns = recordVibrations()
     const c = makeController()
-    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true, alertVibrate: false })
+    ;(c as unknown as { store: Store }).store.setSettings({ alertVibrate: false })
 
     await fix(c, behind)
     await fix(c, near)
