@@ -53,6 +53,10 @@ const fuelAlerts = () => FakeNotification.instances.filter(n => n.title === t('f
 beforeEach(() => {
   FakeNotification.instances = []
   ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification = FakeNotification
+  // Store.setSettings persists to localStorage, which jsdom shares across every
+  // test in this file: without this, 'off mode' would leak its fuelAlertMode
+  // into whatever runs next. Start each test from the real defaults.
+  localStorage.clear()
 })
 
 afterEach(() => {
