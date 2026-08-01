@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.16.0](https://github.com/Endika/erregai/compare/v1.15.2...v1.16.0) (2026-08-01)
+
+
+### Features
+
+* **settings:** add alert volume slider and vibration fallback for alert cues ([217f67e](https://github.com/Endika/erregai/commit/217f67e599e4707a0d78745ba4a189857342c5eb))
+
+
+### Bug Fixes
+
+* **audio:** make alert cues audible with a sustained envelope and fuller timbre ([d4410c7](https://github.com/Endika/erregai/commit/d4410c750f344e46238d682cdf46decbc3a5727f))
+
 ## [1.15.2](https://github.com/Endika/erregai/compare/v1.15.1...v1.15.2) (2026-08-01)
 
 
