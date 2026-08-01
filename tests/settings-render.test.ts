@@ -21,7 +21,7 @@ describe('renderSettings', () => {
     renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
     const fields = [...el.querySelectorAll('[data-field]')].map(n => (n as HTMLElement).dataset.field)
     expect(fields).toEqual([
-      'fuel', 'sort', 'radiusKm', 'locale', 'theme',
+      'fuel', 'sort', 'radiusKm', 'locale', 'theme', 'alertVolume', 'alertVibrate',
       'radarLayerEnabled', 'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
       'fuelAlertMode', 'fuelAlertDistanceM', 'fuelSound',
     ])
@@ -29,5 +29,29 @@ describe('renderSettings', () => {
     sound.checked = false
     sound.dispatchEvent(new Event('change'))
     expect(partials).toContainEqual({ radarSound: false })
+  })
+
+  it('commits the alert volume on release and never offers a silent slider', () => {
+    const el = document.createElement('div')
+    const partials: Record<string, unknown>[] = []
+    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    const volume = el.querySelector<HTMLInputElement>('[data-field="alertVolume"]')!
+    expect(volume.type).toBe('range')
+    // Silencing a cue is the sound toggles' job, so the slider floor is audible.
+    expect(Number(volume.min)).toBeGreaterThan(0)
+    expect(Number(volume.max)).toBe(1)
+    volume.value = '0.5'
+    volume.dispatchEvent(new Event('change'))
+    expect(partials).toContainEqual({ alertVolume: 0.5 })
+  })
+
+  it('toggles the haptic fallback', () => {
+    const el = document.createElement('div')
+    const partials: Record<string, unknown>[] = []
+    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    const vibrate = el.querySelector<HTMLInputElement>('[data-field="alertVibrate"]')!
+    vibrate.checked = false
+    vibrate.dispatchEvent(new Event('change'))
+    expect(partials).toContainEqual({ alertVibrate: false })
   })
 })

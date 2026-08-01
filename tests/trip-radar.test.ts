@@ -55,7 +55,19 @@ beforeEach(() => {
 
 afterEach(() => {
   delete (globalThis as unknown as { Notification?: unknown }).Notification
+  delete (navigator as unknown as { vibrate?: unknown }).vibrate
 })
+
+// jsdom has no Vibration API; install a recording one so the haptic wiring can
+// be asserted the same way notifications are.
+function recordVibrations(): (number | readonly number[])[] {
+  const patterns: (number | readonly number[])[] = []
+  Object.defineProperty(navigator, 'vibrate', {
+    configurable: true,
+    value: (p: number | readonly number[]) => { patterns.push(p); return true },
+  })
+  return patterns
+}
 
 describe('TripController radar alerting', () => {
   it('alerts exactly once for a radar ahead and does not re-alert while still in range', async () => {
@@ -81,6 +93,35 @@ describe('TripController radar alerting', () => {
     await fix(c, near)
     await fix(c, nearer)
     expect(FakeNotification.instances).toHaveLength(0)
+  })
+
+  it('vibrates once when a radar alert fires', async () => {
+    const patterns = recordVibrations()
+    const c = makeController()
+    // Settings persist to localStorage, which jsdom shares across tests in this
+    // file, so state this test's preconditions rather than inheriting them.
+    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true, alertVibrate: true })
+
+    await fix(c, behind)
+    expect(patterns).toHaveLength(0)
+
+    await fix(c, near)
+    expect(patterns).toHaveLength(1)
+
+    await fix(c, nearer) // already alerted -> no second buzz
+    expect(patterns).toHaveLength(1)
+  })
+
+  it('does not vibrate when the haptic fallback is disabled', async () => {
+    const patterns = recordVibrations()
+    const c = makeController()
+    ;(c as unknown as { store: Store }).store.setSettings({ radarAlertsEnabled: true, alertVibrate: false })
+
+    await fix(c, behind)
+    await fix(c, near)
+    // The alert itself still fires — only the haptic is off.
+    expect(FakeNotification.instances.filter(n => n.body?.includes(RADAR.via))).toHaveLength(1)
+    expect(patterns).toHaveLength(0)
   })
 
   it('renders nearby radars onto the map layer when the radar layer is enabled', async () => {

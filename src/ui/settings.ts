@@ -3,6 +3,7 @@ import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
+import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 
 const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
@@ -98,6 +99,30 @@ function numberField(
   return field(labelText, input)
 }
 
+function rangeField(
+  labelText: string,
+  fieldName: string,
+  currentValue: number,
+  onCommit: (value: number) => void,
+): HTMLLabelElement {
+  const input = document.createElement('input')
+  input.type = 'range'
+  // Floor at 0.1 rather than 0: silencing a cue is what the sound toggles are
+  // for, and a slider dragged to zero looks like a broken alert.
+  input.min = '0.1'
+  input.max = '1'
+  input.step = '0.1'
+  input.dataset.field = fieldName
+  input.value = String(currentValue)
+  // 'change', not 'input': commit once on release rather than on every pixel of
+  // the drag, so the level is not saved (and previewed) dozens of times.
+  input.addEventListener('change', () => {
+    const value = Number(input.value)
+    if (Number.isFinite(value)) onCommit(value)
+  })
+  return field(labelText, input)
+}
+
 function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement {
   const section = document.createElement('section')
   section.className = 'settings-section'
@@ -154,6 +179,18 @@ export function renderSettings(
       THEMES.map(theme => ({ value: theme, label: t(`theme.${theme}`) })),
       value => onChange({ theme: value as Theme }),
     ),
+    // Previews the new level on release: a volume slider you cannot hear while
+    // setting it is guesswork, and the release is still a user gesture, so the
+    // audio context unlocks here too.
+    rangeField(t('settings.alertVolume'), 'alertVolume', settings.alertVolume, value => {
+      onChange({ alertVolume: value })
+      unlockAudio()
+      playRadarBeep({ volume: value })
+    }),
+    toggleField(t('settings.alertVibrate'), 'alertVibrate', settings.alertVibrate, checked => {
+      onChange({ alertVibrate: checked })
+      if (checked) vibrateRadar()
+    }),
   ])
 
   const radar = section(t('settings.section.radar'), [
@@ -181,7 +218,12 @@ export function renderSettings(
     ),
     // Plays the radar beep from a real tap, which also unlocks audio: the only
     // way to verify sound works without driving up to a fixed radar in a trip.
-    buttonField(t('radar.settings.testSound'), () => { unlockAudio(); playRadarBeep() }),
+    // Mirrors the real alert — configured volume and haptics included.
+    buttonField(t('radar.settings.testSound'), () => {
+      unlockAudio()
+      playRadarBeep({ volume: settings.alertVolume })
+      if (settings.alertVibrate) vibrateRadar()
+    }),
   ])
 
   const fuel = section(t('settings.section.fuel'), [
@@ -202,7 +244,11 @@ export function renderSettings(
     toggleField(t('fuel.settings.sound'), 'fuelSound', settings.fuelSound, checked =>
       onChange({ fuelSound: checked }),
     ),
-    buttonField(t('fuel.settings.testSound'), () => { unlockAudio(); playFuelChime() }),
+    buttonField(t('fuel.settings.testSound'), () => {
+      unlockAudio()
+      playFuelChime({ volume: settings.alertVolume })
+      if (settings.alertVibrate) vibrateFuel()
+    }),
   ])
 
   const about = document.createElement('section')

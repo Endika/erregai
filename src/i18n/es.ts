@@ -48,6 +48,8 @@ export const es: Record<string, string> = {
   'settings.radius': 'Radio',
   'settings.locale': 'Idioma',
   'settings.theme': 'Tema',
+  'settings.alertVolume': 'Volumen de los avisos',
+  'settings.alertVibrate': 'Vibración en los avisos',
   'theme.light': 'Claro',
   'theme.system': 'Sistema',
   'theme.dark': 'Oscuro',

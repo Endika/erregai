@@ -614,6 +614,15 @@ body {
   max-width: 100%;
 }
 
+/* The shared input rule boxes every control; a slider wants no box, just the
+   native track tinted with the accent. Keeps the 2.75rem touch target. */
+.settings-form input[type='range'] {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  accent-color: var(--color-accent);
+}
+
 .settings-form__button {
   align-self: flex-start;
   min-height: 2.75rem;

@@ -7,8 +7,11 @@ export type FuelAlertMode = 'cheap' | 'any' | 'off'
 
 // locale is left unset by default: the app falls back to browser-detected
 // locale until the user explicitly picks one in settings (see main.ts).
-export interface Settings { fuel: FuelId; sort: SortKey; tripSort: SortKey; radiusKm: number; locale?: Locale; theme: Theme; radarLayerEnabled: boolean; radarAlertsEnabled: boolean; radarAlertDistanceM: number; radarSound: boolean; fuelAlertMode: FuelAlertMode; fuelAlertDistanceM: number; fuelSound: boolean }
-export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', tripSort: 'distance', radiusKm: 15, theme: 'system', radarLayerEnabled: true, radarAlertsEnabled: true, radarAlertDistanceM: 800, radarSound: true, fuelAlertMode: 'cheap', fuelAlertDistanceM: 2000, fuelSound: true }
+// alertVolume is a 0..1 multiplier shared by both cues, and alertVibrate the
+// haptic fallback; both apply to radar and fuel alerts alike, so they live
+// alongside the app-wide preferences rather than being duplicated per section.
+export interface Settings { fuel: FuelId; sort: SortKey; tripSort: SortKey; radiusKm: number; locale?: Locale; theme: Theme; alertVolume: number; alertVibrate: boolean; radarLayerEnabled: boolean; radarAlertsEnabled: boolean; radarAlertDistanceM: number; radarSound: boolean; fuelAlertMode: FuelAlertMode; fuelAlertDistanceM: number; fuelSound: boolean }
+export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', tripSort: 'distance', radiusKm: 15, theme: 'system', alertVolume: 1, alertVibrate: true, radarLayerEnabled: true, radarAlertsEnabled: true, radarAlertDistanceM: 800, radarSound: true, fuelAlertMode: 'cheap', fuelAlertDistanceM: 2000, fuelSound: true }
 const KEY = 'erregai.settings'
 
 export function loadSettings(store: Storage = localStorage): Settings {

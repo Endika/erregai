@@ -48,6 +48,8 @@ export const eu: Record<string, string> = {
   'settings.radius': 'Erradioa',
   'settings.locale': 'Hizkuntza',
   'settings.theme': 'Itxura',
+  'settings.alertVolume': 'Abisuen bolumena',
+  'settings.alertVibrate': 'Bibrazioa abisuetan',
   'theme.light': 'Argia',
   'theme.system': 'Sistema',
   'theme.dark': 'Iluna',
