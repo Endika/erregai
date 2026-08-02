@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.17.0](https://github.com/Endika/erregai/compare/v1.16.0...v1.17.0) (2026-08-02)
+
+
+### Features
+
+* **list:** flag stations that are closed or closing soon ([5421768](https://github.com/Endika/erregai/commit/54217680f332b0b691a5aa0ed3dca6ba98819453))
+* **schedule:** parse Ministerio opening hours and derive open/closed status ([7368bc6](https://github.com/Endika/erregai/commit/7368bc663e09cf6eaae11c2bf25ef59cd7a52099))
+* **services:** generate the motorway service area dataset from OpenStreetMap ([38dee95](https://github.com/Endika/erregai/commit/38dee95c4e3fe2c09703681fdac9b1a05e1e038e))
+
 ## [1.16.0](https://github.com/Endika/erregai/compare/v1.15.2...v1.16.0) (2026-08-01)
 
 
