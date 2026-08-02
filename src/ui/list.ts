@@ -2,8 +2,13 @@ import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import { haversineKm, type LatLon } from '../core/geo'
 import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
+import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
 
+// Only the states worth interrupting for get a badge: more than half the feed
+// is 24 h, so marking those "open" would put a label on most rows and mean
+// nothing. `now` is read once per render rather than per row, and injectable
+// so tests can pin the clock.
 export function renderList(
   container: HTMLElement,
   stations: Station[],
@@ -11,6 +16,7 @@ export function renderList(
   origin: LatLon,
   onSelect: (s: Station) => void,
   selectedId?: string,
+  now: Date = new Date(),
 ): void {
   const knownPrices = stations
     .map(s => priceOf(s, fuel))
@@ -57,7 +63,18 @@ export function renderList(
       priceEl.setAttribute('aria-label', bandLabel)
     }
 
-    row.append(brand, town, distance, priceEl)
+    const cells: HTMLElement[] = [brand, town, distance]
+    const status = scheduleStatus(parseSchedule(station.schedule), now)
+    if (status === 'closed' || status === 'closing-soon') {
+      const badge = document.createElement('span')
+      badge.className = 'station-row__schedule'
+      badge.dataset.schedule = status
+      badge.textContent = t(status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon')
+      cells.push(badge)
+    }
+    cells.push(priceEl)
+
+    row.append(...cells)
     row.addEventListener('click', () => onSelect(station))
     list.appendChild(row)
   }

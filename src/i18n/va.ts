@@ -38,6 +38,9 @@ export const va: Record<string, string> = {
 
   'detail.openInMaps': 'Obrir en Maps',
   'detail.schedule': 'Horari',
+  'schedule.open': 'Obert ara',
+  'schedule.closed': 'Tancat ara',
+  'schedule.closingSoon': 'Tanca prompte',
   'detail.address': 'Adreça',
 
   'settings.fuel': 'Combustible',

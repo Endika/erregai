@@ -38,6 +38,9 @@ export const gl: Record<string, string> = {
 
   'detail.openInMaps': 'Abrir en Maps',
   'detail.schedule': 'Horario',
+  'schedule.open': 'Aberto agora',
+  'schedule.closed': 'Pechado agora',
+  'schedule.closingSoon': 'Pecha pronto',
   'detail.address': 'Enderezo',
 
   'settings.fuel': 'Combustible',
