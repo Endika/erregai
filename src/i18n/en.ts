@@ -33,6 +33,7 @@ export const en: Record<string, string> = {
   'trip.start': 'Start trip',
   'trip.stop': 'Stop trip',
   'trip.foregroundOnly': 'Foreground only',
+  'trip.mediaSession.title': 'Trip mode',
   'trip.cheapestAhead': 'Cheapest ahead',
   'trip.noneAhead': 'No stations ahead yet',
 

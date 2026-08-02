@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { playRadarBeep, playFuelChime, unlockAudio, __resetAudio } from '../src/adapters/audio'
+import { playRadarBeep, playFuelChime, unlockAudio, startBackgroundAudio, stopBackgroundAudio, __resetAudio } from '../src/adapters/audio'
 
 beforeEach(() => { __resetAudio() })
 
@@ -10,6 +10,8 @@ function recordingCtx(state: AudioContextState = 'running') {
   const ramps: { value: number; at: number }[] = []
   const holds: { value: number; at: number }[] = []
   const resumeCalls = { count: 0 }
+  const connectedTo: unknown[] = []
+  const streamDest = { stream: { id: 'fake-stream' }, disconnect() {} }
   let created = 0
   const ctx = {
     state,
@@ -22,8 +24,9 @@ function recordingCtx(state: AudioContextState = 'running') {
         setValueAtTime(value: number, at: number) { holds.push({ value, at }) },
         exponentialRampToValueAtTime(value: number, at: number) { ramps.push({ value, at }) },
       },
-      connect() {},
+      connect(target: unknown) { connectedTo.push(target) },
     }),
+    createMediaStreamDestination: () => streamDest,
     createOscillator: () => {
       const osc = { frequency: { value: 0 }, type: 'sine', started: false, connect() {}, start() { osc.started = true }, stop() {} }
       oscs.push(osc)
@@ -31,7 +34,7 @@ function recordingCtx(state: AudioContextState = 'running') {
     },
   }
   const make = () => { created++; return ctx as unknown as AudioContext }
-  return { ctx, make, oscs, ramps, holds, resumeCalls, createdCount: () => created }
+  return { ctx, make, oscs, ramps, holds, resumeCalls, connectedTo, streamDest, createdCount: () => created }
 }
 
 const peakOf = (ramps: { value: number }[]): number => Math.max(...ramps.map(r => r.value))
@@ -140,4 +143,72 @@ describe('shared context', () => {
     playRadarBeep({ makeCtx: rec.make })
     expect(rec.createdCount()).toBe(1)
   })
+})
+
+// Trip mode routes the cues through a media element so a backgrounded page
+// keeps its AudioContext alive and Android has a session it can hand to the
+// car. These cover the wiring; the real Android Auto behaviour can only be
+// confirmed on a phone in a car.
+function fakeAudioElement(playResult: Promise<void> = Promise.resolve()) {
+  const el = {
+    loop: false,
+    srcObject: null as unknown,
+    paused: true,
+    play() { this.paused = false; return playResult },
+    pause() { this.paused = true },
+  }
+  return el as unknown as HTMLAudioElement & { paused: boolean; srcObject: unknown }
+}
+
+it('routes cues through the media stream once background audio starts', () => {
+  const rec = recordingCtx()
+  const el = fakeAudioElement()
+  startBackgroundAudio({ makeCtx: rec.make, makeAudio: () => el })
+  expect(el.srcObject).toBe(rec.streamDest.stream)
+  expect(el.loop).toBe(true)
+  expect(el.paused).toBe(false)
+
+  playRadarBeep({ makeCtx: rec.make })
+  expect(rec.connectedTo).toContain(rec.streamDest)
+  expect(rec.connectedTo).not.toContain(rec.ctx.destination)
+})
+
+it('goes back to the speakers when background audio stops', () => {
+  const rec = recordingCtx()
+  const el = fakeAudioElement()
+  startBackgroundAudio({ makeCtx: rec.make, makeAudio: () => el })
+  stopBackgroundAudio()
+  expect(el.paused).toBe(true)
+  expect(el.srcObject).toBeNull()
+
+  playRadarBeep({ makeCtx: rec.make })
+  expect(rec.connectedTo).toContain(rec.ctx.destination)
+  expect(rec.connectedTo).not.toContain(rec.streamDest)
+})
+
+it('falls back to the speakers when the element refuses to play', async () => {
+  const rec = recordingCtx()
+  const el = fakeAudioElement(Promise.reject(new Error('autoplay blocked')))
+  startBackgroundAudio({ makeCtx: rec.make, makeAudio: () => el })
+  await Promise.resolve()
+  await Promise.resolve()
+
+  // A blocked element must never leave the cues pointing at a stream nobody
+  // is playing: silent radar alerts would be worse than foreground-only ones.
+  playRadarBeep({ makeCtx: rec.make })
+  expect(rec.connectedTo).toContain(rec.ctx.destination)
+})
+
+it('keeps cues on the speakers when the context has no stream destination', () => {
+  const rec = recordingCtx()
+  const ctx = rec.ctx as unknown as Record<string, unknown>
+  delete ctx.createMediaStreamDestination
+  expect(() => startBackgroundAudio({ makeCtx: rec.make, makeAudio: fakeAudioElement })).not.toThrow()
+
+  playRadarBeep({ makeCtx: rec.make })
+  expect(rec.connectedTo).toContain(rec.ctx.destination)
+})
+
+it('stopping background audio that never started is a no-op', () => {
+  expect(() => stopBackgroundAudio()).not.toThrow()
 })

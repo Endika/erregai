@@ -17,6 +17,8 @@ export default [
         indexedDB: 'readonly',
         navigator: 'readonly',
         Notification: 'readonly',
+        Audio: 'readonly',
+        MediaMetadata: 'readonly',
         window: 'readonly',
         localStorage: 'readonly',
         document: 'readonly',
