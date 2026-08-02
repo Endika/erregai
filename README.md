@@ -21,9 +21,9 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
   the alert sound.
 - **Service areas** on the map as square markers, with the services inside them and, where
   the data exists, whether the restaurant is open. Its own Settings toggle.
-- **Trip mode**: while the app is open and in the foreground, it tracks your heading and
-  alerts you when a cheaper station appears ahead within your configured radius. It does
-  **not** run in the background — see the caveat below.
+- **Trip mode**: tracks your heading and alerts you when a cheaper station appears ahead
+  within your configured radius. Designed for the app being open in the foreground — see
+  [Trip mode & alerts](#trip-mode--alerts).
 - **Configurable default fuel** and trip radius, persisted locally.
 - **Offline-first**: station data is cached in IndexedDB per province and served stale
   when the network is unavailable; the app itself is installable and works fully offline
@@ -75,39 +75,32 @@ development; those raw files are not committed. Overpass requires an identifying
 User-Agent — it answers `406` without one. The scheduled actions `update-radars.yml` and
 `update-services.yml` re-run each generator and open a PR when a dataset changes.
 
-## Alert cues
+## Trip mode & alerts
 
-Radar and fuel alerts each have their own sound toggle, plus two shared controls in
-Settings: an **alert volume** slider and a **vibration** toggle. The cues are synthesized
-with the Web Audio API (no audio files): a double beep for radars, an ascending two-note
-chime for stations, so the two are distinguishable without looking at the screen. The
-"Test sound" buttons play the real cue at the configured volume, and also unlock audio —
-mobile browsers only allow sound after a user gesture.
+Radar and fuel alerts each have their own sound toggle, plus a shared **volume** slider and
+**vibration** toggle. Cues are synthesized with the Web Audio API — a double beep for
+radars, an ascending chime for stations — so the two are told apart without looking. The
+"Test sound" buttons play the real cue and unlock audio, which mobile browsers only allow
+from a user gesture.
 
-**If you cannot hear the alerts:** the cues play on the **media** channel, so they follow
-media volume and compete with whatever the car stereo is playing. On **iOS, the hardware
-mute switch silences Web Audio entirely**, whatever the in-app volume says. Vibration is a
-fallback for exactly those cases, but the Vibration API is Android-only — iOS Safari does
-not implement it, so on iPhone audio is the only cue.
+Trip mode is built for Erregai being **open in the foreground**: browsers throttle
+geolocation once a page loses focus. If location access is revoked mid-trip, trip mode
+stops and says why rather than failing silently.
 
-## Trip mode caveat
+**If you cannot hear the alerts.** Cues play on the **media** channel, so they follow media
+volume and compete with the car stereo. On **iOS the hardware mute switch silences Web Audio
+entirely**, whatever the in-app volume says — and the Vibration API is Android-only, so on
+iPhone audio is the only cue.
 
-Trip mode is built for Erregai being **open in the foreground**. Mobile browsers throttle
-or stop geolocation once a page loses focus, so position tracking is not guaranteed when
-the screen is off or another app is in front. If the browser or OS revokes location access
-mid-trip, the app degrades gracefully (trip mode stops and tells you why) rather than
-failing silently.
+During a trip the cues are routed through a looping media element, which keeps the audio
+session alive when the page is backgrounded and gives Android something it can hand to a
+car head unit. That is the **audio** half of the problem, not the location half: if the
+browser stops delivering fixes, there is nothing to alert about.
 
-While a trip is running the alert cues are routed through a looping media element, which
-keeps the audio session alive and gives Android something it can hand to a car head unit.
-That covers the case where the page is backgrounded and Chrome would otherwise suspend the
-audio: **it is the audio half of the problem, not the location half.** If the browser stops
-delivering position fixes, there is nothing to alert about in the first place.
-
-**Android Auto specifically:** Erregai is a web app, so it cannot draw on the car screen —
-that needs a native app built against the Android Auto templates. Connecting the phone by
-plain Bluetooth (A2DP) instead keeps Erregai in the foreground with the screen awake and
-sends its audio to the car, which is the arrangement trip mode is designed for.
+**Android Auto.** Erregai is a web app and cannot draw on the car screen — that needs a
+native app on the Android Auto templates. Connecting by plain Bluetooth (A2DP) keeps
+Erregai in the foreground with the screen awake and sends its audio to the car, which is
+what trip mode is designed for.
 
 ## Privacy
 
