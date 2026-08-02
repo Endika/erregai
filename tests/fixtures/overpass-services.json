@@ -1,0 +1,71 @@
+{
+ "areas": [
+  {
+   "type": "way",
+   "id": 100,
+   "center": { "lat": 41.0, "lon": -1.0 },
+   "tags": { "highway": "services", "name": "Área de La Muela" }
+  },
+  {
+   "type": "way",
+   "id": 200,
+   "center": { "lat": 41.005, "lon": -1.0 },
+   "tags": { "highway": "services" }
+  },
+  {
+   "type": "way",
+   "id": 300,
+   "center": { "lat": 42.0, "lon": -2.0 },
+   "tags": { "highway": "rest_area", "name": "Área de descanso del Ebro" }
+  },
+  {
+   "type": "way",
+   "id": 400,
+   "tags": { "highway": "services", "name": "Sin coordenadas" }
+  }
+ ],
+ "pois": [
+  {
+   "type": "node",
+   "id": 1,
+   "lat": 41.0002,
+   "lon": -1.0002,
+   "tags": { "amenity": "restaurant", "opening_hours": "Mo-Su 07:00-23:00" }
+  },
+  {
+   "type": "node",
+   "id": 2,
+   "lat": 41.0003,
+   "lon": -1.0001,
+   "tags": { "amenity": "fuel", "opening_hours": "24/7" }
+  },
+  {
+   "type": "node",
+   "id": 3,
+   "lat": 41.0001,
+   "lon": -1.0003,
+   "tags": { "shop": "convenience" }
+  },
+  {
+   "type": "node",
+   "id": 4,
+   "lat": 41.0051,
+   "lon": -1.0001,
+   "tags": { "amenity": "toilets" }
+  },
+  {
+   "type": "node",
+   "id": 5,
+   "lat": 43.5,
+   "lon": -3.5,
+   "tags": { "amenity": "restaurant", "opening_hours": "Mo-Su 09:00-21:00" }
+  },
+  {
+   "type": "node",
+   "id": 6,
+   "lat": 41.0004,
+   "lon": -1.0004,
+   "tags": { "amenity": "parking" }
+  }
+ ]
+}

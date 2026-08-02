@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint 'src/**/*.ts'",
     "test": "vitest run",
-    "data:radars": "node scripts/build-radars.mjs"
+    "data:radars": "node scripts/build-radars.mjs",
+    "data:services": "node scripts/build-services.mjs"
   },
   "keywords": [],
   "author": "Endika Iglesias",
