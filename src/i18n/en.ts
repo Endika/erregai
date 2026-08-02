@@ -41,6 +41,16 @@ export const en: Record<string, string> = {
   'schedule.open': 'Open now',
   'schedule.closed': 'Closed now',
   'schedule.closingSoon': 'Closing soon',
+
+  'settings.section.services': 'Service areas',
+  'services.settings.showOnMap': 'Show service areas on the map',
+  'services.unnamed': 'Service area',
+  'services.kind.fuel': 'Fuel',
+  'services.kind.restaurant': 'Restaurant',
+  'services.kind.cafe': 'Café',
+  'services.kind.fast_food': 'Fast food',
+  'services.kind.toilets': 'Toilets',
+  'services.kind.shop': 'Shop',
   'detail.address': 'Address',
 
   'settings.fuel': 'Fuel',

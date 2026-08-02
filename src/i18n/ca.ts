@@ -41,6 +41,16 @@ export const ca: Record<string, string> = {
   'schedule.open': 'Obert ara',
   'schedule.closed': 'Tancat ara',
   'schedule.closingSoon': 'Tanca aviat',
+
+  'settings.section.services': 'Àrees de servei',
+  'services.settings.showOnMap': 'Mostra les àrees de servei al mapa',
+  'services.unnamed': 'Àrea de servei',
+  'services.kind.fuel': 'Benzinera',
+  'services.kind.restaurant': 'Restaurant',
+  'services.kind.cafe': 'Cafeteria',
+  'services.kind.fast_food': 'Menjar ràpid',
+  'services.kind.toilets': 'Lavabos',
+  'services.kind.shop': 'Botiga',
   'detail.address': 'Adreça',
 
   'settings.fuel': 'Combustible',

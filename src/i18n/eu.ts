@@ -41,6 +41,16 @@ export const eu: Record<string, string> = {
   'schedule.open': 'Orain irekita',
   'schedule.closed': 'Orain itxita',
   'schedule.closingSoon': 'Laster ixten du',
+
+  'settings.section.services': 'Zerbitzuguneak',
+  'services.settings.showOnMap': 'Erakutsi zerbitzuguneak mapan',
+  'services.unnamed': 'Zerbitzugunea',
+  'services.kind.fuel': 'Gasolindegia',
+  'services.kind.restaurant': 'Jatetxea',
+  'services.kind.cafe': 'Kafetegia',
+  'services.kind.fast_food': 'Janari azkarra',
+  'services.kind.toilets': 'Komunak',
+  'services.kind.shop': 'Denda',
   'detail.address': 'Helbidea',
 
   'settings.fuel': 'Erregaia',

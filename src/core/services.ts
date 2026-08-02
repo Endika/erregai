@@ -1,4 +1,5 @@
 import { haversineKm, type LatLon } from './geo'
+import { parseOsmHours, scheduleStatus, type ScheduleStatus } from './schedule'
 
 // Motorway service areas (OSM `highway=services`) and what they offer. The
 // dataset is baked in at build time, exactly like the radars, so the layer
@@ -17,6 +18,12 @@ export interface ServiceArea {
 }
 
 export interface ServiceAreaHit { area: ServiceArea; distanceKm: number }
+
+// Only 141 of the 999 areas publish opening hours, so `unknown` is the normal
+// answer here, not an error path — the popup must read well without it.
+export function serviceAreaStatus(area: ServiceArea, at: Date): ScheduleStatus {
+  return scheduleStatus(parseOsmHours(area.hours ?? ''), at)
+}
 
 export function nearbyServiceAreas(
   pos: LatLon,

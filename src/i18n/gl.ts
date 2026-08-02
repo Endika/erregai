@@ -41,6 +41,16 @@ export const gl: Record<string, string> = {
   'schedule.open': 'Aberto agora',
   'schedule.closed': 'Pechado agora',
   'schedule.closingSoon': 'Pecha pronto',
+
+  'settings.section.services': 'Áreas de servizo',
+  'services.settings.showOnMap': 'Amosar as áreas de servizo no mapa',
+  'services.unnamed': 'Área de servizo',
+  'services.kind.fuel': 'Gasolineira',
+  'services.kind.restaurant': 'Restaurante',
+  'services.kind.cafe': 'Cafetaría',
+  'services.kind.fast_food': 'Comida rápida',
+  'services.kind.toilets': 'Aseos',
+  'services.kind.shop': 'Tenda',
   'detail.address': 'Enderezo',
 
   'settings.fuel': 'Combustible',
