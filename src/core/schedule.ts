@@ -76,6 +76,63 @@ export function parseSchedule(raw: string): DayRange[] | undefined {
   return ranges.length > 0 ? ranges : undefined
 }
 
+const OSM_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+const OSM_SEGMENT = /^\s*(?:([A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?(?:\s*,\s*[A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?)*)\s+)?(.+?)\s*$/
+const OSM_RANGE = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/
+
+// `PH` is public holidays. We have no holiday calendar, so days that only apply
+// on holidays contribute nothing rather than being guessed at either way.
+function expandOsmDays(spec: string): number[] | undefined {
+  const days = new Set<number>()
+  for (const token of spec.split(',')) {
+    const [rawStart, rawEnd] = token.split('-').map(s => s.trim().toUpperCase())
+    if (rawStart === 'PH' && rawEnd === undefined) continue
+    const start = OSM_DAYS.indexOf(rawStart)
+    if (start < 0) return undefined
+    if (rawEnd === undefined) { days.add(start); continue }
+    const end = OSM_DAYS.indexOf(rawEnd)
+    if (end < 0) return undefined
+    for (let i = 0; i <= (end - start + 7) % 7; i++) days.add((start + i) % 7)
+  }
+  return [...days].sort((a, b) => a - b)
+}
+
+const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6]
+
+// The subset of the OSM opening_hours grammar that Spanish service areas
+// actually use: `24/7`, day ranges and lists, several time ranges per segment,
+// `PH`, and `off`. Month rules, `sunrise`/`sunset` and week selectors are not
+// supported and make the whole value unknown — ignoring a seasonal exception
+// would have us claim a restaurant is open in August when it is shut.
+export function parseOsmHours(raw: string): DayRange[] | undefined {
+  const text = raw.trim()
+  if (!text) return undefined
+  if (/^24\/7$/i.test(text)) return [{ days: EVERY_DAY, from: 0, to: DAY }]
+
+  const ranges: DayRange[] = []
+  for (const segment of text.split(';')) {
+    if (!segment.trim()) continue
+    const m = OSM_SEGMENT.exec(segment)
+    if (!m) return undefined
+    const days = m[1] === undefined ? EVERY_DAY : expandOsmDays(m[1])
+    if (!days) return undefined
+    const times = m[2].trim()
+    // "Sa-Su off" states a closure; with an open-intervals model that is simply
+    // an absence, so the segment is dropped rather than rejected.
+    if (/^off$/i.test(times)) continue
+    if (days.length === 0) continue
+    for (const part of times.split(',')) {
+      const r = OSM_RANGE.exec(part.trim())
+      if (!r) return undefined
+      const from = minutes(r[1], r[2])
+      const to = minutes(r[3], r[4])
+      if (from === undefined || to === undefined) return undefined
+      ranges.push({ days, from, to })
+    }
+  }
+  return ranges.length > 0 ? ranges : undefined
+}
+
 interface Interval { start: number; end: number }
 
 // Projects the ranges onto a single week measured in minutes, splitting the
