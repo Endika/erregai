@@ -1,0 +1,59 @@
+name: Update service areas
+
+on:
+  schedule:
+    # Day 3, offset from the radar refresh (days 1 and 15) so two automated
+    # dataset PRs never land on top of each other.
+    - cron: '0 5 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout with the PAT so the branch push is authored by it and the
+      # opened PR triggers the required CI checks (a GITHUB_TOKEN push does not).
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Queries Overpass server-side. There is no local fallback on a runner, so
+      # a total outage fails the job rather than writing a truncated dataset.
+      - run: npm run data:services
+      - run: npm run typecheck
+      - name: Open PR if the dataset changed
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if git diff --quiet -- src/core/services.data.ts; then
+            echo "Service area dataset unchanged; nothing to do."
+            exit 0
+          fi
+          # Sanity floor: a partial Overpass answer can still produce a valid but
+          # thin dataset. Spain has ~999 areas, so anything under 800 means the
+          # query came back wrong and must not overwrite what is committed.
+          count=$(grep -c '{ id: "' src/core/services.data.ts || true)
+          if [ "${count:-0}" -lt 800 ]; then
+            echo "Only ${count:-0} service areas generated (<800); refusing to overwrite the dataset." >&2
+            exit 1
+          fi
+          echo "Generated $count service areas."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="chore/update-services-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git add src/core/services.data.ts
+          git commit -m "chore(services): refresh motorway service area dataset"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(services): refresh motorway service area dataset" \
+            --body "Automated refresh of the motorway service area dataset from OpenStreetMap via Overpass. Data © OpenStreetMap contributors, ODbL."
+          gh pr merge --rebase --auto "$branch"
