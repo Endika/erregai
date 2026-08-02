@@ -1,5 +1,6 @@
 import type { Station } from '../core/station'
 import { FUELS } from '../core/fuels'
+import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
 
 // Deep-link that respects the device's default maps app: Apple Maps on iOS
@@ -14,7 +15,7 @@ function mapsUrl(station: Station): string {
     : `geo:${lat},${lon}?q=${lat},${lon}(${label})`
 }
 
-export function renderDetail(container: HTMLElement, station: Station): void {
+export function renderDetail(container: HTMLElement, station: Station, now: Date = new Date()): void {
   const wrapper = document.createElement('div')
   wrapper.className = 'station-detail'
 
@@ -28,9 +29,20 @@ export function renderDetail(container: HTMLElement, station: Station): void {
   address.textContent = `${t('detail.address')}: ${station.address}, ${station.town}`
   wrapper.appendChild(address)
 
+  // The raw text stays visible whatever we make of it: the derived state is an
+  // aid, not a replacement for what the Ministerio actually published.
   const schedule = document.createElement('p')
   schedule.className = 'station-detail__schedule'
   schedule.textContent = `${t('detail.schedule')}: ${station.schedule}`
+  const status = scheduleStatus(parseSchedule(station.schedule), now)
+  if (status !== 'unknown') {
+    const badge = document.createElement('span')
+    badge.className = 'station-detail__schedule-status'
+    badge.dataset.schedule = status
+    const key = status === 'open' ? 'schedule.open' : status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon'
+    badge.textContent = t(key)
+    schedule.append(' ', badge)
+  }
   wrapper.appendChild(schedule)
 
   const priceList = document.createElement('ul')

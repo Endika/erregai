@@ -38,6 +38,9 @@ export const eu: Record<string, string> = {
 
   'detail.openInMaps': 'Ireki Maps-en',
   'detail.schedule': 'Ordutegia',
+  'schedule.open': 'Orain irekita',
+  'schedule.closed': 'Orain itxita',
+  'schedule.closingSoon': 'Laster ixten du',
   'detail.address': 'Helbidea',
 
   'settings.fuel': 'Erregaia',

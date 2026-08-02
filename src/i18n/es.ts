@@ -38,6 +38,9 @@ export const es: Record<string, string> = {
 
   'detail.openInMaps': 'Abrir en Maps',
   'detail.schedule': 'Horario',
+  'schedule.open': 'Abierto ahora',
+  'schedule.closed': 'Cerrado ahora',
+  'schedule.closingSoon': 'Cierra pronto',
   'detail.address': 'Dirección',
 
   'settings.fuel': 'Combustible',
