@@ -4,16 +4,18 @@ import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import type { LatLon } from '../core/geo'
 import type { Radar } from '../core/radars'
+import { serviceAreaStatus, type ServiceArea } from '../core/services'
 import { bandForThresholds, bandThresholds, priceOf, type PriceBand } from '../core/pricing'
+import { t } from '../i18n'
 
-type MarkerKind = PriceBand | 'unknown' | 'user' | 'radar'
+type MarkerKind = PriceBand | 'unknown' | 'user' | 'radar' | 'services'
 
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 const INITIAL_ZOOM = 12
 const FALLBACK_MARKER_COLOR = '#666666'
 const SELECTED_STROKE = '#111111'
-const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user', 'radar']
+const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user', 'radar', 'services']
 
 function readMarkerColors(): Record<MarkerKind, string> {
   const style = getComputedStyle(document.documentElement)
@@ -24,10 +26,42 @@ function readMarkerColors(): Record<MarkerKind, string> {
   return colors
 }
 
+// Built as a real element rather than an HTML string: area names come from OSM,
+// which anyone can edit, and must never be interpreted as markup.
+function servicePopup(area: ServiceArea, now: Date): HTMLElement {
+  const wrapper = document.createElement('div')
+  wrapper.className = 'service-popup'
+
+  const title = document.createElement('strong')
+  title.textContent = area.name ?? t('services.unnamed')
+  wrapper.appendChild(title)
+
+  if (area.services.length > 0) {
+    const list = document.createElement('p')
+    list.className = 'service-popup__services'
+    list.textContent = area.services.map(kind => t(`services.kind.${kind}`)).join(' · ')
+    wrapper.appendChild(list)
+  }
+
+  // No hours tagged means no claim: neither "open" nor "closed" is shown.
+  const status = serviceAreaStatus(area, now)
+  if (status !== 'unknown' && area.hours) {
+    const line = document.createElement('p')
+    line.className = 'service-popup__hours'
+    const badge = document.createElement('span')
+    badge.dataset.schedule = status
+    badge.textContent = t(status === 'open' ? 'schedule.open' : status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon')
+    line.append(badge, ` ${area.hours}`)
+    wrapper.appendChild(line)
+  }
+  return wrapper
+}
+
 export class MapView {
   private map?: L.Map
   private markers?: L.LayerGroup
   private radarMarkers?: L.LayerGroup
+  private serviceMarkers?: L.LayerGroup
   private userMarker?: L.CircleMarker
 
   constructor(private container: HTMLElement) {}
@@ -86,6 +120,29 @@ export class MapView {
     this.radarMarkers?.clearLayers()
   }
 
+  // Square markers, so a service area reads as a different thing from a fuel
+  // station (filled circle) and a radar (hollow circle) at a glance.
+  renderServiceAreas(areas: readonly ServiceArea[], now: Date = new Date()): void {
+    if (!this.map || !this.serviceMarkers) return
+    this.serviceMarkers.clearLayers()
+    const color = readMarkerColors().services
+    for (const area of areas) {
+      const marker = L.marker([area.lat, area.lon], {
+        icon: L.divIcon({
+          className: 'map-service-marker',
+          html: `<span class="map-service-marker__box" style="background:${color}"></span>`,
+          iconSize: [14, 14],
+        }),
+      })
+      marker.bindPopup(servicePopup(area, now))
+      this.serviceMarkers.addLayer(marker)
+    }
+  }
+
+  clearServiceAreas(): void {
+    this.serviceMarkers?.clearLayers()
+  }
+
   invalidateSize(): void {
     this.map?.invalidateSize()
   }
@@ -103,6 +160,7 @@ export class MapView {
     this.map = undefined
     this.markers = undefined
     this.radarMarkers = undefined
+    this.serviceMarkers = undefined
     this.userMarker = undefined
   }
 
@@ -111,6 +169,7 @@ export class MapView {
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map)
     this.markers = L.layerGroup().addTo(map)
     this.radarMarkers = L.layerGroup().addTo(map)
+    this.serviceMarkers = L.layerGroup().addTo(map)
     const colors = readMarkerColors()
     this.userMarker = L.circleMarker([pos.lat, pos.lon], {
       radius: 7,

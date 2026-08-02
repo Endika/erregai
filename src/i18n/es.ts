@@ -41,6 +41,16 @@ export const es: Record<string, string> = {
   'schedule.open': 'Abierto ahora',
   'schedule.closed': 'Cerrado ahora',
   'schedule.closingSoon': 'Cierra pronto',
+
+  'settings.section.services': 'Áreas de servicio',
+  'services.settings.showOnMap': 'Mostrar áreas de servicio en el mapa',
+  'services.unnamed': 'Área de servicio',
+  'services.kind.fuel': 'Gasolinera',
+  'services.kind.restaurant': 'Restaurante',
+  'services.kind.cafe': 'Cafetería',
+  'services.kind.fast_food': 'Comida rápida',
+  'services.kind.toilets': 'Aseos',
+  'services.kind.shop': 'Tienda',
   'detail.address': 'Dirección',
 
   'settings.fuel': 'Combustible',

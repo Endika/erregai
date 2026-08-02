@@ -26,6 +26,9 @@
   /* Radar hazard hue — a distinct violet so it never collides with the price
      bands (green/orange/red), unknown grey or the blue user dot. */
   --map-marker-radar: #8e24aa;
+  /* Teal, and square rather than round: it must not be mistaken for the blue
+     user dot, the violet radar or any of the price bands. */
+  --map-marker-services: #00838f;
 }
 
 /* Dark palette shared by system-dark (unless the user forced light) and by an
@@ -768,4 +771,32 @@ body {
   color: var(--color-muted);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
+}
+
+/* Service areas are squares so they never read as a fuel station (filled
+   circle) or a radar (hollow circle) at a glance. */
+.map-service-marker__box {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid #ffffff;
+  border-radius: 0.1875rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.service-popup__services {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.service-popup__hours {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+}
+
+.service-popup__hours [data-schedule] {
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
 }

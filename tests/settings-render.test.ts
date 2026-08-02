@@ -4,12 +4,13 @@ import { DEFAULT_SETTINGS } from '../src/app/settings'
 import { t } from '../src/i18n'
 
 describe('renderSettings', () => {
-  it('renders the general, radar and fuel section headings in order', () => {
+  it('renders the general, services, radar and fuel section headings in order', () => {
     const el = document.createElement('div')
     renderSettings(el, DEFAULT_SETTINGS, () => {})
     const titles = [...el.querySelectorAll('.settings-section__title')].map(h => h.textContent)
     expect(titles).toEqual([
       t('settings.section.general'),
+      t('settings.section.services'),
       t('settings.section.radar'),
       t('settings.section.fuel'),
     ])
@@ -22,7 +23,7 @@ describe('renderSettings', () => {
     const fields = [...el.querySelectorAll('[data-field]')].map(n => (n as HTMLElement).dataset.field)
     expect(fields).toEqual([
       'fuel', 'sort', 'radiusKm', 'locale', 'theme', 'alertVolume', 'alertVibrate',
-      'radarLayerEnabled', 'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
+      'servicesLayerEnabled', 'radarLayerEnabled', 'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
       'fuelAlertMode', 'fuelAlertDistanceM', 'fuelSound',
     ])
     const sound = el.querySelector<HTMLInputElement>('[data-field="radarSound"]')!
@@ -43,6 +44,17 @@ describe('renderSettings', () => {
     volume.value = '0.5'
     volume.dispatchEvent(new Event('change'))
     expect(partials).toContainEqual({ alertVolume: 0.5 })
+  })
+
+  it('toggles the service area layer independently of the radar one', () => {
+    const el = document.createElement('div')
+    const partials: Record<string, unknown>[] = []
+    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    const layer = el.querySelector<HTMLInputElement>('[data-field="servicesLayerEnabled"]')!
+    expect(layer.checked).toBe(true)
+    layer.checked = false
+    layer.dispatchEvent(new Event('change'))
+    expect(partials).toEqual([{ servicesLayerEnabled: false }])
   })
 
   it('toggles the haptic fallback', () => {

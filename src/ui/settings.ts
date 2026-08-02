@@ -193,6 +193,15 @@ export function renderSettings(
     }),
   ])
 
+  const services = section(t('settings.section.services'), [
+    toggleField(
+      t('services.settings.showOnMap'),
+      'servicesLayerEnabled',
+      settings.servicesLayerEnabled,
+      checked => onChange({ servicesLayerEnabled: checked }),
+    ),
+  ])
+
   const radar = section(t('settings.section.radar'), [
     toggleField(
       t('radar.settings.showOnMap'),
@@ -276,6 +285,6 @@ export function renderSettings(
   version.textContent = `v${__APP_VERSION__}`
   about.append(aboutTitle, legend, dataCredit, mapCredit, version)
 
-  form.append(general, radar, fuel, about)
+  form.append(general, services, radar, fuel, about)
   container.replaceChildren(form)
 }

@@ -13,6 +13,8 @@ import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { nearbyRadars } from './core/radars'
 import { RADARS } from './core/radars.data'
+import { nearbyServiceAreas } from './core/services'
+import { SERVICE_AREAS } from './core/services.data'
 import { sortStations, type SortKey } from './core/pricing'
 import { haversineKm, type LatLon } from './core/geo'
 import type { Station } from './core/station'
@@ -25,6 +27,9 @@ const TRIP_ZOOM = 15
 // icons and list rows so a dense urban area can't flood Leaflet or the DOM.
 const RADAR_MARKER_CAP = 60
 const RADAR_LIST_CAP = 10
+// Service areas are far sparser than radars, so a lower cap still covers any
+// realistic radius without crowding the map.
+const SERVICE_MARKER_CAP = 30
 
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
 
@@ -223,7 +228,10 @@ function render(): void {
       const radarHits = state.settings.radarLayerEnabled
         ? nearbyRadars(state.pos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP)
         : []
-      if (nearby.length === 0 && radarHits.length === 0) {
+      const serviceHits = state.settings.servicesLayerEnabled
+        ? nearbyServiceAreas(state.pos, SERVICE_AREAS, state.settings.radiusKm, SERVICE_MARKER_CAP)
+        : []
+      if (nearby.length === 0 && radarHits.length === 0 && serviceHits.length === 0) {
         renderEmptyState(state.settings.radiusKm)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
@@ -239,6 +247,8 @@ function render(): void {
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
         if (radarHits.length > 0) mapView.renderRadars(radarHits.map(h => h.radar))
         else mapView.clearRadars()
+        if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map(h => h.area))
+        else mapView.clearServiceAreas()
         mapView.invalidateSize()
         if (selectedStation) mapView.panTo(selectedStation.pos)
         if (sorted.length > 0) renderStationList(listWrap, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
@@ -265,6 +275,11 @@ function render(): void {
         } else {
           mapView.clearRadars()
         }
+      }
+      if (state.settings.servicesLayerEnabled) {
+        mapView.renderServiceAreas(nearbyServiceAreas(tripPos, SERVICE_AREAS, state.settings.radiusKm, SERVICE_MARKER_CAP).map(h => h.area))
+      } else {
+        mapView.clearServiceAreas()
       }
       mapView.invalidateSize()
     }
