@@ -33,6 +33,7 @@ export const eu: Record<string, string> = {
   'trip.start': 'Hasi bidaia',
   'trip.stop': 'Gelditu bidaia',
   'trip.foregroundOnly': 'Lehen planoan soilik',
+  'trip.mediaSession.title': 'Bidaia modua',
   'trip.cheapestAhead': 'Merkeena aurrean',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
 

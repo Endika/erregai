@@ -30,10 +30,77 @@ export function unlockAudio(makeCtx: () => AudioContextLike = defaultCtx): void 
   }
 }
 
+// While a trip is running the cues are routed through a MediaStream feeding a
+// looping <audio> element instead of straight to the speakers. Two reasons,
+// both about the phone being in a pocket or projecting to Android Auto:
+// Chrome suspends the AudioContext of a backgrounded page that is not playing
+// media, and an element-backed stream is what Android treats as a media
+// session it can route to the car. Null until a trip starts.
+let streamDest: MediaStreamAudioDestinationNode | null = null
+let keepAlive: HTMLAudioElement | null = null
+
+type AudioElementFactory = () => HTMLAudioElement
+
+export interface BackgroundAudioOptions {
+  title?: string
+  artist?: string
+  makeCtx?: () => AudioContextLike
+  makeAudio?: AudioElementFactory
+}
+
+function setMediaSession(title: string, artist: string): void {
+  const session = typeof navigator === 'undefined' ? undefined : navigator.mediaSession
+  if (!session || typeof MediaMetadata === 'undefined') return
+  session.metadata = new MediaMetadata({ title, artist })
+  session.playbackState = 'playing'
+}
+
+// Must be called from a user gesture (trip start), like unlockAudio. If the
+// element refuses to play we tear the routing back down rather than leave the
+// cues pointing at a stream nobody is listening to — silent alerts on a
+// motorway are worse than alerts that only work in the foreground.
+export function startBackgroundAudio(opts: BackgroundAudioOptions = {}): void {
+  const title = opts.title ?? 'Erregai'
+  const artist = opts.artist ?? 'Erregai'
+  try {
+    const ctx = ensureCtx(opts.makeCtx ?? defaultCtx)
+    resumeIfSuspended(ctx)
+    if (typeof ctx.createMediaStreamDestination !== 'function') return
+    const makeAudio = opts.makeAudio ?? (typeof Audio === 'function' ? () => new Audio() : undefined)
+    if (!makeAudio) return
+
+    streamDest = ctx.createMediaStreamDestination()
+    keepAlive = makeAudio()
+    keepAlive.loop = true
+    keepAlive.srcObject = streamDest.stream
+    void Promise.resolve(keepAlive.play())
+      .then(() => setMediaSession(title, artist))
+      .catch(() => { stopBackgroundAudio() })
+  } catch {
+    stopBackgroundAudio()
+  }
+}
+
+export function stopBackgroundAudio(): void {
+  try {
+    keepAlive?.pause()
+    if (keepAlive) keepAlive.srcObject = null
+    streamDest?.disconnect()
+    const session = typeof navigator === 'undefined' ? undefined : navigator.mediaSession
+    if (session) { session.metadata = null; session.playbackState = 'none' }
+  } catch {
+    /* nothing to unwind */
+  }
+  streamDest = null
+  keepAlive = null
+}
+
 // Test-only: drops the shared context so injected fake contexts don't leak
 // state across tests.
 export function __resetAudio(): void {
   shared = null
+  streamDest = null
+  keepAlive = null
 }
 
 interface Tone { freq: number; start: number; duration: number; peak: number }
@@ -66,7 +133,7 @@ function scheduleTone(ctx: AudioContextLike, freq: number, at: number, duration:
   gain.gain.exponentialRampToValueAtTime(peak, at + ATTACK)
   gain.gain.setValueAtTime(peak, hold)
   gain.gain.exponentialRampToValueAtTime(SILENT, at + duration)
-  osc.connect(gain); gain.connect(ctx.destination)
+  osc.connect(gain); gain.connect(streamDest ?? ctx.destination)
   osc.start(at)
   osc.stop(at + duration)
 }

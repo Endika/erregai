@@ -33,6 +33,7 @@ export const gl: Record<string, string> = {
   'trip.start': 'Iniciar viaxe',
   'trip.stop': 'Deter viaxe',
   'trip.foregroundOnly': 'Só en primeiro plano',
+  'trip.mediaSession.title': 'Modo viaxe',
   'trip.cheapestAhead': 'A máis barata diante',
   'trip.noneAhead': 'Aínda non hai gasolineiras diante',
 

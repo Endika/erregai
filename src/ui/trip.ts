@@ -9,7 +9,7 @@ import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
 import { keepScreenAwake } from '../adapters/wakeLock'
-import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
+import { playRadarBeep, playFuelChime, unlockAudio, startBackgroundAudio, stopBackgroundAudio } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
@@ -59,6 +59,10 @@ export class TripController {
     // prefix is still a user gesture — unlock audio before any await, or the
     // gesture context is lost and mobile cues stay silent.
     unlockAudio()
+    // Same gesture, same reason: routing the cues through a media element is
+    // what keeps them audible once the phone backgrounds the page or hands the
+    // audio session to Android Auto.
+    startBackgroundAudio({ title: t('trip.mediaSession.title'), artist: t('app.title') })
     if (this.active) return
     this.active = true
     this.tripState = newTripState()
@@ -88,6 +92,7 @@ export class TripController {
     this.stopFn = undefined
     this.releaseWakeLock?.()
     this.releaseWakeLock = undefined
+    stopBackgroundAudio()
     this.tripState = newTripState()
     this.lastUpdate = undefined
     this.lastProvinceId = undefined

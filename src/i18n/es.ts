@@ -33,6 +33,7 @@ export const es: Record<string, string> = {
   'trip.start': 'Iniciar viaje',
   'trip.stop': 'Detener viaje',
   'trip.foregroundOnly': 'Solo en primer plano',
+  'trip.mediaSession.title': 'Modo viaje',
   'trip.cheapestAhead': 'Más barata por delante',
   'trip.noneAhead': 'Aún no hay gasolineras por delante',
 
