@@ -92,12 +92,22 @@ not implement it, so on iPhone audio is the only cue.
 
 ## Trip mode caveat
 
-Trip mode only works **while Erregai is open in the foreground**. Mobile browsers
-suspend background tabs and throttle or stop geolocation once the app loses focus, so
-there is no reliable way to keep tracking your position or firing alerts when the screen
-is off or another app is active. If the browser or OS revokes location access mid-trip,
-the app degrades gracefully (trip mode stops and tells you why) rather than failing
-silently.
+Trip mode is built for Erregai being **open in the foreground**. Mobile browsers throttle
+or stop geolocation once a page loses focus, so position tracking is not guaranteed when
+the screen is off or another app is in front. If the browser or OS revokes location access
+mid-trip, the app degrades gracefully (trip mode stops and tells you why) rather than
+failing silently.
+
+While a trip is running the alert cues are routed through a looping media element, which
+keeps the audio session alive and gives Android something it can hand to a car head unit.
+That covers the case where the page is backgrounded and Chrome would otherwise suspend the
+audio: **it is the audio half of the problem, not the location half.** If the browser stops
+delivering position fixes, there is nothing to alert about in the first place.
+
+**Android Auto specifically:** Erregai is a web app, so it cannot draw on the car screen —
+that needs a native app built against the Android Auto templates. Connecting the phone by
+plain Bluetooth (A2DP) instead keeps Erregai in the foreground with the screen awake and
+sends its audio to the car, which is the arrangement trip mode is designed for.
 
 ## Privacy
 
