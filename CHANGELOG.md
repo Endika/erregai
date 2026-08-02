@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.18.0](https://github.com/Endika/erregai/compare/v1.17.0...v1.18.0) (2026-08-02)
+
+
+### Features
+
+* **map:** draw service areas with their opening status behind a settings toggle ([65fdb9e](https://github.com/Endika/erregai/commit/65fdb9e347131b19458019f50efaac49be2c8aa3))
+* **schedule:** parse OSM opening_hours onto the same open/closed model ([52ea17a](https://github.com/Endika/erregai/commit/52ea17a6a0c78c84f96dd12d19b57aa875549fc4))
+
+
+### Bug Fixes
+
+* **audio:** keep trip alerts audible when the page is backgrounded ([5d0af26](https://github.com/Endika/erregai/commit/5d0af2632fe644b14cb403ac596f75b0bfb9a154))
+
+
+### Documentation
+
+* describe what background audio does and does not fix in trip mode ([a6ea0e5](https://github.com/Endika/erregai/commit/a6ea0e5a66c7a3df97fe3b8f4fd55585656e0e5f))
+* fold the three data sections into one table-led section ([1246bfb](https://github.com/Endika/erregai/commit/1246bfbb29790decf1a9af45b80dd09cdd441194))
+* merge the alert and trip mode sections into one ([d5b7a81](https://github.com/Endika/erregai/commit/d5b7a81c9138b2be51f4ba5851dc80b133f56c1f))
+
 ## [1.17.0](https://github.com/Endika/erregai/compare/v1.16.0...v1.17.0) (2026-08-02)
 
 
