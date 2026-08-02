@@ -16,8 +16,11 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
   in your maps app.
 - **Opening status**: stations that are closed right now, or about to close, are flagged in
   the list; the detail card shows the derived state next to the Ministerio's own text.
-- **Service areas** on the map, with the services they offer and, where the data exists,
-  whether the restaurant is open — see below.
+- **Fixed speed radars**: warned ahead in your direction of travel during a trip, and shown
+  on the map with a browsable "nearby radars" list. Its own Settings toggle, separate from
+  the alert sound.
+- **Service areas** on the map as square markers, with the services inside them and, where
+  the data exists, whether the restaurant is open. Its own Settings toggle.
 - **Trip mode**: while the app is open and in the foreground, it tracks your heading and
   alerts you when a cheaper station appears ahead within your configured radius. It does
   **not** run in the background — see the caveat below.
@@ -25,97 +28,52 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
 - **Offline-first**: station data is cached in IndexedDB per province and served stale
   when the network is unavailable; the app itself is installable and works fully offline
   once loaded.
-- **Spanish and English**, following the browser/device language.
+- **Six languages** — Spanish, English, Catalan, Basque, Valencian and Galician —
+  following the browser/device language, or picked manually in Settings.
 
-## Data source & attribution
+## Data
 
-Station and price data comes from the public REST API of the Spanish
-**[Ministerio para la Transición Ecológica y el Reto Demográfico](https://www.mites.gob.es/)**
-("Sede Electrónica del Ministerio para la Transición Ecológica"), fetched live per
-province — there is no backend, no proxy, and no third-party data resale. Map tiles are
-© [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Erregai is an
-independent client and is not affiliated with or endorsed by the Ministerio.
+| Layer | Source | Licence | Refresh |
+| --- | --- | --- | --- |
+| Stations & prices | [Ministerio para la Transición Ecológica](https://www.mites.gob.es/) REST API | Public sector | Live per province, cached 6 h |
+| Fixed radars | [DGT](https://nap.dgt.es/), [Servei Català de Trànsit](https://transit.gencat.cat/), [Trafikoa](https://apps.trafikoa.euskadi.eus/) | Open data | Bundled; cron on the 1st and 15th |
+| Service areas | [OpenStreetMap](https://www.openstreetmap.org/) via [Overpass](https://overpass-api.de/) | **ODbL** | Bundled; cron monthly |
+| Map tiles | [OpenStreetMap](https://www.openstreetmap.org/copyright) | ODbL | Live |
 
-## Radar data
+No backend, no proxy, no data resale. The radar and service-area datasets are baked in at
+build time, so both layers work offline and neither source is ever contacted from a user's
+device.
 
-Trip mode can also warn you about **official fixed speed radars** ahead in your direction
-of travel. Beyond that alert, nearby radars are shown as icons on the map and as a
-browsable "nearby radars" list on the **Map** tab (and on the trip map), so you can see
-them without an active trip. Visibility is governed by its own **"Show radars on the map"**
-toggle in Settings, independent of the audio/notification alert toggle. The dataset is
-built from three public open-data sources and bundled at build time (there is no runtime
-radar fetch — the layer works fully offline):
+Erregai is an independent client, not affiliated with or endorsed by any of these bodies.
+OSM data is © OpenStreetMap contributors under the
+[ODbL](https://opendatacommons.org/licenses/odbl/) — a share-alike licence on the
+*database*, so `src/core/services.data.ts` carries the ODbL regardless of the MIT licence
+on Erregai's own code.
 
-- **[Dirección General de Tráfico (DGT)](https://nap.dgt.es/)** — national access point
-  (`nap.dgt.es`, infocar DATEX2 feeds).
-- **[Servei Català de Trànsit](https://transit.gencat.cat/)** — Catalonia open data.
-- **[Trafikoa / Gobierno Vasco](https://apps.trafikoa.euskadi.eus/)** — Basque Country
-  open data.
+### What the data does not cover
 
-Attribution: radar locations are published by the respective traffic authorities under
-their open-data terms. Erregai is an independent client and is not affiliated with or
-endorsed by any of them.
+**Radars** — fixed cabins only: no mobile units, no section control, no crowdsourced
+reports. Regions whose authority publishes nothing are under-represented, and the heading
+cone can occasionally trigger on the far carriageway of a divided highway.
 
-**Limitations.** Only **fixed** radars are included — no mobile radars, no
-section-control (tramo) radars, and no crowdsourced reports. Coverage depends on each
-authority actually publishing its cabins, so regions whose administration does not release
-the data will be under-represented. The alert filter uses a heading cone, so on divided
-highways a radar on the opposite carriageway may occasionally trigger.
+**Service areas** — 999 areas, 437 named, and only **141 publishing opening hours**. The
+other 86% show no opening status at all: a missing schedule never becomes "closed". One
+seasonal rule is deliberately left unmodelled rather than claim 24/7 through a summer
+restriction. Amenities attach to the nearest area centre within 600 m instead of by polygon
+geometry, so twin areas across a motorway can swap a restaurant. Rest areas
+(`highway=rest_area`) are excluded.
 
-**Regenerating the dataset.** The bundled file `src/core/radars.data.ts` is generated by:
+### Regenerating the bundled datasets
 
 ```bash
-npm run data:radars
+npm run data:radars    # DGT + Catalunya + Euskadi
+npm run data:services  # OpenStreetMap via Overpass
 ```
 
-which downloads the sources server-side (falling back to local raw files in
-`../erregai-notes/radar-sources/` for development) and writes the merged, de-duplicated
-list plus a dataset date. The raw source files are not committed. A scheduled GitHub
-Action, `.github/workflows/update-radars.yml`, re-runs this generator twice a month and
-opens a PR when the dataset changes.
-
-## Service area data
-
-Motorway **service areas** are drawn on the map as square markers, with the services found
-inside them (fuel, restaurant, cafe, fast food, shop, toilets) and — when the data exists —
-whether the restaurant is open right now. The layer has its own **"Show service areas on the
-map"** toggle in Settings, independent of the radar one. Like the radars, the dataset is
-bundled at build time, so the layer works fully offline and **Overpass is never called from
-a user's device**.
-
-The source is **[OpenStreetMap](https://www.openstreetmap.org/)**, queried through the
-[Overpass API](https://overpass-api.de/): `highway=services` scoped to Spain by
-`ISO3166-1=ES`, plus the amenities mapped inside each area.
-
-**Attribution and licence.** OpenStreetMap data is published under the
-**[Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/)**. Data ©
-OpenStreetMap contributors. The ODbL is a share-alike licence for the *database*: the
-generated dataset in `src/core/services.data.ts` is a derivative database and carries the
-ODbL with it, independently of the MIT licence covering Erregai's own source code.
-
-**Limitations, honestly.** Coverage is whatever volunteers have mapped:
-
-- Of 999 areas, **437 have a name** and only **141 publish opening hours**. The remaining
-  86% show no opening status at all — the app never infers "closed" from missing data.
-- One seasonal schedule (`24/7; Jun 15-Sep 15 07:30-22:30 off`) is deliberately not
-  modelled and shows no status, rather than claiming 24/7 through the summer restriction.
-- Amenities are matched to the nearest area centre within 600 m, not by polygon geometry,
-  so on twin areas facing each other across a motorway a restaurant may occasionally be
-  attributed to the opposite carriageway.
-- Rest areas (`highway=rest_area` — parking and toilets, no fuel or restaurant) are **not**
-  included.
-
-**Regenerating the dataset.** The bundled file `src/core/services.data.ts` is generated by:
-
-```bash
-npm run data:services
-```
-
-which queries Overpass server-side, cascading over mirrors with backoff (falling back to
-local raw files in `../erregai-notes/service-sources/` for development). The request sends
-an identifying User-Agent, which Overpass requires — it answers `406` without one. A
-scheduled GitHub Action, `.github/workflows/update-services.yml`, re-runs this generator
-monthly and opens a PR when the dataset changes.
+Both fetch server-side and fall back to local raw files under `../erregai-notes/` for
+development; those raw files are not committed. Overpass requires an identifying
+User-Agent — it answers `406` without one. The scheduled actions `update-radars.yml` and
+`update-services.yml` re-run each generator and open a PR when a dataset changes.
 
 ## Alert cues
 
@@ -179,4 +137,5 @@ opens a release PR and auto-merges it once checks pass.
 
 ## License
 
-ISC
+MIT (see `LICENSE`). Note that the bundled OpenStreetMap dataset in
+`src/core/services.data.ts` is a derivative database under the ODbL, not MIT.
