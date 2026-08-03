@@ -773,8 +773,29 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Service areas are squares so they never read as a fuel station (filled
-   circle) or a radar (hollow circle) at a glance. */
+/* Map pins: a round disc carrying a glyph (pump, camera, cutlery). The colour
+   keeps its old meaning — price band, radar violet, services teal — and the
+   glyph says which layer the pin belongs to. */
+.map-pin {
+  background: none;
+  border: 0;
+}
+
+.map-pin__disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.map-glyph {
+  display: block;
+}
+
+/* Fallback for a service area with no glyph-worthy amenity: still a square, so
+   it never reads as one of the round pins. */
 .map-service-marker__box {
   display: block;
   width: 0.875rem;

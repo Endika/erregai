@@ -11,7 +11,9 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
 ## Features
 
 - **List & map views** of nearby stations, sortable by price or distance, with a
-  colour cue (cheap / mid / expensive) computed from same-province prices.
+  colour cue (cheap / mid / expensive) computed from same-province prices. On the map every
+  layer is a glyphed pin — a pump for stations, a camera for radars — so colour carries the
+  price and the glyph carries the kind.
 - **Station detail** with full per-fuel pricing and a one-tap link to open the station
   in your maps app.
 - **Opening status**: stations that are closed right now, or about to close, are flagged in
@@ -19,8 +21,9 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
 - **Fixed speed radars**: warned ahead in your direction of travel during a trip, and shown
   on the map with a browsable "nearby radars" list. Its own Settings toggle, separate from
   the alert sound.
-- **Service areas** on the map as square markers, with the services inside them and, where
-  the data exists, whether the restaurant is open. Its own Settings toggle.
+- **Service areas** on the map as teal pins glyphed by what they offer — cutlery, a cup, a
+  pump — with the services inside them and, where the data exists, whether the restaurant is
+  open. Areas with nothing glyph-worthy tagged keep a plain square. Its own Settings toggle.
 - **Trip mode**: tracks your heading and alerts you when a cheaper station appears ahead
   within your configured radius. Designed for the app being open in the foreground — see
   [Trip mode & alerts](#trip-mode--alerts).
