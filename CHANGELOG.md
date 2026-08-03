@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.1](https://github.com/Endika/erregai/compare/v1.18.0...v1.18.1) (2026-08-03)
+
+
+### Chores
+
+* **services:** refresh motorway service area dataset ([4e09d7a](https://github.com/Endika/erregai/commit/4e09d7aa58312ac5cd9e57849d416f46fa830d32))
+
 ## [1.18.0](https://github.com/Endika/erregai/compare/v1.17.0...v1.18.0) (2026-08-02)
 
 
