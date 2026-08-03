@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.0](https://github.com/Endika/erregai/compare/v1.18.1...v1.19.0) (2026-08-03)
+
+
+### Features
+
+* **map:** glyph pins for stations, radars and service areas ([#49](https://github.com/Endika/erregai/issues/49)) ([ff97e16](https://github.com/Endika/erregai/commit/ff97e16a6aa53350a5fc517e9a733472368b39a3))
+
 ## [1.18.1](https://github.com/Endika/erregai/compare/v1.18.0...v1.18.1) (2026-08-03)
 
 
