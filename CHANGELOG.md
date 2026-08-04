@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.3](https://github.com/Endika/erregai/compare/v1.19.2...v1.19.3) (2026-08-04)
+
+
+### Chores
+
+* bump jsdom from 29.1.1 to 30.0.1 ([#57](https://github.com/Endika/erregai/issues/57)) ([437e00d](https://github.com/Endika/erregai/commit/437e00d194544ae6343ae178fddb00577b930229))
+
 ## [1.19.2](https://github.com/Endika/erregai/compare/v1.19.1...v1.19.2) (2026-08-04)
 
 
