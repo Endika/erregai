@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.1](https://github.com/Endika/erregai/compare/v1.19.0...v1.19.1) (2026-08-04)
+
+
+### Chores
+
+* bump undici from 7.28.0 to 7.29.0 ([#53](https://github.com/Endika/erregai/issues/53)) ([eb77c31](https://github.com/Endika/erregai/commit/eb77c31cb42edeb76c48584dc7bfa53d4ae9a838))
+
 ## [1.19.0](https://github.com/Endika/erregai/compare/v1.18.1...v1.19.0) (2026-08-03)
 
 
