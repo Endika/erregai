@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.19.2](https://github.com/Endika/erregai/compare/v1.19.1...v1.19.2) (2026-08-04)
+
+
+### Chores
+
+* bump @types/leaflet from 1.9.21 to 1.9.22 ([#58](https://github.com/Endika/erregai/issues/58)) ([85406e8](https://github.com/Endika/erregai/commit/85406e8be015d4e58958858e63a05890c84ca297))
+* bump fast-uri from 3.1.3 to 3.1.5 ([#51](https://github.com/Endika/erregai/issues/51)) ([dfc2b26](https://github.com/Endika/erregai/commit/dfc2b263656529ef20efc6295627a6c4c73195c8))
+* bump vite from 8.1.5 to 8.2.0 ([#56](https://github.com/Endika/erregai/issues/56)) ([510dc75](https://github.com/Endika/erregai/commit/510dc7576048140e937ffacdcce06d76e9209d49))
+
 ## [1.19.1](https://github.com/Endika/erregai/compare/v1.19.0...v1.19.1) (2026-08-04)
 
 
