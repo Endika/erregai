@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.19.4](https://github.com/Endika/erregai/compare/v1.19.3...v1.19.4) (2026-08-15)
+
+
+### Chores
+
+* bump @typescript-eslint/eslint-plugin from 8.65.0 to 8.66.0 ([#64](https://github.com/Endika/erregai/issues/64)) ([3d8ba2b](https://github.com/Endika/erregai/commit/3d8ba2b5bc680813356ae0a72c134f56d6e62761))
+* bump eslint from 10.8.0 to 10.8.1 ([#61](https://github.com/Endika/erregai/issues/61)) ([a3a6166](https://github.com/Endika/erregai/commit/a3a61664e0cfd03dcf3f76b6a84082dfc4dda651))
+* bump vite from 8.2.0 to 8.2.1 ([#62](https://github.com/Endika/erregai/issues/62)) ([2f59ca4](https://github.com/Endika/erregai/commit/2f59ca434b9d2777f51fcc1890d9f24cfec1468e))
+* **radars:** refresh fixed-radar dataset ([bbdc3e1](https://github.com/Endika/erregai/commit/bbdc3e16d91be2f381752ad6607e092665b1cf69))
+
 ## [1.19.3](https://github.com/Endika/erregai/compare/v1.19.2...v1.19.3) (2026-08-04)
 
 
