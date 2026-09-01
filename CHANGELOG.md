@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.19.5](https://github.com/Endika/erregai/compare/v1.19.4...v1.19.5) (2026-09-01)
+
+
+### Chores
+
+* bump @commitlint/cli from 21.2.1 to 21.2.2 ([#67](https://github.com/Endika/erregai/issues/67)) ([cafd736](https://github.com/Endika/erregai/commit/cafd73663050c14c3cce81968b4d0c12c326e969))
+* bump @commitlint/config-conventional from 21.2.0 to 21.2.2 ([#68](https://github.com/Endika/erregai/issues/68)) ([b6128c1](https://github.com/Endika/erregai/commit/b6128c1c310a156ce4a13c2310fcddefa70f4530))
+* bump @typescript-eslint/eslint-plugin from 8.66.0 to 8.67.0 ([#69](https://github.com/Endika/erregai/issues/69)) ([63b160e](https://github.com/Endika/erregai/commit/63b160e1ddb036d1deabeda9fc085365654ff08c))
+* bump eslint from 10.8.1 to 10.9.0 ([#72](https://github.com/Endika/erregai/issues/72)) ([5aa7bfc](https://github.com/Endika/erregai/commit/5aa7bfc62837c722cecea1b4115b575453d1954c))
+* bump vite from 8.2.1 to 8.2.2 ([#70](https://github.com/Endika/erregai/issues/70)) ([b5e17a5](https://github.com/Endika/erregai/commit/b5e17a57a9cff45682f0bdf4854aaee25b833646))
+* bump vitest from 4.1.10 to 4.1.11 ([#71](https://github.com/Endika/erregai/issues/71)) ([888fa9f](https://github.com/Endika/erregai/commit/888fa9fc954526cdb300b6f2e25144188220b770))
+* **radars:** refresh fixed-radar dataset ([0fb3342](https://github.com/Endika/erregai/commit/0fb3342d85c6924ec06269377e4a293f8594ca90))
+
 ## [1.19.4](https://github.com/Endika/erregai/compare/v1.19.3...v1.19.4) (2026-08-15)
 
 
