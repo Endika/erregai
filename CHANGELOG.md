@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.6](https://github.com/Endika/erregai/compare/v1.19.5...v1.19.6) (2026-09-03)
+
+
+### Chores
+
+* bump @typescript-eslint/eslint-plugin from 8.67.0 to 8.68.0 ([#76](https://github.com/Endika/erregai/issues/76)) ([eaaf3bd](https://github.com/Endika/erregai/commit/eaaf3bd249556f810f2c29aaada6667a8435735b))
+* bump @typescript-eslint/parser from 8.67.0 to 8.68.0 ([#75](https://github.com/Endika/erregai/issues/75)) ([a257a40](https://github.com/Endika/erregai/commit/a257a408f6db73a5dd6a7852ebaa1be2ae657fb7))
+* bump browserslist in the security-npm group across 1 directory ([#78](https://github.com/Endika/erregai/issues/78)) ([87f4903](https://github.com/Endika/erregai/commit/87f4903560b2da2c1fd40f685283b7db2d9e3b20))
+* bump eslint from 10.9.0 to 10.9.1 ([#77](https://github.com/Endika/erregai/issues/77)) ([5f5dbb4](https://github.com/Endika/erregai/commit/5f5dbb4aa91126b8fee0490962aa954519cdd202))
+* bump fast-uri in the security-npm group across 1 directory ([#79](https://github.com/Endika/erregai/issues/79)) ([895d8b6](https://github.com/Endika/erregai/commit/895d8b6d73d8aa08958c2aea79bb31e4c4408055))
+* **services:** refresh motorway service area dataset ([b8b6fee](https://github.com/Endika/erregai/commit/b8b6fee68912ef293c5fe44f357ddb0c7a11657f))
+
 ## [1.19.5](https://github.com/Endika/erregai/compare/v1.19.4...v1.19.5) (2026-09-01)
 
 
