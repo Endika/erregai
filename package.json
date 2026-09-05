@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:run": "vitest run --passWithNoTests",
     "data:radars": "node scripts/build-radars.mjs",
-    "data:services": "node scripts/build-services.mjs"
+    "data:services": "node scripts/build-services.mjs",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "Endika Iglesias",
@@ -30,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "eslint": "^10.9.1",
+    "husky": "^9.1.7",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "proj4": "^2.21.0",
