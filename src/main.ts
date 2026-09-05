@@ -41,8 +41,11 @@ let selectedStation: Station | undefined
 let locationError: string | undefined
 let locating = false
 
-const root: HTMLElement = document.getElementById('app') ??
-  (() => { throw new Error('missing #app root element') })()
+const root: HTMLElement =
+  document.getElementById('app') ??
+  (() => {
+    throw new Error('missing #app root element')
+  })()
 
 root.innerHTML = `
   <header class="app-header">
@@ -54,7 +57,7 @@ root.innerHTML = `
   <main class="app-main" data-view></main>
   <aside class="detail-card" data-card hidden></aside>
   <nav class="tab-bar" role="tablist">
-    ${TABS.map(tab => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}"></button>`).join('')}
+    ${TABS.map((tab) => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}"></button>`).join('')}
   </nav>
 `
 
@@ -75,11 +78,21 @@ const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
 const mapView = new MapView(mapContainer)
-const tripController = new TripController(store, mapView, () => { if (activeTab === 'trip') render() }, selectStation)
+const tripController = new TripController(
+  store,
+  mapView,
+  () => {
+    if (activeTab === 'trip') render()
+  },
+  selectStation,
+)
 
-root.addEventListener('click', e => {
+root.addEventListener('click', (e) => {
   const target = e.target as HTMLElement
-  if (target.closest('[data-refresh]')) { void store.refresh(); return }
+  if (target.closest('[data-refresh]')) {
+    void store.refresh()
+    return
+  }
   const tabButton = target.closest<HTMLElement>('[data-tab]')
   if (tabButton) {
     activeTab = tabButton.dataset.tab as Tab
@@ -124,9 +137,17 @@ function locate(): void {
   locating = true
   render()
   getOnce()
-    .then(pos => { locationError = undefined; return store.loadFor(pos) })
-    .catch(() => { locationError = t('error.location') })
-    .finally(() => { locating = false; render() })
+    .then((pos) => {
+      locationError = undefined
+      return store.loadFor(pos)
+    })
+    .catch(() => {
+      locationError = t('error.location')
+    })
+    .finally(() => {
+      locating = false
+      render()
+    })
 }
 
 function renderPositionPlaceholder(): void {
@@ -152,11 +173,18 @@ function renderEmptyState(radiusKm: number): void {
 }
 
 function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): Station[] {
-  return stations.filter(s => haversineKm(origin, s.pos) <= radiusKm)
+  return stations.filter((s) => haversineKm(origin, s.pos) <= radiusKm)
 }
 
-function renderStationList(container: HTMLElement, sorted: Station[], fuel: Settings['fuel'], origin: LatLon, sort: SortKey, selectedId?: string): void {
-  container.appendChild(renderSortBar(sort, key => store.setSettings({ sort: key })))
+function renderStationList(
+  container: HTMLElement,
+  sorted: Station[],
+  fuel: Settings['fuel'],
+  origin: LatLon,
+  sort: SortKey,
+  selectedId?: string,
+): void {
+  container.appendChild(renderSortBar(sort, (key) => store.setSettings({ sort: key })))
   const listContainer = document.createElement('div')
   container.appendChild(listContainer)
   renderList(listContainer, sorted, fuel, origin, selectStation, selectedId)
@@ -197,11 +225,14 @@ function render(): void {
   const busy = state.loading || locating
   freshnessEl.textContent = busy
     ? t('app.refreshing')
-    : (state.dataDate ? `${t('app.updated')} ${state.dataDate}` : t('app.loading'))
+    : state.dataDate
+      ? `${t('app.updated')} ${state.dataDate}`
+      : t('app.loading')
   refreshButton.classList.toggle('is-busy', busy)
   refreshButton.disabled = busy
 
-  const errorMessage = locationError ?? (state.error ? `${t('error.network')}: ${state.error}` : undefined)
+  const errorMessage =
+    locationError ?? (state.error ? `${t('error.network')}: ${state.error}` : undefined)
   errorEl.textContent = errorMessage ?? ''
   errorEl.hidden = !errorMessage
 
@@ -217,7 +248,14 @@ function render(): void {
         renderEmptyState(state.settings.radiusKm)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        renderStationList(viewEl, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
+        renderStationList(
+          viewEl,
+          sorted,
+          state.settings.fuel,
+          state.pos,
+          state.settings.sort,
+          selectedId,
+        )
       }
     } else {
       renderPositionPlaceholder()
@@ -245,14 +283,23 @@ function render(): void {
         split.append(mapWrap, listWrap)
         viewEl.appendChild(split)
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
-        if (radarHits.length > 0) mapView.renderRadars(radarHits.map(h => h.radar))
+        if (radarHits.length > 0) mapView.renderRadars(radarHits.map((h) => h.radar))
         else mapView.clearRadars()
-        if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map(h => h.area))
+        if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map((h) => h.area))
         else mapView.clearServiceAreas()
         mapView.invalidateSize()
         if (selectedStation) mapView.panTo(selectedStation.pos)
-        if (sorted.length > 0) renderStationList(listWrap, sorted, state.settings.fuel, state.pos, state.settings.sort, selectedId)
-        if (radarHits.length > 0) listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
+        if (sorted.length > 0)
+          renderStationList(
+            listWrap,
+            sorted,
+            state.settings.fuel,
+            state.pos,
+            state.settings.sort,
+            selectedId,
+          )
+        if (radarHits.length > 0)
+          listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
       }
     } else {
       renderPositionPlaceholder()
@@ -265,19 +312,33 @@ function render(): void {
       mapWrap.className = 'trip-map'
       mapWrap.appendChild(mapContainer)
       viewEl.appendChild(mapWrap)
-      mapView.render(tripPos, nearby, state.settings.fuel, selectStation, { recenter: true, selectedId })
+      mapView.render(tripPos, nearby, state.settings.fuel, selectStation, {
+        recenter: true,
+        selectedId,
+      })
       // While a trip is active, onFix owns the radar layer (per GPS fix); when it
       // is not, keep the preview map's radar layer in sync with the toggle so
       // markers drawn on the map tab don't linger here after it's turned off.
       if (!tripController.isActive) {
         if (state.settings.radarLayerEnabled) {
-          mapView.renderRadars(nearbyRadars(tripPos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP).map(h => h.radar))
+          mapView.renderRadars(
+            nearbyRadars(tripPos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP).map(
+              (h) => h.radar,
+            ),
+          )
         } else {
           mapView.clearRadars()
         }
       }
       if (state.settings.servicesLayerEnabled) {
-        mapView.renderServiceAreas(nearbyServiceAreas(tripPos, SERVICE_AREAS, state.settings.radiusKm, SERVICE_MARKER_CAP).map(h => h.area))
+        mapView.renderServiceAreas(
+          nearbyServiceAreas(
+            tripPos,
+            SERVICE_AREAS,
+            state.settings.radiusKm,
+            SERVICE_MARKER_CAP,
+          ).map((h) => h.area),
+        )
       } else {
         mapView.clearServiceAreas()
       }

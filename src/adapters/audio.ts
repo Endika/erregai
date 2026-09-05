@@ -1,7 +1,9 @@
 type AudioContextLike = AudioContext
 
 function defaultCtx(): AudioContextLike {
-  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
   return new Ctor()
 }
 
@@ -66,7 +68,8 @@ export function startBackgroundAudio(opts: BackgroundAudioOptions = {}): void {
     const ctx = ensureCtx(opts.makeCtx ?? defaultCtx)
     resumeIfSuspended(ctx)
     if (typeof ctx.createMediaStreamDestination !== 'function') return
-    const makeAudio = opts.makeAudio ?? (typeof Audio === 'function' ? () => new Audio() : undefined)
+    const makeAudio =
+      opts.makeAudio ?? (typeof Audio === 'function' ? () => new Audio() : undefined)
     if (!makeAudio) return
 
     streamDest = ctx.createMediaStreamDestination()
@@ -75,7 +78,9 @@ export function startBackgroundAudio(opts: BackgroundAudioOptions = {}): void {
     keepAlive.srcObject = streamDest.stream
     void Promise.resolve(keepAlive.play())
       .then(() => setMediaSession(title, artist))
-      .catch(() => { stopBackgroundAudio() })
+      .catch(() => {
+        stopBackgroundAudio()
+      })
   } catch {
     stopBackgroundAudio()
   }
@@ -87,7 +92,10 @@ export function stopBackgroundAudio(): void {
     if (keepAlive) keepAlive.srcObject = null
     streamDest?.disconnect()
     const session = typeof navigator === 'undefined' ? undefined : navigator.mediaSession
-    if (session) { session.metadata = null; session.playbackState = 'none' }
+    if (session) {
+      session.metadata = null
+      session.playbackState = 'none'
+    }
   } catch {
     /* nothing to unwind */
   }
@@ -103,7 +111,12 @@ export function __resetAudio(): void {
   keepAlive = null
 }
 
-interface Tone { freq: number; start: number; duration: number; peak: number }
+interface Tone {
+  freq: number
+  start: number
+  duration: number
+  peak: number
+}
 
 // Envelope shape, in seconds. Short attack and release keep the edges
 // click-free; everything between them is held at full level, because a cue
@@ -120,7 +133,13 @@ const SILENT = 0.0001
 // the perceived pitch of the cue.
 const PARTIAL_GAIN = 0.35
 
-function scheduleTone(ctx: AudioContextLike, freq: number, at: number, duration: number, peak: number): void {
+function scheduleTone(
+  ctx: AudioContextLike,
+  freq: number,
+  at: number,
+  duration: number,
+  peak: number,
+): void {
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
   // Triangle rather than sine: a little harmonic content carries far better on
@@ -133,7 +152,8 @@ function scheduleTone(ctx: AudioContextLike, freq: number, at: number, duration:
   gain.gain.exponentialRampToValueAtTime(peak, at + ATTACK)
   gain.gain.setValueAtTime(peak, hold)
   gain.gain.exponentialRampToValueAtTime(SILENT, at + duration)
-  osc.connect(gain); gain.connect(streamDest ?? ctx.destination)
+  osc.connect(gain)
+  gain.connect(streamDest ?? ctx.destination)
   osc.start(at)
   osc.stop(at + duration)
 }
@@ -177,10 +197,13 @@ function playTones(tones: readonly Tone[], opts: CueOptions): void {
 // a single short cue is lost to a passing truck or a gear change, and the
 // repeat costs a quarter of a second.
 export function playRadarBeep(opts: CueOptions = {}): void {
-  playTones([
-    { freq: 880, start: 0, duration: 0.2, peak: 0.9 },
-    { freq: 880, start: 0.26, duration: 0.2, peak: 0.9 },
-  ], opts)
+  playTones(
+    [
+      { freq: 880, start: 0, duration: 0.2, peak: 0.9 },
+      { freq: 880, start: 0.26, duration: 0.2, peak: 0.9 },
+    ],
+    opts,
+  )
 }
 
 // Pleasant ascending two-note chime (523 Hz -> 784 Hz), clearly distinct in
@@ -188,8 +211,11 @@ export function playRadarBeep(opts: CueOptions = {}): void {
 // distinguishable by ear. The notes do not overlap, so their peaks never sum
 // into clipping.
 export function playFuelChime(opts: CueOptions = {}): void {
-  playTones([
-    { freq: 523, start: 0, duration: 0.18, peak: 0.85 },
-    { freq: 784, start: 0.19, duration: 0.3, peak: 0.85 },
-  ], opts)
+  playTones(
+    [
+      { freq: 523, start: 0, duration: 0.18, peak: 0.85 },
+      { freq: 784, start: 0.19, duration: 0.3, peak: 0.85 },
+    ],
+    opts,
+  )
 }

@@ -5,7 +5,13 @@ import { vibrateRadar, vibrateFuel } from '../src/adapters/vibrate'
 // adapter takes the vibrator as an injectable argument.
 function recorder() {
   const patterns: (number | readonly number[])[] = []
-  return { patterns, vibrate: (p: number | readonly number[]) => { patterns.push(p); return true } }
+  return {
+    patterns,
+    vibrate: (p: number | readonly number[]) => {
+      patterns.push(p)
+      return true
+    },
+  }
 }
 
 it('buzzes a double pulse for radar alerts, mirroring the double beep', () => {
@@ -26,7 +32,9 @@ it('is a no-op when the platform has no Vibration API', () => {
 })
 
 it('does not throw when the platform refuses the request', () => {
-  const throwing = () => { throw new Error('blocked') }
+  const throwing = () => {
+    throw new Error('blocked')
+  }
   expect(() => vibrateRadar(throwing)).not.toThrow()
   expect(() => vibrateFuel(throwing)).not.toThrow()
 })

@@ -4,12 +4,13 @@ import fixture from './fixtures/overpass-services.json'
 
 // The generator is plain .mjs, so its output arrives untyped; the cast is the
 // point where we assert it really is shaped like the dataset the app imports.
-const normalized = (): ServiceArea[] => normalizeServiceAreas(fixture.areas, fixture.pois) as ServiceArea[]
-const byId = (id: string): ServiceArea | undefined => normalized().find(a => a.id === id)
+const normalized = (): ServiceArea[] =>
+  normalizeServiceAreas(fixture.areas, fixture.pois) as ServiceArea[]
+const byId = (id: string): ServiceArea | undefined => normalized().find((a) => a.id === id)
 
 describe('normalizeServiceAreas', () => {
   it('keeps only highway=services with usable coordinates', () => {
-    expect(normalized().map(a => a.id)).toEqual(['w100', 'w200'])
+    expect(normalized().map((a) => a.id)).toEqual(['w100', 'w200'])
   })
 
   it('collects the services found inside an area', () => {
@@ -29,9 +30,9 @@ describe('normalizeServiceAreas', () => {
   })
 
   it('drops POIs too far from any area and tags it does not understand', () => {
-    const services = normalized().flatMap(a => [...a.services])
+    const services = normalized().flatMap((a) => [...a.services])
     expect(services).not.toContain('parking')
-    expect(normalized().every(a => a.services.length > 0)).toBe(true)
+    expect(normalized().every((a) => a.services.length > 0)).toBe(true)
   })
 
   it('names areas only when OSM does', () => {
@@ -66,7 +67,7 @@ describe('nearbyServiceAreas', () => {
 
   it('returns areas within the radius, nearest first', () => {
     const hits = nearbyServiceAreas({ lat: 41.0, lon: -1.0 }, areas, 30, 10)
-    expect(hits.map(h => h.area.id)).toEqual(['near', 'mid'])
+    expect(hits.map((h) => h.area.id)).toEqual(['near', 'mid'])
   })
 
   it('caps the result at the limit', () => {

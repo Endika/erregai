@@ -40,7 +40,9 @@ export class Store {
 
   subscribe(fn: () => void): () => void {
     this.subscribers.add(fn)
-    return () => { this.subscribers.delete(fn) }
+    return () => {
+      this.subscribers.delete(fn)
+    }
   }
 
   setSettings(partial: Partial<Settings>): void {
@@ -63,7 +65,7 @@ export class Store {
     const box = provinceFor(pos)
     this.current = { ...this.current, pos }
     this.currentProvinceId = box.id
-    const ids = [box.id, ...adjacentProvinces(box.id, adjacent).map(b => b.id)]
+    const ids = [box.id, ...adjacentProvinces(box.id, adjacent).map((b) => b.id)]
     await this.runBatch(ids)
     this.updateDataDate()
     this.notify()

@@ -17,7 +17,10 @@ export interface ServiceArea {
   hours?: string
 }
 
-export interface ServiceAreaHit { area: ServiceArea; distanceKm: number }
+export interface ServiceAreaHit {
+  area: ServiceArea
+  distanceKm: number
+}
 
 // Only 141 of the 999 areas publish opening hours, so `unknown` is the normal
 // answer here, not an error path — the popup must read well without it.
@@ -32,8 +35,8 @@ export function nearbyServiceAreas(
   limit: number,
 ): ServiceAreaHit[] {
   return areas
-    .map(area => ({ area, distanceKm: haversineKm(pos, { lat: area.lat, lon: area.lon }) }))
-    .filter(hit => hit.distanceKm <= radiusKm)
+    .map((area) => ({ area, distanceKm: haversineKm(pos, { lat: area.lat, lon: area.lon }) }))
+    .filter((hit) => hit.distanceKm <= radiusKm)
     .sort((a, b) => a.distanceKm - b.distanceKm)
     .slice(0, limit)
 }

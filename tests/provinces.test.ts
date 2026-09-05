@@ -17,7 +17,7 @@ describe('provinces', () => {
     const madrid = provinceFor({ lat: 40.4168, lon: -3.7038 })
     const adj = adjacentProvinces(madrid.id, 3)
     expect(adj.length).toBe(3)
-    expect(adj.every(p => p.id !== madrid.id)).toBe(true)
+    expect(adj.every((p) => p.id !== madrid.id)).toBe(true)
   })
   it('every province bbox has a centroid within Spain and a consistent envelope', () => {
     for (const b of PROVINCE_BBOX) {
@@ -30,7 +30,7 @@ describe('provinces', () => {
     }
   })
   it('PONTEVEDRA centroid sits in Galicia, not a corrupted out-of-range envelope', () => {
-    const pontevedra = PROVINCE_BBOX.find(b => b.name.includes('PONTEVEDRA'))
+    const pontevedra = PROVINCE_BBOX.find((b) => b.name.includes('PONTEVEDRA'))
     expect(pontevedra).toBeDefined()
     expect(pontevedra!.cLat).toBeGreaterThan(41)
     expect(pontevedra!.cLat).toBeLessThan(43)

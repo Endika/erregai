@@ -1,7 +1,12 @@
 import { serviceAreaStatus, nearbyServiceAreas, type ServiceArea } from '../src/core/services'
 
 const area = (hours?: string): ServiceArea => ({
-  id: 'w1', lat: 41, lon: -1, name: 'Área de prueba', services: ['restaurant'], hours,
+  id: 'w1',
+  lat: 41,
+  lon: -1,
+  name: 'Área de prueba',
+  services: ['restaurant'],
+  hours,
 })
 
 // Wednesday 2026-01-07, 12:00 local.
@@ -32,7 +37,7 @@ describe('nearbyServiceAreas caps and ordering', () => {
 
   it('orders by distance and honours the limit', () => {
     const hits = nearbyServiceAreas({ lat: 41.0, lon: -1.0 }, areas, 50, 2)
-    expect(hits.map(h => h.area.id)).toEqual(['a', 'c'])
+    expect(hits.map((h) => h.area.id)).toEqual(['a', 'c'])
   })
 
   it('returns nothing when everything is out of range', () => {

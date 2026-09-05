@@ -1,8 +1,20 @@
-import { priceOf, bandFor, bandThresholds, bandForThresholds, sortStations } from '../src/core/pricing'
+import {
+  priceOf,
+  bandFor,
+  bandThresholds,
+  bandForThresholds,
+  sortStations,
+} from '../src/core/pricing'
 import type { Station } from '../src/core/station'
 
 const mk = (id: string, lat: number, price?: number): Station => ({
-  id, brand: 'X', name: 'X', pos: { lat, lon: 0 }, address: '', town: '', schedule: '',
+  id,
+  brand: 'X',
+  name: 'X',
+  pos: { lat, lon: 0 },
+  address: '',
+  town: '',
+  schedule: '',
   prices: price === undefined ? {} : { gasoleoA: price },
 })
 
@@ -29,11 +41,21 @@ describe('pricing', () => {
     expect(bandForThresholds(1.25, thresholds)).toBe('mid')
   })
   it('sort by price ascending, missing-fuel last', () => {
-    const out = sortStations([mk('a', 0, 1.5), mk('b', 0, 1.2), mk('c', 0)], 'gasoleoA', { lat: 0, lon: 0 }, 'price')
-    expect(out.map(s => s.id)).toEqual(['b', 'a', 'c'])
+    const out = sortStations(
+      [mk('a', 0, 1.5), mk('b', 0, 1.2), mk('c', 0)],
+      'gasoleoA',
+      { lat: 0, lon: 0 },
+      'price',
+    )
+    expect(out.map((s) => s.id)).toEqual(['b', 'a', 'c'])
   })
   it('sort by distance ascending from origin', () => {
-    const out = sortStations([mk('far', 5, 1), mk('near', 1, 9)], 'gasoleoA', { lat: 0, lon: 0 }, 'distance')
-    expect(out.map(s => s.id)).toEqual(['near', 'far'])
+    const out = sortStations(
+      [mk('far', 5, 1), mk('near', 1, 9)],
+      'gasoleoA',
+      { lat: 0, lon: 0 },
+      'distance',
+    )
+    expect(out.map((s) => s.id)).toEqual(['near', 'far'])
   })
 })

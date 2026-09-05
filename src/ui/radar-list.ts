@@ -3,7 +3,11 @@ import { t } from '../i18n'
 
 // Shared radar list used by both the trip view and the map tab: a titled list of
 // radar hits (road name + distance), nearest first, capped to `limit`.
-export function renderRadarList(hits: readonly RadarHit[], titleKey: string, limit: number): HTMLElement {
+export function renderRadarList(
+  hits: readonly RadarHit[],
+  titleKey: string,
+  limit: number,
+): HTMLElement {
   const section = document.createElement('div')
   section.className = 'radar-list'
 

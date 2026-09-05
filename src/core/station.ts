@@ -3,8 +3,13 @@ import { FUELS, type FuelId } from './fuels'
 
 export type RawStation = Record<string, string>
 export interface Station {
-  id: string; brand: string; name: string; pos: LatLon
-  address: string; town: string; schedule: string
+  id: string
+  brand: string
+  name: string
+  pos: LatLon
+  address: string
+  town: string
+  schedule: string
   prices: Partial<Record<FuelId, number>>
 }
 

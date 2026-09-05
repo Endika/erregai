@@ -3,20 +3,33 @@ import fixture from './fixtures/horarios.json'
 import osmFixture from './fixtures/osm-hours.json'
 
 // 2026-01-05 is a Monday, so dayIdx maps 0..6 onto Monday..Sunday.
-const at = (dayIdx: number, hours: number, mins = 0): Date => new Date(2026, 0, 5 + dayIdx, hours, mins)
+const at = (dayIdx: number, hours: number, mins = 0): Date =>
+  new Date(2026, 0, 5 + dayIdx, hours, mins)
 const status = (raw: string, when: Date): string => scheduleStatus(parseSchedule(raw), when)
 
-const MON = 0, TUE = 1, WED = 2, SAT = 5, SUN = 6
+const MON = 0,
+  TUE = 1,
+  WED = 2,
+  SAT = 5,
+  SUN = 6
 
 describe('parseSchedule', () => {
   it('parses every distinct Horario value in the real Ministerio sample', () => {
-    const failures = fixture.filter(entry => parseSchedule(entry.raw) === undefined)
-    expect(failures.map(f => f.raw)).toEqual([])
+    const failures = fixture.filter((entry) => parseSchedule(entry.raw) === undefined)
+    expect(failures.map((f) => f.raw)).toEqual([])
     expect(fixture.length).toBeGreaterThan(300)
   })
 
   it('returns undefined for empty and unrecognised input', () => {
-    for (const raw of ['', '   ', 'sunrise-sunset', 'L-D', 'Lunes de 9 a 5', 'Z: 24H', 'L-D: 25:00-26:00']) {
+    for (const raw of [
+      '',
+      '   ',
+      'sunrise-sunset',
+      'L-D',
+      'Lunes de 9 a 5',
+      'Z: 24H',
+      'L-D: 25:00-26:00',
+    ]) {
       expect(parseSchedule(raw)).toBeUndefined()
     }
   })
@@ -85,7 +98,7 @@ describe('parseOsmHours', () => {
   const SEASONAL = '24/7; Jun 15-Sep 15 07:30-22:30 off'
 
   it('parses every opening_hours value in the shipped dataset bar the seasonal one', () => {
-    const failures = osmFixture.filter(e => parseOsmHours(e.raw) === undefined).map(e => e.raw)
+    const failures = osmFixture.filter((e) => parseOsmHours(e.raw) === undefined).map((e) => e.raw)
     expect(failures).toEqual([SEASONAL])
     expect(osmFixture.length).toBe(38)
   })
@@ -119,7 +132,7 @@ describe('parseOsmHours', () => {
     expect(osmStatus('Mo-Su 13:00-16:30,19:30-23:30', at(WED, 20))).toBe('open')
   })
 
-  it('crosses midnight, carrying the previous day\'s block into the small hours', () => {
+  it("crosses midnight, carrying the previous day's block into the small hours", () => {
     // Tuesday's block runs until 00:30 on Wednesday, so at 00:15 it is still
     // serving — and, being 15 minutes from closing, worth warning about.
     expect(osmStatus('Tu-Su 07:00-00:30', at(WED, 0, 15))).toBe('closing-soon')

@@ -134,7 +134,7 @@ function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement
 }
 
 function metersOptions(values: readonly number[]): SelectOption[] {
-  return values.map(m => ({ value: String(m), label: `${m} m` }))
+  return values.map((m) => ({ value: String(m), label: `${m} m` }))
 }
 
 export function renderSettings(
@@ -152,42 +152,42 @@ export function renderSettings(
       t('settings.fuel'),
       'fuel',
       settings.fuel,
-      FUELS.map(f => ({ value: f.id, label: t(f.i18nKey) })),
-      value => onChange({ fuel: value as Settings['fuel'] }),
+      FUELS.map((f) => ({ value: f.id, label: t(f.i18nKey) })),
+      (value) => onChange({ fuel: value as Settings['fuel'] }),
     ),
     selectField(
       t('settings.sort'),
       'sort',
       settings.sort,
-      SORT_KEYS.map(key => ({ value: key, label: t(`sort.${key}`) })),
-      value => onChange({ sort: value as SortKey }),
+      SORT_KEYS.map((key) => ({ value: key, label: t(`sort.${key}`) })),
+      (value) => onChange({ sort: value as SortKey }),
     ),
-    numberField(t('settings.radius'), 'radiusKm', settings.radiusKm, value =>
+    numberField(t('settings.radius'), 'radiusKm', settings.radiusKm, (value) =>
       onChange({ radiusKm: value }),
     ),
     selectField(
       t('settings.locale'),
       'locale',
       activeLocale,
-      LOCALE_ORDER.map(locale => ({ value: locale, label: LOCALE_LABELS[locale] })),
-      value => onChange({ locale: value as Locale }),
+      LOCALE_ORDER.map((locale) => ({ value: locale, label: LOCALE_LABELS[locale] })),
+      (value) => onChange({ locale: value as Locale }),
     ),
     selectField(
       t('settings.theme'),
       'theme',
       settings.theme,
-      THEMES.map(theme => ({ value: theme, label: t(`theme.${theme}`) })),
-      value => onChange({ theme: value as Theme }),
+      THEMES.map((theme) => ({ value: theme, label: t(`theme.${theme}`) })),
+      (value) => onChange({ theme: value as Theme }),
     ),
     // Previews the new level on release: a volume slider you cannot hear while
     // setting it is guesswork, and the release is still a user gesture, so the
     // audio context unlocks here too.
-    rangeField(t('settings.alertVolume'), 'alertVolume', settings.alertVolume, value => {
+    rangeField(t('settings.alertVolume'), 'alertVolume', settings.alertVolume, (value) => {
       onChange({ alertVolume: value })
       unlockAudio()
       playRadarBeep({ volume: value })
     }),
-    toggleField(t('settings.alertVibrate'), 'alertVibrate', settings.alertVibrate, checked => {
+    toggleField(t('settings.alertVibrate'), 'alertVibrate', settings.alertVibrate, (checked) => {
       onChange({ alertVibrate: checked })
       if (checked) vibrateRadar()
     }),
@@ -198,7 +198,7 @@ export function renderSettings(
       t('services.settings.showOnMap'),
       'servicesLayerEnabled',
       settings.servicesLayerEnabled,
-      checked => onChange({ servicesLayerEnabled: checked }),
+      (checked) => onChange({ servicesLayerEnabled: checked }),
     ),
   ])
 
@@ -207,22 +207,22 @@ export function renderSettings(
       t('radar.settings.showOnMap'),
       'radarLayerEnabled',
       settings.radarLayerEnabled,
-      checked => onChange({ radarLayerEnabled: checked }),
+      (checked) => onChange({ radarLayerEnabled: checked }),
     ),
     toggleField(
       t('radar.settings.enabled'),
       'radarAlertsEnabled',
       settings.radarAlertsEnabled,
-      checked => onChange({ radarAlertsEnabled: checked }),
+      (checked) => onChange({ radarAlertsEnabled: checked }),
     ),
     selectField(
       t('radar.settings.distance'),
       'radarAlertDistanceM',
       String(settings.radarAlertDistanceM),
       metersOptions(RADAR_DISTANCES_M),
-      value => onChange({ radarAlertDistanceM: Number(value) }),
+      (value) => onChange({ radarAlertDistanceM: Number(value) }),
     ),
-    toggleField(t('radar.settings.sound'), 'radarSound', settings.radarSound, checked =>
+    toggleField(t('radar.settings.sound'), 'radarSound', settings.radarSound, (checked) =>
       onChange({ radarSound: checked }),
     ),
     // Plays the radar beep from a real tap, which also unlocks audio: the only
@@ -240,17 +240,17 @@ export function renderSettings(
       t('fuel.settings.mode'),
       'fuelAlertMode',
       settings.fuelAlertMode,
-      FUEL_ALERT_MODES.map(mode => ({ value: mode, label: t(`fuel.settings.mode.${mode}`) })),
-      value => onChange({ fuelAlertMode: value as FuelAlertMode }),
+      FUEL_ALERT_MODES.map((mode) => ({ value: mode, label: t(`fuel.settings.mode.${mode}`) })),
+      (value) => onChange({ fuelAlertMode: value as FuelAlertMode }),
     ),
     selectField(
       t('fuel.settings.distance'),
       'fuelAlertDistanceM',
       String(settings.fuelAlertDistanceM),
       metersOptions(FUEL_DISTANCES_M),
-      value => onChange({ fuelAlertDistanceM: Number(value) }),
+      (value) => onChange({ fuelAlertDistanceM: Number(value) }),
     ),
-    toggleField(t('fuel.settings.sound'), 'fuelSound', settings.fuelSound, checked =>
+    toggleField(t('fuel.settings.sound'), 'fuelSound', settings.fuelSound, (checked) =>
       onChange({ fuelSound: checked }),
     ),
     buttonField(t('fuel.settings.testSound'), () => {

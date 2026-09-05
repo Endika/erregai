@@ -7,7 +7,15 @@ import type { Kv, CacheEntry } from '../src/adapters/cache'
 import type { LatLon } from '../src/core/geo'
 import { RADARS } from '../src/core/radars.data'
 
-const memKv = (): Kv => { const m = new Map<string, CacheEntry>(); return { get: async id => m.get(id), put: async e => { m.set(e.id, e) } } }
+const memKv = (): Kv => {
+  const m = new Map<string, CacheEntry>()
+  return {
+    get: async (id) => m.get(id),
+    put: async (e) => {
+      m.set(e.id, e)
+    },
+  }
+}
 const emptyProvince = async () => ({ fecha: 'x', stations: [] })
 
 // Real in-memory fake of the Web Notification API (jsdom does not provide it),
@@ -22,9 +30,9 @@ class FakeNotification {
 
 // Pick a real, geographically isolated radar from the bundled dataset and drive
 // the controller straight at it heading north.
-const RADAR = RADARS.find(r => r.id === 'dgt-0')!
+const RADAR = RADARS.find((r) => r.id === 'dgt-0')!
 const behind: LatLon = { lat: RADAR.lat - 0.01326, lon: RADAR.lon } // ~1.47 km south (out of range)
-const near: LatLon = { lat: RADAR.lat - 0.00326, lon: RADAR.lon }   // ~0.36 km south (in range, ahead)
+const near: LatLon = { lat: RADAR.lat - 0.00326, lon: RADAR.lon } // ~0.36 km south (in range, ahead)
 const nearer: LatLon = { lat: RADAR.lat - 0.00226, lon: RADAR.lon } // ~0.25 km south (still in range)
 
 // In-memory fake of MapView recording the radars it was asked to render, so the
@@ -33,15 +41,24 @@ const fakeMap = (): MapView & { rendered: readonly { id: string }[]; cleared: nu
   const view = {
     rendered: [] as readonly { id: string }[],
     cleared: 0,
-    renderRadars(radars: readonly { id: string }[]) { view.rendered = radars },
-    clearRadars() { view.cleared += 1 },
+    renderRadars(radars: readonly { id: string }[]) {
+      view.rendered = radars
+    },
+    clearRadars() {
+      view.cleared += 1
+    },
   }
   return view as unknown as MapView & { rendered: readonly { id: string }[]; cleared: number }
 }
 
 function makeController(map: MapView = fakeMap()): TripController {
   const store = new Store({ fetchProvince: emptyProvince as never, kv: memKv(), now: () => 1000 })
-  return new TripController(store, map, () => {}, () => {})
+  return new TripController(
+    store,
+    map,
+    () => {},
+    () => {},
+  )
 }
 
 // onFix is private; the geolocation adapter is the production caller, so drive it directly here.
@@ -50,7 +67,8 @@ const fix = (c: TripController, pos: LatLon): Promise<void> =>
 
 beforeEach(() => {
   FakeNotification.instances = []
-  ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification = FakeNotification
+  ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification =
+    FakeNotification
   // Store.setSettings persists to localStorage, which jsdom shares across every
   // test in this file, so a test that disables an alert would otherwise leak
   // that into the ones after it. Start each test from the real defaults.
@@ -68,7 +86,10 @@ function recordVibrations(): (number | readonly number[])[] {
   const patterns: (number | readonly number[])[] = []
   Object.defineProperty(navigator, 'vibrate', {
     configurable: true,
-    value: (p: number | readonly number[]) => { patterns.push(p); return true },
+    value: (p: number | readonly number[]) => {
+      patterns.push(p)
+      return true
+    },
   })
   return patterns
 }
@@ -81,11 +102,11 @@ describe('TripController radar alerting', () => {
     expect(FakeNotification.instances).toHaveLength(0)
 
     await fix(c, near) // heading now north, radar ahead within range -> one alert
-    const radarAlerts = FakeNotification.instances.filter(n => n.body?.includes(RADAR.via))
+    const radarAlerts = FakeNotification.instances.filter((n) => n.body?.includes(RADAR.via))
     expect(radarAlerts).toHaveLength(1)
 
     await fix(c, nearer) // still in range, already alerted -> no new alert
-    expect(FakeNotification.instances.filter(n => n.body?.includes(RADAR.via))).toHaveLength(1)
+    expect(FakeNotification.instances.filter((n) => n.body?.includes(RADAR.via))).toHaveLength(1)
   })
 
   it('does not alert when radar alerts are disabled', async () => {
@@ -121,7 +142,7 @@ describe('TripController radar alerting', () => {
     await fix(c, behind)
     await fix(c, near)
     // The alert itself still fires — only the haptic is off.
-    expect(FakeNotification.instances.filter(n => n.body?.includes(RADAR.via))).toHaveLength(1)
+    expect(FakeNotification.instances.filter((n) => n.body?.includes(RADAR.via))).toHaveLength(1)
     expect(patterns).toHaveLength(0)
   })
 
@@ -131,8 +152,8 @@ describe('TripController radar alerting', () => {
     ;(c as unknown as { store: Store }).store.setSettings({ radarLayerEnabled: true })
 
     await fix(c, behind) // seed heading
-    await fix(c, near)    // radar within the map radius
-    expect(map.rendered.map(r => r.id)).toContain(RADAR.id)
+    await fix(c, near) // radar within the map radius
+    expect(map.rendered.map((r) => r.id)).toContain(RADAR.id)
   })
 
   it('clears the radar map layer when the radar layer is disabled', async () => {
@@ -156,7 +177,7 @@ describe('TripController radar alerting', () => {
 
     await fix(c, behind)
     await fix(c, near)
-    expect(map.rendered.map(r => r.id)).toContain(RADAR.id)
+    expect(map.rendered.map((r) => r.id)).toContain(RADAR.id)
     expect(FakeNotification.instances).toHaveLength(0)
   })
 })

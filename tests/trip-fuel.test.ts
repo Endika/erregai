@@ -8,21 +8,35 @@ import type { LatLon } from '../src/core/geo'
 import type { Station } from '../src/core/station'
 import { t } from '../src/i18n'
 
-const memKv = (): Kv => { const m = new Map<string, CacheEntry>(); return { get: async id => m.get(id), put: async e => { m.set(e.id, e) } } }
+const memKv = (): Kv => {
+  const m = new Map<string, CacheEntry>()
+  return {
+    get: async (id) => m.get(id),
+    put: async (e) => {
+      m.set(e.id, e)
+    },
+  }
+}
 
 // Two dataset-independent in-memory stations on the route ahead: one cheap
 // (below the nearby average), one expensive (above it).
 const st = (id: string, lat: number, price: number): Station => ({
-  id, brand: id, name: id, pos: { lat, lon: 0 }, address: '', town: '', schedule: '',
+  id,
+  brand: id,
+  name: id,
+  pos: { lat, lon: 0 },
+  address: '',
+  town: '',
+  schedule: '',
   prices: { gasoleoA: price },
 })
-const CHEAP = st('cheap', 40.035, 1.0)  // farther of the two, below the 1.5 average
+const CHEAP = st('cheap', 40.035, 1.0) // farther of the two, below the 1.5 average
 const PRICEY = st('pricey', 40.03, 2.0) // nearest station ahead, above the 1.5 average
 const STATIONS = [CHEAP, PRICEY]
 const provinceWithStations = async () => ({ fecha: 'x', stations: STATIONS })
 
-const behind: LatLon = { lat: 40.0, lon: 0 }  // ~3.3 km south of CHEAP: out of alert range
-const near: LatLon = { lat: 40.02, lon: 0 }   // ~1.1 km south of CHEAP, heading north: in range, ahead
+const behind: LatLon = { lat: 40.0, lon: 0 } // ~3.3 km south of CHEAP: out of alert range
+const near: LatLon = { lat: 40.02, lon: 0 } // ~1.1 km south of CHEAP, heading north: in range, ahead
 const nearer: LatLon = { lat: 40.025, lon: 0 } // still in range, already alerted
 
 class FakeNotification {
@@ -39,20 +53,30 @@ const fakeMap = (): MapView => {
 }
 
 function makeController(): TripController {
-  const store = new Store({ fetchProvince: provinceWithStations as never, kv: memKv(), now: () => 1000 })
+  const store = new Store({
+    fetchProvince: provinceWithStations as never,
+    kv: memKv(),
+    now: () => 1000,
+  })
   // fuel is the only alert under test; silence radar to keep dataset out of it.
   store.setSettings({ fuel: 'gasoleoA', radarAlertsEnabled: false, fuelSound: false })
-  return new TripController(store, fakeMap(), () => {}, () => {})
+  return new TripController(
+    store,
+    fakeMap(),
+    () => {},
+    () => {},
+  )
 }
 
 const fix = (c: TripController, pos: LatLon): Promise<void> =>
   (c as unknown as { onFix(p: LatLon): Promise<void> }).onFix(pos)
 
-const fuelAlerts = () => FakeNotification.instances.filter(n => n.title === t('fuel.alert.title'))
+const fuelAlerts = () => FakeNotification.instances.filter((n) => n.title === t('fuel.alert.title'))
 
 beforeEach(() => {
   FakeNotification.instances = []
-  ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification = FakeNotification
+  ;(globalThis as unknown as { Notification: typeof FakeNotification }).Notification =
+    FakeNotification
   // Store.setSettings persists to localStorage, which jsdom shares across every
   // test in this file: without this, 'off mode' would leak its fuelAlertMode
   // into whatever runs next. Start each test from the real defaults.
@@ -91,7 +115,7 @@ describe('TripController fuel alerting', () => {
     ;(c as unknown as { store: Store }).store.setSettings({ fuelAlertMode: 'any' })
     await fix(c, behind)
     await fix(c, near)
-    const bodies = fuelAlerts().map(n => n.body ?? '')
-    expect(bodies.some(b => b.includes(PRICEY.brand))).toBe(true)
+    const bodies = fuelAlerts().map((n) => n.body ?? '')
+    expect(bodies.some((b) => b.includes(PRICEY.brand))).toBe(true)
   })
 })

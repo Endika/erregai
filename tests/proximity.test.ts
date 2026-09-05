@@ -1,11 +1,14 @@
 import { nextProximityAlerts } from '../src/core/proximity'
 
-const item = (id: string, km: number): { id: string; distanceKm: number } => ({ id, distanceKm: km })
+const item = (id: string, km: number): { id: string; distanceKm: number } => ({
+  id,
+  distanceKm: km,
+})
 
 describe('nextProximityAlerts', () => {
   it('alerts once when an item enters the alert distance', () => {
     const res = nextProximityAlerts(new Set(), [item('x', 0.5)], 0.8)
-    expect(res.newlyAlerted.map(i => i.id)).toEqual(['x'])
+    expect(res.newlyAlerted.map((i) => i.id)).toEqual(['x'])
     expect(res.alertedIds.has('x')).toBe(true)
   })
 
