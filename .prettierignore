@@ -1,0 +1,10 @@
+dist
+coverage
+node_modules
+package-lock.json
+
+# Generated datasets. The update-radars / update-services workflows commit the
+# generator's raw output, so reformatting them here would fail format:check on
+# every automated refresh PR.
+src/core/radars.data.ts
+src/core/services.data.ts
