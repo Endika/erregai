@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       # The generator fetches DGT, Euskadi and Catalunya sources server-side.
       - run: npm run data:radars
-      - run: npm run typecheck
+      - run: npm run type:check
       - name: Open PR if the dataset changed
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}

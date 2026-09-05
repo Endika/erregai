@@ -33,4 +33,20 @@ export default [
       ...tsPlugin.configs.recommended.rules,
     },
   },
+  {
+    files: ['tests/**/*.ts'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        vi: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+      },
+    },
+  },
 ]

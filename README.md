@@ -121,7 +121,7 @@ npm install
 npm run dev         # local dev server
 npm run build       # typecheck + production build (dist/)
 npm run lint         # ESLint
-npm run typecheck    # TypeScript, no emit
+npm run type:check   # TypeScript, no emit
 npm test             # Vitest unit/integration tests
 ```
 

@@ -28,7 +28,7 @@ jobs:
       # Queries Overpass server-side. There is no local fallback on a runner, so
       # a total outage fails the job rather than writing a truncated dataset.
       - run: npm run data:services
-      - run: npm run typecheck
+      - run: npm run type:check
       - name: Open PR if the dataset changed
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}

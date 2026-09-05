@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint 'src/**/*.ts'",
+    "type:check": "tsc --noEmit",
+    "lint": "eslint src tests --ext .ts --max-warnings 0",
+    "lint:fix": "eslint src tests --ext .ts --fix",
     "test": "vitest run",
+    "test:run": "vitest run --passWithNoTests",
     "data:radars": "node scripts/build-radars.mjs",
     "data:services": "node scripts/build-services.mjs"
   },
