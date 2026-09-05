@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.7](https://github.com/Endika/erregai/compare/v1.19.6...v1.19.7) (2026-09-05)
+
+
+### Chores
+
+* **ci:** extend lint and gate scripts to cover the test directory ([ad97dea](https://github.com/Endika/erregai/commit/ad97dea401ab90dee8872753068ec2ebe686447e))
+
 ## [1.19.6](https://github.com/Endika/erregai/compare/v1.19.5...v1.19.6) (2026-09-03)
 
 
