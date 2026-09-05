@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.8](https://github.com/Endika/erregai/compare/v1.19.7...v1.19.8) (2026-09-05)
+
+
+### Chores
+
+* add prettier and a format:check gate ([67390ef](https://github.com/Endika/erregai/commit/67390efaa61790c8b92a60525ce021b83413a58a))
+
 ## [1.19.7](https://github.com/Endika/erregai/compare/v1.19.6...v1.19.7) (2026-09-05)
 
 
