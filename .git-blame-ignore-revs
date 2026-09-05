@@ -1,0 +1,7 @@
+# Revisions listed here are skipped by `git blame`. Only whole-repo
+# reformatting belongs in this file — never a commit that changes behaviour.
+
+# style: format the codebase with prettier
+# The one-off Prettier run over src/ and tests/ when the format:check gate
+# was added (#84). Touched 55 files without changing behaviour.
+9efb5bab32852c63b748220974254d45eabf4736
