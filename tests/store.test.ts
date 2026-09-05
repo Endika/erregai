@@ -9,7 +9,7 @@ describe('store.loadFor', () => {
   it('fetches on cache miss then serves from cache on second call', async () => {
     let calls = 0
     const fake = async () => { calls++; return { fecha: 'x', stations: [stn('1')] } }
-    const store = new Store({ fetchProvince: fake as any, kv: memKv(), now: () => 1000 })
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })   // Madrid
     expect(store.state.stations.length).toBe(1)
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })
@@ -17,7 +17,7 @@ describe('store.loadFor', () => {
   })
   it('sets error and does not throw on network failure', async () => {
     const fake = async () => { throw new Error('boom') }
-    const store = new Store({ fetchProvince: fake as any, kv: memKv(), now: () => 1000 })
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })
     expect(store.state.error).toBeTruthy()
     expect(store.state.loading).toBe(false)
@@ -26,7 +26,7 @@ describe('store.loadFor', () => {
     const calls: string[] = []
     // fetch echoes the province id into the returned station id so we can assert the union
     const fake = (async (id: string) => { calls.push(id); return { fecha: 'x', stations: [stn(`p${id}`), stn('shared')] } })
-    const store = new Store({ fetchProvince: fake as any, kv: memKv(), now: () => 1000 })
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
     await store.ensureAround({ lat: 40.4168, lon: -3.7038 }, 2)  // Madrid + 2 neighbours = 3 provinces
     expect(calls.length).toBe(3)
     const ids = store.state.stations.map(s => s.id)
@@ -38,7 +38,7 @@ describe('store.loadFor', () => {
     const fake = async () => { calls++; return { fecha: `f${calls}`, stations: [stn('1')] } }
     const kv = memKv()
     let clock = 1000
-    const store = new Store({ fetchProvince: fake as any, kv, now: () => clock })
+    const store = new Store({ fetchProvince: fake, kv, now: () => clock })
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })         // miss -> fetch (calls=1)
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })         // fresh cache -> no fetch
     expect(calls).toBe(1)
@@ -53,7 +53,7 @@ describe('store.loadFor', () => {
       if (callOrder.length === 2) throw new Error('offline')
       return { fecha: 'x', stations: [stn(`p${id}`), stn('shared')] }
     })
-    const store = new Store({ fetchProvince: fake as any, kv: memKv(), now: () => 1000 })
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
     await store.ensureAround({ lat: 40.4168, lon: -3.7038 }, 2)  // Madrid + 2 neighbours = 3 provinces
     expect(callOrder.length).toBe(3)
     expect(store.state.error).toBeTruthy()                        // one province failed with no cache -> batch error surfaced
@@ -68,7 +68,7 @@ describe('store.loadFor', () => {
     const fake = async () => { calls++; if (calls > 1) throw new Error('offline'); return { fecha: 'f1', stations: [stn('1')] } }
     const kv = memKv()
     let clock = 1000
-    const store = new Store({ fetchProvince: fake as any, kv, now: () => clock })
+    const store = new Store({ fetchProvince: fake, kv, now: () => clock })
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })         // fetch ok, cached at t=1000
     clock = 1000 + 7 * 60 * 60 * 1000                           // now stale (past 6h TTL)
     await store.loadFor({ lat: 40.4168, lon: -3.7038 })         // shows stale, revalidate fails
