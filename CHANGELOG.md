@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.10](https://github.com/Endika/erregai/compare/v1.19.9...v1.19.10) (2026-09-05)
+
+
+### Chores
+
+* run the four CI gates in pre-commit ([0cc68b6](https://github.com/Endika/erregai/commit/0cc68b61967d2eea5eab8b0fd6ced5d606972fab))
+
 ## [1.19.9](https://github.com/Endika/erregai/compare/v1.19.8...v1.19.9) (2026-09-05)
 
 
