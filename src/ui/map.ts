@@ -12,11 +12,20 @@ import { t } from '../i18n'
 type MarkerKind = PriceBand | 'unknown' | 'user' | 'radar' | 'services'
 
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+const TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 const INITIAL_ZOOM = 12
 const FALLBACK_MARKER_COLOR = '#666666'
 const SELECTED_STROKE = '#111111'
-const MARKER_KINDS: readonly MarkerKind[] = ['cheap', 'mid', 'expensive', 'unknown', 'user', 'radar', 'services']
+const MARKER_KINDS: readonly MarkerKind[] = [
+  'cheap',
+  'mid',
+  'expensive',
+  'unknown',
+  'user',
+  'radar',
+  'services',
+]
 const PIN_SIZE = 26
 const PIN_SIZE_SELECTED = 34
 const PIN_RADAR_SIZE = 24
@@ -43,7 +52,11 @@ function readMarkerColors(): Record<MarkerKind, string> {
 // A round pin carrying a glyph, anchored on its centre so it sits exactly where
 // the old circleMarker did. Colour still carries the meaning (price band, radar
 // violet, services teal); the glyph only says *what kind of thing* this is.
-function glyphIcon(glyph: Glyph, size: number, look: { fill: string; glyphColor: string; ring: string; ringWidth: number }): L.DivIcon {
+function glyphIcon(
+  glyph: Glyph,
+  size: number,
+  look: { fill: string; glyphColor: string; ring: string; ringWidth: number },
+): L.DivIcon {
   const shadow = `0 0 0 ${look.ringWidth}px ${look.ring}, 0 1px 3px rgba(0, 0, 0, 0.35)`
   return L.divIcon({
     className: 'map-pin',
@@ -68,7 +81,7 @@ function servicePopup(area: ServiceArea, now: Date): HTMLElement {
   if (area.services.length > 0) {
     const list = document.createElement('p')
     list.className = 'service-popup__services'
-    list.textContent = area.services.map(kind => t(`services.kind.${kind}`)).join(' · ')
+    list.textContent = area.services.map((kind) => t(`services.kind.${kind}`)).join(' · ')
     wrapper.appendChild(list)
   }
 
@@ -79,7 +92,13 @@ function servicePopup(area: ServiceArea, now: Date): HTMLElement {
     line.className = 'service-popup__hours'
     const badge = document.createElement('span')
     badge.dataset.schedule = status
-    badge.textContent = t(status === 'open' ? 'schedule.open' : status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon')
+    badge.textContent = t(
+      status === 'open'
+        ? 'schedule.open'
+        : status === 'closed'
+          ? 'schedule.closed'
+          : 'schedule.closingSoon',
+    )
     line.append(badge, ` ${area.hours}`)
     wrapper.appendChild(line)
   }
@@ -95,7 +114,13 @@ export class MapView {
 
   constructor(private container: HTMLElement) {}
 
-  render(pos: LatLon, stations: Station[], fuel: FuelId, onSelect: (s: Station) => void, opts: { recenter?: boolean; selectedId?: string } = {}): void {
+  render(
+    pos: LatLon,
+    stations: Station[],
+    fuel: FuelId,
+    onSelect: (s: Station) => void,
+    opts: { recenter?: boolean; selectedId?: string } = {},
+  ): void {
     if (!this.map) this.init(pos)
     if (!this.map || !this.markers) return
 
@@ -104,14 +129,15 @@ export class MapView {
     this.markers.clearLayers()
 
     const knownPrices = stations
-      .map(s => priceOf(s, fuel))
+      .map((s) => priceOf(s, fuel))
       .filter((p): p is number => p !== undefined)
     const thresholds = bandThresholds(knownPrices)
     const colors = readMarkerColors()
 
     for (const station of stations) {
       const price = priceOf(station, fuel)
-      const kind: MarkerKind = price !== undefined ? bandForThresholds(price, thresholds) : 'unknown'
+      const kind: MarkerKind =
+        price !== undefined ? bandForThresholds(price, thresholds) : 'unknown'
       const selected = station.id === opts.selectedId
       const size = selected ? PIN_SIZE_SELECTED : PIN_SIZE
       const marker = L.marker([station.pos.lat, station.pos.lon], {
@@ -169,12 +195,17 @@ export class MapView {
       const glyph = serviceGlyph(area.services)
       const marker = L.marker([area.lat, area.lon], {
         icon: glyph
-          ? glyphIcon(glyph, PIN_SERVICE_SIZE, { fill: color, glyphColor: '#ffffff', ring: '#ffffff', ringWidth: 2 })
+          ? glyphIcon(glyph, PIN_SERVICE_SIZE, {
+              fill: color,
+              glyphColor: '#ffffff',
+              ring: '#ffffff',
+              ringWidth: 2,
+            })
           : L.divIcon({
-            className: 'map-service-marker',
-            html: `<span class="map-service-marker__box" style="background:${color}"></span>`,
-            iconSize: [14, 14],
-          }),
+              className: 'map-service-marker',
+              html: `<span class="map-service-marker__box" style="background:${color}"></span>`,
+              iconSize: [14, 14],
+            }),
         pane: PANE_SERVICES,
         keyboard: false,
       })

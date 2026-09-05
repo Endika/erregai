@@ -15,7 +15,10 @@ function percentile(sorted: number[], p: number): number {
   return sorted[idx]
 }
 
-export interface BandThresholds { low: number; high: number }
+export interface BandThresholds {
+  low: number
+  high: number
+}
 
 export function bandThresholds(prices: number[]): BandThresholds {
   const sorted = [...prices].sort((a, b) => a - b)
@@ -32,10 +35,16 @@ export function bandFor(price: number, all: number[]): PriceBand {
   return bandForThresholds(price, bandThresholds(all))
 }
 
-export function sortStations(stations: Station[], fuel: FuelId, origin: LatLon, key: SortKey): Station[] {
+export function sortStations(
+  stations: Station[],
+  fuel: FuelId,
+  origin: LatLon,
+  key: SortKey,
+): Station[] {
   return [...stations].sort((a, b) => {
     if (key === 'distance') return haversineKm(origin, a.pos) - haversineKm(origin, b.pos)
-    const pa = priceOf(a, fuel), pb = priceOf(b, fuel)
+    const pa = priceOf(a, fuel),
+      pb = priceOf(b, fuel)
     if (pa === undefined && pb === undefined) return 0
     if (pa === undefined) return 1
     if (pb === undefined) return -1

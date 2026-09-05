@@ -1,8 +1,11 @@
 export type FuelId =
-  | 'gasoleoA' | 'gasoleoPremium' | 'gasoleoB'
-  | 'gasolina95' | 'gasolina98' | 'glp' | 'gnc' | 'gnl'
+  'gasoleoA' | 'gasoleoPremium' | 'gasoleoB' | 'gasolina95' | 'gasolina98' | 'glp' | 'gnc' | 'gnl'
 
-export interface Fuel { id: FuelId; apiKey: string; i18nKey: string }
+export interface Fuel {
+  id: FuelId
+  apiKey: string
+  i18nKey: string
+}
 
 export const FUELS: readonly Fuel[] = [
   { id: 'gasoleoA', apiKey: 'Precio Gasoleo A', i18nKey: 'fuel.gasoleoA' },

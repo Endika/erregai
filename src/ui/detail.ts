@@ -15,7 +15,11 @@ function mapsUrl(station: Station): string {
     : `geo:${lat},${lon}?q=${lat},${lon}(${label})`
 }
 
-export function renderDetail(container: HTMLElement, station: Station, now: Date = new Date()): void {
+export function renderDetail(
+  container: HTMLElement,
+  station: Station,
+  now: Date = new Date(),
+): void {
   const wrapper = document.createElement('div')
   wrapper.className = 'station-detail'
 
@@ -39,7 +43,12 @@ export function renderDetail(container: HTMLElement, station: Station, now: Date
     const badge = document.createElement('span')
     badge.className = 'station-detail__schedule-status'
     badge.dataset.schedule = status
-    const key = status === 'open' ? 'schedule.open' : status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon'
+    const key =
+      status === 'open'
+        ? 'schedule.open'
+        : status === 'closed'
+          ? 'schedule.closed'
+          : 'schedule.closingSoon'
     badge.textContent = t(key)
     schedule.append(' ', badge)
   }

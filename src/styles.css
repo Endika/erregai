@@ -89,7 +89,11 @@ body {
   overflow-y: hidden;
   background: var(--color-bg);
   color: var(--color-fg);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
   font-size: 1rem;
   line-height: 1.4;
 }
@@ -691,7 +695,9 @@ body {
 }
 
 @keyframes erregai-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- Location retry --- */
@@ -757,8 +763,12 @@ body {
   border-radius: 50%;
 }
 
-.legend__item[data-band='cheap']::before { background: var(--band-cheap-fg); }
-.legend__item[data-band='expensive']::before { background: var(--band-expensive-fg); }
+.legend__item[data-band='cheap']::before {
+  background: var(--band-cheap-fg);
+}
+.legend__item[data-band='expensive']::before {
+  background: var(--band-expensive-fg);
+}
 
 .settings-about__credit {
   margin: 0.25rem 0;

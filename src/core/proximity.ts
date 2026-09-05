@@ -1,4 +1,7 @@
-export interface ProximityItem { id: string; distanceKm: number }
+export interface ProximityItem {
+  id: string
+  distanceKm: number
+}
 
 // Alert-once dedup with hysteresis, shared by radar and fuel proximity alerts.
 // An id alerts the first time it enters `alertDistanceKm`; it is forgotten once
@@ -11,7 +14,7 @@ export function nextProximityAlerts<T extends ProximityItem>(
   hysteresisKm = 0.2,
 ): { alertedIds: Set<string>; newlyAlerted: T[] } {
   const alertedIds = new Set(prevAlertedIds)
-  const byId = new Map(items.map(i => [i.id, i]))
+  const byId = new Map(items.map((i) => [i.id, i]))
   for (const id of prevAlertedIds) {
     const item = byId.get(id)
     if (!item || item.distanceKm > alertDistanceKm + hysteresisKm) alertedIds.delete(id)

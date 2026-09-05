@@ -7,7 +7,7 @@ describe('renderSettings', () => {
   it('renders the general, services, radar and fuel section headings in order', () => {
     const el = document.createElement('div')
     renderSettings(el, DEFAULT_SETTINGS, () => {})
-    const titles = [...el.querySelectorAll('.settings-section__title')].map(h => h.textContent)
+    const titles = [...el.querySelectorAll('.settings-section__title')].map((h) => h.textContent)
     expect(titles).toEqual([
       t('settings.section.general'),
       t('settings.section.services'),
@@ -19,12 +19,26 @@ describe('renderSettings', () => {
   it('keeps every control field and fires the matching onChange payload', () => {
     const el = document.createElement('div')
     const partials: Record<string, unknown>[] = []
-    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
-    const fields = [...el.querySelectorAll('[data-field]')].map(n => (n as HTMLElement).dataset.field)
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
+    const fields = [...el.querySelectorAll('[data-field]')].map(
+      (n) => (n as HTMLElement).dataset.field,
+    )
     expect(fields).toEqual([
-      'fuel', 'sort', 'radiusKm', 'locale', 'theme', 'alertVolume', 'alertVibrate',
-      'servicesLayerEnabled', 'radarLayerEnabled', 'radarAlertsEnabled', 'radarAlertDistanceM', 'radarSound',
-      'fuelAlertMode', 'fuelAlertDistanceM', 'fuelSound',
+      'fuel',
+      'sort',
+      'radiusKm',
+      'locale',
+      'theme',
+      'alertVolume',
+      'alertVibrate',
+      'servicesLayerEnabled',
+      'radarLayerEnabled',
+      'radarAlertsEnabled',
+      'radarAlertDistanceM',
+      'radarSound',
+      'fuelAlertMode',
+      'fuelAlertDistanceM',
+      'fuelSound',
     ])
     const sound = el.querySelector<HTMLInputElement>('[data-field="radarSound"]')!
     sound.checked = false
@@ -35,7 +49,7 @@ describe('renderSettings', () => {
   it('commits the alert volume on release and never offers a silent slider', () => {
     const el = document.createElement('div')
     const partials: Record<string, unknown>[] = []
-    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
     const volume = el.querySelector<HTMLInputElement>('[data-field="alertVolume"]')!
     expect(volume.type).toBe('range')
     // Silencing a cue is the sound toggles' job, so the slider floor is audible.
@@ -49,7 +63,7 @@ describe('renderSettings', () => {
   it('toggles the service area layer independently of the radar one', () => {
     const el = document.createElement('div')
     const partials: Record<string, unknown>[] = []
-    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
     const layer = el.querySelector<HTMLInputElement>('[data-field="servicesLayerEnabled"]')!
     expect(layer.checked).toBe(true)
     layer.checked = false
@@ -60,7 +74,7 @@ describe('renderSettings', () => {
   it('toggles the haptic fallback', () => {
     const el = document.createElement('div')
     const partials: Record<string, unknown>[] = []
-    renderSettings(el, DEFAULT_SETTINGS, p => partials.push(p))
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
     const vibrate = el.querySelector<HTMLInputElement>('[data-field="alertVibrate"]')!
     vibrate.checked = false
     vibrate.dispatchEvent(new Event('change'))

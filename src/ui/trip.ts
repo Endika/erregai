@@ -1,7 +1,13 @@
 import type { Station } from '../core/station'
 import type { LatLon } from '../core/geo'
 import { haversineKm } from '../core/geo'
-import { newTripState, updateTrip, type TripConfig, type TripState, type TripUpdate } from '../core/trip'
+import {
+  newTripState,
+  updateTrip,
+  type TripConfig,
+  type TripState,
+  type TripUpdate,
+} from '../core/trip'
 import { radarsAhead, nearbyRadars, nextRadarAlerts, type RadarHit } from '../core/radars'
 import { nextProximityAlerts } from '../core/proximity'
 import { cheapAhead } from '../core/fuel-alert'
@@ -9,7 +15,13 @@ import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
 import { watchPosition } from '../adapters/geolocation'
 import { ensureNotifyPermission, notify } from '../adapters/notifications'
 import { keepScreenAwake } from '../adapters/wakeLock'
-import { playRadarBeep, playFuelChime, unlockAudio, startBackgroundAudio, stopBackgroundAudio } from '../adapters/audio'
+import {
+  playRadarBeep,
+  playFuelChime,
+  unlockAudio,
+  startBackgroundAudio,
+  stopBackgroundAudio,
+} from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 import { priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
@@ -80,8 +92,12 @@ export class TripController {
     await ensureNotifyPermission()
 
     this.stopFn = watchPosition(
-      pos => { void this.onFix(pos) },
-      () => { /* location errors surface via the app-wide location banner */ },
+      (pos) => {
+        void this.onFix(pos)
+      },
+      () => {
+        /* location errors surface via the app-wide location banner */
+      },
     )
     this.onChange()
   }
@@ -114,7 +130,11 @@ export class TripController {
     }
 
     const settings = this.store.state.settings
-    const cfg: TripConfig = { fuel: settings.fuel, radiusKm: settings.radiusKm, corridorDeg: DEFAULT_CORRIDOR_DEG }
+    const cfg: TripConfig = {
+      fuel: settings.fuel,
+      radiusKm: settings.radiusKm,
+      corridorDeg: DEFAULT_CORRIDOR_DEG,
+    }
     const update = updateTrip(this.tripState, pos, this.store.state.stations, cfg)
     this.tripState = update.state
     this.lastUpdate = update
@@ -129,9 +149,16 @@ export class TripController {
 
     if (settings.radarAlertsEnabled) {
       const alertDistanceKm = settings.radarAlertDistanceM / 1000
-      const hits = radarsAhead(pos, this.tripState.headingDeg, RADARS, { radiusKm: alertDistanceKm, corridorDeg: DEFAULT_CORRIDOR_DEG })
+      const hits = radarsAhead(pos, this.tripState.headingDeg, RADARS, {
+        radiusKm: alertDistanceKm,
+        corridorDeg: DEFAULT_CORRIDOR_DEG,
+      })
       this.radarHits = hits
-      const { alertedIds, newlyAlerted } = nextRadarAlerts(this.alertedRadarIds, hits, alertDistanceKm)
+      const { alertedIds, newlyAlerted } = nextRadarAlerts(
+        this.alertedRadarIds,
+        hits,
+        alertDistanceKm,
+      )
       this.alertedRadarIds = alertedIds
       if (newlyAlerted.length > 0) {
         const nearest = newlyAlerted[0]
@@ -149,7 +176,7 @@ export class TripController {
     // alert: show nearby radars as icons even before an alert would fire.
     if (settings.radarLayerEnabled) {
       const displayRadars = nearbyRadars(pos, RADARS, settings.radiusKm, RADAR_LAYER_CAP)
-      this.map.renderRadars(displayRadars.map(h => h.radar))
+      this.map.renderRadars(displayRadars.map((h) => h.radar))
     } else {
       this.map.clearRadars()
     }
@@ -165,15 +192,20 @@ export class TripController {
       })
       const { alertedIds, newlyAlerted } = nextProximityAlerts(
         this.alertedFuelIds,
-        hits.map(h => ({ id: h.station.id, distanceKm: h.distanceKm })),
+        hits.map((h) => ({ id: h.station.id, distanceKm: h.distanceKm })),
         alertDistanceKm,
       )
       this.alertedFuelIds = alertedIds
       if (newlyAlerted.length > 0) {
-        const nearest = hits.find(h => h.station.id === newlyAlerted[0].id)!
+        const nearest = hits.find((h) => h.station.id === newlyAlerted[0].id)!
         const meters = Math.round(nearest.distanceKm * 1000)
-        this.fuelBanner = t('fuel.alert.banner').replace('{brand}', nearest.station.brand).replace('{m}', String(meters))
-        notify(t('fuel.alert.title'), t('fuel.alert.body').replace('{brand}', nearest.station.brand))
+        this.fuelBanner = t('fuel.alert.banner')
+          .replace('{brand}', nearest.station.brand)
+          .replace('{m}', String(meters))
+        notify(
+          t('fuel.alert.title'),
+          t('fuel.alert.body').replace('{brand}', nearest.station.brand),
+        )
         if (settings.fuelSound) playFuelChime({ volume: settings.alertVolume })
         if (settings.alertVibrate) vibrateFuel()
       }
@@ -195,7 +227,9 @@ export class TripController {
     toggle.type = 'button'
     toggle.className = 'trip-view__toggle'
     toggle.textContent = this.active ? t('trip.stop') : t('trip.start')
-    toggle.addEventListener('click', () => { void (this.active ? this.stop() : this.start()) })
+    toggle.addEventListener('click', () => {
+      void (this.active ? this.stop() : this.start())
+    })
     wrapper.appendChild(toggle)
 
     if (this.banner) {
@@ -222,10 +256,11 @@ export class TripController {
 
     if (this.active) {
       const sort = this.store.state.settings.tripSort
-      wrapper.appendChild(renderSortBar(sort, key => this.store.setSettings({ tripSort: key })))
+      wrapper.appendChild(renderSortBar(sort, (key) => this.store.setSettings({ tripSort: key })))
       wrapper.appendChild(this.renderAhead(update, selectedId))
       if (this.store.state.settings.radarAlertsEnabled) {
-        if (this.radarHits.length > 0) wrapper.appendChild(renderRadarList(this.radarHits, 'radar.list.title', NEARBY_RADARS))
+        if (this.radarHits.length > 0)
+          wrapper.appendChild(renderRadarList(this.radarHits, 'radar.list.title', NEARBY_RADARS))
         wrapper.appendChild(this.renderRadarNotice())
       }
     }
@@ -251,7 +286,9 @@ export class TripController {
       return list
     }
 
-    const display = origin ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort) : ahead
+    const display = origin
+      ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort)
+      : ahead
 
     for (const station of display) {
       const price = priceOf(station, fuel)

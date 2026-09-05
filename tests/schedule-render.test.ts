@@ -4,8 +4,14 @@ import { renderDetail } from '../src/ui/detail'
 import type { Station } from '../src/core/station'
 
 const station = (id: string, schedule: string): Station => ({
-  id, brand: 'REPSOL', name: 'REPSOL', pos: { lat: 40, lon: -3 },
-  address: 'Calle X', town: 'Madrid', schedule, prices: { gasoleoA: 1.5 },
+  id,
+  brand: 'REPSOL',
+  name: 'REPSOL',
+  pos: { lat: 40, lon: -3 },
+  address: 'Calle X',
+  town: 'Madrid',
+  schedule,
+  prices: { gasoleoA: 1.5 },
 })
 
 // Wednesday 2026-01-07, 23:00 local.
@@ -29,7 +35,9 @@ describe('schedule badge in the list', () => {
 
   it('badges a station about to close', () => {
     const el = renderRows([station('soon', 'L-D: 06:00-23:30')])
-    expect(el.querySelector('.station-row__schedule')?.getAttribute('data-schedule')).toBe('closing-soon')
+    expect(el.querySelector('.station-row__schedule')?.getAttribute('data-schedule')).toBe(
+      'closing-soon',
+    )
   })
 
   it('says nothing when the schedule cannot be understood', () => {
@@ -49,13 +57,17 @@ describe('schedule status in the detail card', () => {
     renderDetail(el, station('closed', 'L-D: 06:00-22:00'), lateWednesday)
     const line = el.querySelector('.station-detail__schedule')
     expect(line?.textContent).toContain('L-D: 06:00-22:00')
-    expect(line?.querySelector('.station-detail__schedule-status')?.getAttribute('data-schedule')).toBe('closed')
+    expect(
+      line?.querySelector('.station-detail__schedule-status')?.getAttribute('data-schedule'),
+    ).toBe('closed')
   })
 
   it('marks an open station open', () => {
     const el = document.createElement('div')
     renderDetail(el, station('open', 'L-D: 24H'), lateWednesday)
-    expect(el.querySelector('.station-detail__schedule-status')?.getAttribute('data-schedule')).toBe('open')
+    expect(
+      el.querySelector('.station-detail__schedule-status')?.getAttribute('data-schedule'),
+    ).toBe('open')
   })
 
   it('shows the raw text with no state when it cannot be parsed', () => {

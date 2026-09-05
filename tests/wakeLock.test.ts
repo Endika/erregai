@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import { keepScreenAwake } from '../src/adapters/wakeLock'
 
-const flush = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve() }
+const flush = async (): Promise<void> => {
+  await Promise.resolve()
+  await Promise.resolve()
+}
 
 it('no-ops safely when the Wake Lock API is unavailable', () => {
   const release = keepScreenAwake({})
@@ -11,8 +14,19 @@ it('no-ops safely when the Wake Lock API is unavailable', () => {
 it('requests a screen lock on start and releases it on stop', async () => {
   let requested = 0
   let released = false
-  const sentinel = { release: async () => { released = true } }
-  const nav = { wakeLock: { request: async () => { requested++; return sentinel } } }
+  const sentinel = {
+    release: async () => {
+      released = true
+    },
+  }
+  const nav = {
+    wakeLock: {
+      request: async () => {
+        requested++
+        return sentinel
+      },
+    },
+  }
 
   const release = keepScreenAwake(nav)
   await flush()

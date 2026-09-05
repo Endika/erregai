@@ -19,7 +19,7 @@ export function renderList(
   now: Date = new Date(),
 ): void {
   const knownPrices = stations
-    .map(s => priceOf(s, fuel))
+    .map((s) => priceOf(s, fuel))
     .filter((p): p is number => p !== undefined)
   const thresholds = bandThresholds(knownPrices)
 

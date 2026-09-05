@@ -15,9 +15,11 @@ export function radarsAhead(
   cfg: RadarSelectConfig,
 ): RadarHit[] {
   return radars
-    .map(radar => ({ radar, distanceKm: haversineKm(pos, posOf(radar)) }))
-    .filter(h => h.distanceKm <= cfg.radiusKm)
-    .filter(h => heading === undefined ? true : isAhead(pos, heading, posOf(h.radar), cfg.corridorDeg))
+    .map((radar) => ({ radar, distanceKm: haversineKm(pos, posOf(radar)) }))
+    .filter((h) => h.distanceKm <= cfg.radiusKm)
+    .filter((h) =>
+      heading === undefined ? true : isAhead(pos, heading, posOf(h.radar), cfg.corridorDeg),
+    )
     .sort((a, b) => a.distanceKm - b.distanceKm)
 }
 
@@ -39,8 +41,13 @@ export function nextRadarAlerts(
   alertDistanceKm: number,
   hysteresisKm = 0.2,
 ): { alertedIds: Set<string>; newlyAlerted: RadarHit[] } {
-  const byId = new Map(hits.map(h => [h.radar.id, h]))
-  const items = hits.map(h => ({ id: h.radar.id, distanceKm: h.distanceKm }))
-  const { alertedIds, newlyAlerted } = nextProximityAlerts(prevAlertedIds, items, alertDistanceKm, hysteresisKm)
-  return { alertedIds, newlyAlerted: newlyAlerted.map(i => byId.get(i.id)!) }
+  const byId = new Map(hits.map((h) => [h.radar.id, h]))
+  const items = hits.map((h) => ({ id: h.radar.id, distanceKm: h.distanceKm }))
+  const { alertedIds, newlyAlerted } = nextProximityAlerts(
+    prevAlertedIds,
+    items,
+    alertDistanceKm,
+    hysteresisKm,
+  )
+  return { alertedIds, newlyAlerted: newlyAlerted.map((i) => byId.get(i.id)!) }
 }

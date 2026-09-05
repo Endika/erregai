@@ -6,14 +6,19 @@ export type ScheduleStatus = 'open' | 'closed' | 'closing-soon' | 'unknown'
 
 // days: 0 = Monday .. 6 = Sunday. from/to are minutes since midnight, 0..1440.
 // `to <= from` means the range crosses midnight into the following day.
-export interface DayRange { days: readonly number[]; from: number; to: number }
+export interface DayRange {
+  days: readonly number[]
+  from: number
+  to: number
+}
 
 const DAY_LETTERS = 'LMXJVSD'
 const DAY = 1440
 const WEEK = 7 * DAY
 const CLOSING_SOON_MIN = 60
 
-const SEGMENT = /^\s*([LMXJVSD](?:\s*-\s*[LMXJVSD])?(?:\s*,\s*[LMXJVSD](?:\s*-\s*[LMXJVSD])?)*)\s*:\s*(.+)$/i
+const SEGMENT =
+  /^\s*([LMXJVSD](?:\s*-\s*[LMXJVSD])?(?:\s*,\s*[LMXJVSD](?:\s*-\s*[LMXJVSD])?)*)\s*:\s*(.+)$/i
 const HH_MM = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/
 
 function dayIndex(letter: string): number {
@@ -24,10 +29,13 @@ function dayIndex(letter: string): number {
 function expandDays(spec: string): number[] | undefined {
   const days = new Set<number>()
   for (const token of spec.split(',')) {
-    const [rawStart, rawEnd] = token.split('-').map(s => s.trim())
+    const [rawStart, rawEnd] = token.split('-').map((s) => s.trim())
     const start = dayIndex(rawStart)
     if (start < 0) return undefined
-    if (rawEnd === undefined) { days.add(start); continue }
+    if (rawEnd === undefined) {
+      days.add(start)
+      continue
+    }
     const end = dayIndex(rawEnd)
     if (end < 0) return undefined
     for (let i = 0; i <= (end - start + 7) % 7; i++) days.add((start + i) % 7)
@@ -47,7 +55,10 @@ function parseTimes(spec: string): { from: number; to: number }[] | undefined {
   const out: { from: number; to: number }[] = []
   for (const raw of spec.split(/\s+y\s+/i)) {
     const part = raw.trim()
-    if (/^24H$/i.test(part)) { out.push({ from: 0, to: DAY }); continue }
+    if (/^24H$/i.test(part)) {
+      out.push({ from: 0, to: DAY })
+      continue
+    }
     const m = HH_MM.exec(part)
     if (!m) return undefined
     const from = minutes(m[1], m[2])
@@ -77,7 +88,8 @@ export function parseSchedule(raw: string): DayRange[] | undefined {
 }
 
 const OSM_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
-const OSM_SEGMENT = /^\s*(?:([A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?(?:\s*,\s*[A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?)*)\s+)?(.+?)\s*$/
+const OSM_SEGMENT =
+  /^\s*(?:([A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?(?:\s*,\s*[A-Za-z]{2}(?:\s*-\s*[A-Za-z]{2})?)*)\s+)?(.+?)\s*$/
 const OSM_RANGE = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/
 
 // `PH` is public holidays. We have no holiday calendar, so days that only apply
@@ -85,11 +97,14 @@ const OSM_RANGE = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/
 function expandOsmDays(spec: string): number[] | undefined {
   const days = new Set<number>()
   for (const token of spec.split(',')) {
-    const [rawStart, rawEnd] = token.split('-').map(s => s.trim().toUpperCase())
+    const [rawStart, rawEnd] = token.split('-').map((s) => s.trim().toUpperCase())
     if (rawStart === 'PH' && rawEnd === undefined) continue
     const start = OSM_DAYS.indexOf(rawStart)
     if (start < 0) return undefined
-    if (rawEnd === undefined) { days.add(start); continue }
+    if (rawEnd === undefined) {
+      days.add(start)
+      continue
+    }
     const end = OSM_DAYS.indexOf(rawEnd)
     if (end < 0) return undefined
     for (let i = 0; i <= (end - start + 7) % 7; i++) days.add((start + i) % 7)
@@ -133,7 +148,10 @@ export function parseOsmHours(raw: string): DayRange[] | undefined {
   return ranges.length > 0 ? ranges : undefined
 }
 
-interface Interval { start: number; end: number }
+interface Interval {
+  start: number
+  end: number
+}
 
 // Projects the ranges onto a single week measured in minutes, splitting the
 // ones that cross midnight and wrapping Sunday night back onto Monday.
@@ -146,7 +164,10 @@ function weekIntervals(ranges: readonly DayRange[]): Interval[] {
       const start = day * DAY + range.from
       const end = start + span
       if (end <= WEEK) raw.push({ start, end })
-      else { raw.push({ start, end: WEEK }); raw.push({ start: 0, end: end - WEEK }) }
+      else {
+        raw.push({ start, end: WEEK })
+        raw.push({ start: 0, end: end - WEEK })
+      }
     }
   }
   raw.sort((a, b) => a.start - b.start)
@@ -168,8 +189,8 @@ function weekMinute(at: Date): number {
 // station that opens only on Mondays — around 1.2% of the Ministerio feed. We
 // refuse to draw any conclusion from it rather than mark it closed all week.
 function isSingleDayAllDay(ranges: readonly DayRange[]): boolean {
-  const days = new Set(ranges.flatMap(r => [...r.days]))
-  return days.size === 1 && ranges.every(r => r.from === 0 && r.to === DAY)
+  const days = new Set(ranges.flatMap((r) => [...r.days]))
+  return days.size === 1 && ranges.every((r) => r.from === 0 && r.to === DAY)
 }
 
 export function scheduleStatus(ranges: readonly DayRange[] | undefined, at: Date): ScheduleStatus {
@@ -181,7 +202,7 @@ export function scheduleStatus(ranges: readonly DayRange[] | undefined, at: Date
   if (intervals.length === 1 && intervals[0].start === 0 && intervals[0].end === WEEK) return 'open'
 
   const now = weekMinute(at)
-  const active = intervals.find(i => now >= i.start && now < i.end)
+  const active = intervals.find((i) => now >= i.start && now < i.end)
   if (!active) return 'closed'
 
   // A block ending exactly at the week boundary continues into Monday's first

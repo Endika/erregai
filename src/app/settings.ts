@@ -10,16 +10,51 @@ export type FuelAlertMode = 'cheap' | 'any' | 'off'
 // alertVolume is a 0..1 multiplier shared by both cues, and alertVibrate the
 // haptic fallback; both apply to radar and fuel alerts alike, so they live
 // alongside the app-wide preferences rather than being duplicated per section.
-export interface Settings { fuel: FuelId; sort: SortKey; tripSort: SortKey; radiusKm: number; locale?: Locale; theme: Theme; alertVolume: number; alertVibrate: boolean; radarLayerEnabled: boolean; servicesLayerEnabled: boolean; radarAlertsEnabled: boolean; radarAlertDistanceM: number; radarSound: boolean; fuelAlertMode: FuelAlertMode; fuelAlertDistanceM: number; fuelSound: boolean }
-export const DEFAULT_SETTINGS: Settings = { fuel: DEFAULT_FUEL, sort: 'price', tripSort: 'distance', radiusKm: 15, theme: 'system', alertVolume: 1, alertVibrate: true, radarLayerEnabled: true, servicesLayerEnabled: true, radarAlertsEnabled: true, radarAlertDistanceM: 800, radarSound: true, fuelAlertMode: 'cheap', fuelAlertDistanceM: 2000, fuelSound: true }
+export interface Settings {
+  fuel: FuelId
+  sort: SortKey
+  tripSort: SortKey
+  radiusKm: number
+  locale?: Locale
+  theme: Theme
+  alertVolume: number
+  alertVibrate: boolean
+  radarLayerEnabled: boolean
+  servicesLayerEnabled: boolean
+  radarAlertsEnabled: boolean
+  radarAlertDistanceM: number
+  radarSound: boolean
+  fuelAlertMode: FuelAlertMode
+  fuelAlertDistanceM: number
+  fuelSound: boolean
+}
+export const DEFAULT_SETTINGS: Settings = {
+  fuel: DEFAULT_FUEL,
+  sort: 'price',
+  tripSort: 'distance',
+  radiusKm: 15,
+  theme: 'system',
+  alertVolume: 1,
+  alertVibrate: true,
+  radarLayerEnabled: true,
+  servicesLayerEnabled: true,
+  radarAlertsEnabled: true,
+  radarAlertDistanceM: 800,
+  radarSound: true,
+  fuelAlertMode: 'cheap',
+  fuelAlertDistanceM: 2000,
+  fuelSound: true,
+}
 const KEY = 'erregai.settings'
 
 export function loadSettings(store: Storage = localStorage): Settings {
   try {
     const raw = store.getItem(KEY)
     if (!raw) return { ...DEFAULT_SETTINGS }
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) as Partial<Settings> }
-  } catch { return { ...DEFAULT_SETTINGS } }
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }
+  } catch {
+    return { ...DEFAULT_SETTINGS }
+  }
 }
 
 export function saveSettings(s: Settings, store: Storage = localStorage): void {
