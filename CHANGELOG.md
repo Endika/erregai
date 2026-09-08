@@ -5,6 +5,7 @@
 
 ### Chores
 
+* bump @typescript-eslint/eslint-plugin from 8.68.0 to 8.69.0 ([25b601a](https://github.com/Endika/erregai/commit/25b601aecfdd5fa84083373a246a33256e03d91a))
 * bump eslint from 10.9.1 to 10.10.0 ([6554963](https://github.com/Endika/erregai/commit/65549632436b79c1eae7aec8b558a42b8e6a1221))
 
 ## [1.19.11](https://github.com/Endika/erregai/compare/v1.19.10...v1.19.11) (2026-09-08)
