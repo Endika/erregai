@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.12](https://github.com/Endika/erregai/compare/v1.19.11...v1.19.12) (2026-09-08)
+
+
+### Chores
+
+* bump eslint from 10.9.1 to 10.10.0 ([6554963](https://github.com/Endika/erregai/commit/65549632436b79c1eae7aec8b558a42b8e6a1221))
+
 ## [1.19.11](https://github.com/Endika/erregai/compare/v1.19.10...v1.19.11) (2026-09-08)
 
 
