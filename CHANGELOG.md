@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.19.11](https://github.com/Endika/erregai/compare/v1.19.10...v1.19.11) (2026-09-08)
+
+
+### Chores
+
+* bump @typescript-eslint/parser from 8.68.0 to 8.69.0 ([2f45d0f](https://github.com/Endika/erregai/commit/2f45d0fb1946afe060dcde2baf4cf559ed211552))
+* bump proj4 from 2.21.0 to 2.22.0 ([12d42e0](https://github.com/Endika/erregai/commit/12d42e063733738b09faa6008e2a60772edeecbf))
+
 ## [1.19.10](https://github.com/Endika/erregai/compare/v1.19.9...v1.19.10) (2026-09-05)
 
 
