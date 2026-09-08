@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.13](https://github.com/Endika/erregai/compare/v1.19.12...v1.19.13) (2026-09-08)
+
+
+### Chores
+
+* bump vitest from 4.1.11 to 5.0.0 ([24febbe](https://github.com/Endika/erregai/commit/24febbe59e03c6167da59a351803214a51353166))
+
 ## [1.19.12](https://github.com/Endika/erregai/compare/v1.19.11...v1.19.12) (2026-09-08)
 
 
