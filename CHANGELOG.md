@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.14](https://github.com/Endika/erregai/compare/v1.19.13...v1.19.14) (2026-09-08)
+
+
+### Chores
+
+* bump js-yaml in the security-npm group across 1 directory ([ac26257](https://github.com/Endika/erregai/commit/ac26257272043ebc1e7651c2d57fe83baed0592d))
+
 ## [1.19.13](https://github.com/Endika/erregai/compare/v1.19.12...v1.19.13) (2026-09-08)
 
 
