@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/Endika/erregai/compare/v1.19.14...v1.20.0) (2026-09-16)
+
+
+### Features
+
+* **ci:** block PRs that introduce high-severity dependency advisories ([9c3b004](https://github.com/Endika/erregai/commit/9c3b004534f7ce78b0fdb23eda567512baae416b))
+
 ## [1.19.14](https://github.com/Endika/erregai/compare/v1.19.13...v1.19.14) (2026-09-08)
 
 
