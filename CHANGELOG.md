@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.0](https://github.com/Endika/erregai/compare/v1.20.0...v1.21.0) (2026-09-16)
+
+
+### Features
+
+* **ci:** add CodeQL static analysis ([0a3390a](https://github.com/Endika/erregai/commit/0a3390a3ddfc540ac660e932f9f7ac48719fffff))
+
 ## [1.20.0](https://github.com/Endika/erregai/compare/v1.19.14...v1.20.0) (2026-09-16)
 
 
