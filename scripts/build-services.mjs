@@ -6,7 +6,7 @@
 // OSM data is ODbL: see the "Service area data" section of the README for the
 // attribution this obliges us to carry.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { normalizeServiceAreas } from './lib/services-normalize.mjs'
+import { normalizeServiceAreas, isValidServiceArea } from './lib/services-normalize.mjs'
 
 const SRC = new URL('../../erregai-notes/service-sources/', import.meta.url)
 const OUT = new URL('../src/core/services.data.ts', import.meta.url)
@@ -85,6 +85,12 @@ console.log(`  areas: ${areaElements.length} elements, pois: ${poiElements.lengt
 const areas = normalizeServiceAreas(areaElements, poiElements)
 if (areas.length === 0) {
   console.error('no service areas produced - aborting')
+  process.exit(1)
+}
+// Overpass content ends up interpolated into a generated .ts file that the app
+// imports as source: an area of the wrong shape must never reach that file.
+if (!areas.every(isValidServiceArea)) {
+  console.error('a service area failed shape validation - aborting')
   process.exit(1)
 }
 

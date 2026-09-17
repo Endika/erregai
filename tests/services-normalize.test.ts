@@ -1,4 +1,9 @@
-import { normalizeServiceAreas, areaId, kindOf } from '../scripts/lib/services-normalize.mjs'
+import {
+  normalizeServiceAreas,
+  areaId,
+  kindOf,
+  isValidServiceArea,
+} from '../scripts/lib/services-normalize.mjs'
 import { nearbyServiceAreas, type ServiceArea } from '../src/core/services'
 import fixture from './fixtures/overpass-services.json'
 
@@ -55,6 +60,42 @@ describe('normalizeServiceAreas', () => {
     expect(kindOf({ amenity: 'restaurant' })).toBe('restaurant')
     expect(kindOf({ shop: 'convenience' })).toBe('shop')
     expect(kindOf({ amenity: 'parking' })).toBeUndefined()
+  })
+})
+
+describe('isValidServiceArea', () => {
+  const valid = { id: 'w100', lat: 41.5, lon: -1.2, services: ['fuel'] }
+
+  it('accepts a well-shaped area, with or without the optional fields', () => {
+    expect(isValidServiceArea(valid)).toBe(true)
+    expect(
+      isValidServiceArea({ ...valid, name: 'Área de La Muela', hours: 'Mo-Su 07:00-23:00' }),
+    ).toBe(true)
+  })
+
+  it('rejects a lat sent as a string instead of a number', () => {
+    expect(isValidServiceArea({ ...valid, lat: '41.5' })).toBe(false)
+  })
+
+  it('rejects services sent as something other than an array', () => {
+    expect(isValidServiceArea({ ...valid, services: 'fuel' })).toBe(false)
+  })
+
+  it('rejects out-of-range coordinates', () => {
+    expect(isValidServiceArea({ ...valid, lat: 95 })).toBe(false)
+    expect(isValidServiceArea({ ...valid, lon: 200 })).toBe(false)
+  })
+
+  it('rejects a non-finite coordinate', () => {
+    expect(isValidServiceArea({ ...valid, lon: NaN })).toBe(false)
+  })
+
+  it('rejects an empty id', () => {
+    expect(isValidServiceArea({ ...valid, id: '' })).toBe(false)
+  })
+
+  it('rejects a services array holding non-string entries', () => {
+    expect(isValidServiceArea({ ...valid, services: ['fuel', 42] })).toBe(false)
   })
 })
 

@@ -44,6 +44,25 @@ export function kindOf(tags) {
   return AMENITY_KINDS[tags.amenity] ?? undefined
 }
 
+// Last check before a normalized area is written into the generated .ts file:
+// the shape the app's ServiceArea type expects, not just "truthy".
+export function isValidServiceArea(area) {
+  return (
+    typeof area.id === 'string' &&
+    area.id.length > 0 &&
+    Number.isFinite(area.lat) &&
+    area.lat >= -90 &&
+    area.lat <= 90 &&
+    Number.isFinite(area.lon) &&
+    area.lon >= -180 &&
+    area.lon <= 180 &&
+    Array.isArray(area.services) &&
+    area.services.every((s) => typeof s === 'string') &&
+    (area.name === undefined || typeof area.name === 'string') &&
+    (area.hours === undefined || typeof area.hours === 'string')
+  )
+}
+
 export function normalizeServiceAreas(areaElements, poiElements) {
   const areas = []
   for (const element of areaElements) {
