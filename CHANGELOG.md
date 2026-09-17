@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/Endika/erregai/compare/v1.21.0...v1.21.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **services:** validate area shape before writing the generated dataset ([c10df69](https://github.com/Endika/erregai/commit/c10df690a76aefe508417908a62c41484661dea8))
+
 ## [1.21.0](https://github.com/Endika/erregai/compare/v1.20.0...v1.21.0) (2026-09-16)
 
 
