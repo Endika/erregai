@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.3](https://github.com/Endika/erregai/compare/v1.21.2...v1.21.3) (2026-09-27)
+
+
+### Bug Fixes
+
+* keep the previous radars of a source that cannot be reached ([bf0d63b](https://github.com/Endika/erregai/commit/bf0d63bc91c72f8aa9b46f697feda3c6b0fd9cb1))
+
 ## [1.21.2](https://github.com/Endika/erregai/compare/v1.21.1...v1.21.2) (2026-09-27)
 
 
