@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.2](https://github.com/Endika/erregai/compare/v1.21.1...v1.21.2) (2026-09-27)
+
+
+### Bug Fixes
+
+* reject malformed fuel and dataset responses instead of treating them as empty ([5e11af7](https://github.com/Endika/erregai/commit/5e11af776de9522e85521a29b1f30d8992dcfd1d))
+
 ## [1.21.1](https://github.com/Endika/erregai/compare/v1.21.0...v1.21.1) (2026-09-17)
 
 
