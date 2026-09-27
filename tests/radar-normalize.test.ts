@@ -1,10 +1,13 @@
+import { readFileSync } from 'node:fs'
 import {
   utmToWgs84,
   dedupeRadars,
   normalizeDgt,
   normalizeEuskadi,
-  emptySources,
+  parseDataset,
+  keepUnreachable,
 } from '../scripts/lib/radar-normalize.mjs'
+import { RADARS, RADARS_DATASET_DATE } from '../src/core/radars.data'
 
 describe('utmToWgs84 (EPSG:25831)', () => {
   it('converts a Barcelona-area UTM 31N point to plausible WGS84', () => {
@@ -62,10 +65,68 @@ describe('normalizeDgt', () => {
   })
 })
 
-describe('emptySources', () => {
-  it('names the source that yielded no rows even when the others are plentiful', () => {
-    const row = { id: 'x', lat: 40, lon: -3, via: '', source: 'dgt' }
-    expect(emptySources({ dgt: [row, row], catalunya: [row], euskadi: [] })).toEqual(['euskadi'])
-    expect(emptySources({ dgt: [row], catalunya: [row], euskadi: [row] })).toEqual([])
+describe('keepUnreachable', () => {
+  const row = (source: string, id = `${source}-0`) => ({
+    id,
+    lat: 43,
+    lon: -2.5,
+    via: 'N-1',
+    source,
+  })
+  const previous = {
+    date: '2026-09-27',
+    rows: [row('dgt'), row('euskadi', 'euskadi-0'), row('euskadi', 'euskadi-1')],
+    keptSince: {},
+  }
+
+  it('keeps the previous radars of a source that came back empty, and says from when', () => {
+    const fresh = {
+      dgt: [row('dgt'), row('dgt', 'dgt-1')],
+      catalunya: [row('catalunya')],
+      euskadi: [],
+    }
+    const out = keepUnreachable(fresh, previous)
+    expect(out.bySource.euskadi.map((r: { id: string }) => r.id)).toEqual([
+      'euskadi-0',
+      'euskadi-1',
+    ])
+    expect(out.bySource.dgt).toHaveLength(2)
+    expect(out.kept).toEqual([{ source: 'euskadi', count: 2, since: '2026-09-27' }])
+    expect(out.missing).toEqual([])
+  })
+
+  it('carries the original date through a second run that still cannot reach it', () => {
+    const fresh = { dgt: [row('dgt')], catalunya: [row('catalunya')], euskadi: [] }
+    const out = keepUnreachable(fresh, {
+      ...previous,
+      date: '2026-10-01',
+      keptSince: { euskadi: '2026-09-27' },
+    })
+    expect(out.kept[0]?.since).toBe('2026-09-27')
+  })
+
+  it('reports a source it has nothing to keep for, so the build can still abort', () => {
+    const fresh = { dgt: [row('dgt')], catalunya: [], euskadi: [row('euskadi')] }
+    expect(keepUnreachable(fresh, previous).missing).toEqual(['catalunya'])
+    expect(keepUnreachable(fresh, null).missing).toEqual(['catalunya'])
+  })
+})
+
+describe('parseDataset', () => {
+  it('reads back every row of the shipped dataset', () => {
+    const text = readFileSync(new URL('../src/core/radars.data.ts', import.meta.url), 'utf8')
+    const parsed = parseDataset(text)
+    expect(parsed.rows).toHaveLength(RADARS.length)
+    expect(parsed.rows).toEqual(RADARS)
+    expect(parsed.date).toBe(RADARS_DATASET_DATE)
+  })
+
+  it('reads the date a kept source really comes from', () => {
+    const text =
+      "// kept: euskadi from 2026-09-27\n\nexport const RADARS_DATASET_DATE = '2026-10-01'\n"
+    expect(parseDataset(text)).toMatchObject({
+      date: '2026-10-01',
+      keptSince: { euskadi: '2026-09-27' },
+    })
   })
 })

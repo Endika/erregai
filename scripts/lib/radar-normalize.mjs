@@ -74,10 +74,42 @@ export function dedupeRadars(radars, precision = 4) {
   return out
 }
 
-// Each source covers its own territory, so one that yields nothing leaves a
-// whole region without radars while the total still looks plausible.
-export function emptySources(bySource) {
-  return Object.entries(bySource)
-    .filter(([, rows]) => rows.length === 0)
-    .map(([name]) => name)
+// Reads back a generated radars.data.ts: its date, its rows, and the sources an
+// earlier run already had to keep, with the date their rows really come from.
+export function parseDataset(text) {
+  const date = text.match(/RADARS_DATASET_DATE = '([^']+)'/)?.[1] ?? null
+  const rowRe =
+    /\{ id: ("[^"]*"), lat: ([-0-9.]+), lon: ([-0-9.]+), via: ("(?:[^"\\]|\\.)*"), source: ("[^"]*") \}/g
+  const rows = [...text.matchAll(rowRe)].map((m) => ({
+    id: JSON.parse(m[1]),
+    lat: Number(m[2]),
+    lon: Number(m[3]),
+    via: JSON.parse(m[4]),
+    source: JSON.parse(m[5]),
+  }))
+  const keptSince = Object.fromEntries(
+    [...text.matchAll(/^\/\/ kept: (\w+) from (\S+)$/gm)].map((m) => [m[1], m[2]]),
+  )
+  return { date, rows, keptSince }
+}
+
+// Each source covers its own territory, so one that yields nothing would leave a
+// whole region without radars while the total still looks plausible. Its rows
+// from the previous dataset are kept instead, and reported with their real date.
+// Trafikoa, for one, refuses connections from outside Spain, CI runners included.
+export function keepUnreachable(bySource, previous) {
+  const kept = []
+  const missing = []
+  const out = { ...bySource }
+  for (const [name, rows] of Object.entries(bySource)) {
+    if (rows.length > 0) continue
+    const old = previous?.rows.filter((r) => r.source === name) ?? []
+    if (old.length === 0) {
+      missing.push(name)
+      continue
+    }
+    out[name] = old
+    kept.push({ source: name, count: old.length, since: previous.keptSince[name] ?? previous.date })
+  }
+  return { bySource: out, kept, missing }
 }
