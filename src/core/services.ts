@@ -22,7 +22,7 @@ export interface ServiceAreaHit {
   distanceKm: number
 }
 
-// Only 141 of the 999 areas publish opening hours, so `unknown` is the normal
+// Only 140 of the 998 areas publish opening hours, so `unknown` is the normal
 // answer here, not an error path — the popup must read well without it.
 export function serviceAreaStatus(area: ServiceArea, at: Date): ScheduleStatus {
   return scheduleStatus(parseOsmHours(area.hours ?? ''), at)
