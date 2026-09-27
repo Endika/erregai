@@ -16,7 +16,7 @@ import {
   keepUnreachable,
 } from './lib/radar-normalize.mjs'
 
-const SRC = new URL('../../erregai-notes/radar-sources/', import.meta.url)
+const SRC = new URL('../data/raw/radar-sources/', import.meta.url)
 const OUT = new URL('../src/core/radars.data.ts', import.meta.url)
 
 const URLS = {

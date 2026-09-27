@@ -2,3 +2,6 @@ node_modules/
 dist/
 .superpowers/
 *.local
+
+# Local raw source files the data scripts fall back to; never committed
+data/raw/

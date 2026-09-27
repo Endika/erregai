@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { normalizeServiceAreas, isValidServiceArea, overpassElements } from './lib/services-normalize.mjs'
 
-const SRC = new URL('../../erregai-notes/service-sources/', import.meta.url)
+const SRC = new URL('../data/raw/service-sources/', import.meta.url)
 const OUT = new URL('../src/core/services.data.ts', import.meta.url)
 
 // The main instance answers roughly two requests in three; the mirrors cover
