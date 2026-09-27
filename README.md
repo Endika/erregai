@@ -43,9 +43,8 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
 | Service areas | [OpenStreetMap](https://www.openstreetmap.org/) via [Overpass](https://overpass-api.de/) | **ODbL** | Bundled; cron monthly |
 | Map tiles | [OpenStreetMap](https://www.openstreetmap.org/copyright) | ODbL | Live |
 
-No backend, no proxy, no data resale. The radar and service-area datasets are baked in at
-build time, so both layers work offline and neither source is ever contacted from a user's
-device.
+The radar and service-area datasets are baked in at build time, so both layers work offline
+and neither source is ever contacted from a user's device.
 
 Erregai is an independent client, not affiliated with or endorsed by any of these bodies.
 OSM data is © OpenStreetMap contributors under the
@@ -59,7 +58,7 @@ on Erregai's own code.
 reports. Regions whose authority publishes nothing are under-represented, and the heading
 cone can occasionally trigger on the far carriageway of a divided highway.
 
-**Service areas** — 999 areas, 437 named, and only **141 publishing opening hours**. The
+**Service areas** — 998 areas, 437 named, and only **140 publishing opening hours**. The
 other 86% show no opening status at all: a missing schedule never becomes "closed". One
 seasonal rule is deliberately left unmodelled rather than claim 24/7 through a summer
 restriction. Amenities attach to the nearest area centre within 600 m instead of by polygon
@@ -73,10 +72,13 @@ npm run data:radars    # DGT + Catalunya + Euskadi
 npm run data:services  # OpenStreetMap via Overpass
 ```
 
-Both fetch server-side and fall back to local raw files under `../erregai-notes/` for
-development; those raw files are not committed. Overpass requires an identifying
-User-Agent — it answers `406` without one. The scheduled actions `update-radars.yml` and
-`update-services.yml` re-run each generator and open a PR when a dataset changes.
+Both fetch server-side and, for development, fall back to local raw files that are not
+committed. Overpass requires an identifying User-Agent — it answers `406` without one. The
+scheduled actions `update-radars.yml` and `update-services.yml` re-run each generator and
+open a PR when a dataset changes. Trafikoa refuses connections from outside Spain, GitHub's
+runners included, so the scheduled radar run keeps the previous Euskadi radars; any source
+it cannot reach is kept as it was and named in the PR. Refreshing Euskadi means running
+`npm run data:radars` from a Spanish connection.
 
 ## Trip mode & alerts
 
