@@ -49,7 +49,14 @@ jobs:
           git add src/core/radars.data.ts
           git commit -m "chore(radars): refresh fixed-radar dataset"
           git push origin "$branch"
+          body="Automated refresh of the fixed-radar dataset from the official DGT, Euskadi and Catalunya open-data sources."
+          kept=$(sed -n 's#^// kept: ##p' src/core/radars.data.ts)
+          if [ -n "$kept" ]; then
+            body="$body
+
+          Unreachable this run, previous radars kept: $kept"
+          fi
           gh pr create --base main --head "$branch" \
             --title "chore(radars): refresh fixed-radar dataset" \
-            --body "Automated refresh of the fixed-radar dataset from the official DGT, Euskadi and Catalunya open-data sources."
+            --body "$body"
           gh pr merge --rebase --auto "$branch"
