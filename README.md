@@ -72,12 +72,12 @@ npm run data:radars    # DGT + Catalunya + Euskadi
 npm run data:services  # OpenStreetMap via Overpass
 ```
 
-Both fetch server-side and, for development, fall back to local raw files that are not
-committed. Overpass requires an identifying User-Agent — it answers `406` without one. The
-scheduled actions `update-radars.yml` and `update-services.yml` re-run each generator and
-open a PR when a dataset changes. Trafikoa refuses connections from outside Spain, GitHub's
-runners included, so the scheduled radar run keeps the previous Euskadi radars; any source
-it cannot reach is kept as it was and named in the PR. Refreshing Euskadi means running
+Both fetch server-side and, for development, fall back to local raw files in `data/raw/`,
+which is gitignored. Overpass requires an identifying User-Agent — it answers `406` without
+one. The scheduled actions `update-radars.yml` and `update-services.yml` re-run each generator
+and open a PR when a dataset changes. Trafikoa refuses connections from outside Spain,
+GitHub's runners included, so the scheduled radar run keeps the previous Euskadi radars; any
+source it cannot reach is kept as it was and named in the PR. Refreshing Euskadi means running
 `npm run data:radars` from a Spanish connection.
 
 ## Trip mode & alerts
