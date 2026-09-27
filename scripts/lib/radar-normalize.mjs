@@ -73,3 +73,11 @@ export function dedupeRadars(radars, precision = 4) {
   }
   return out
 }
+
+// Each source covers its own territory, so one that yields nothing leaves a
+// whole region without radars while the total still looks plausible.
+export function emptySources(bySource) {
+  return Object.entries(bySource)
+    .filter(([, rows]) => rows.length === 0)
+    .map(([name]) => name)
+}

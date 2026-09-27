@@ -6,7 +6,7 @@
 // OSM data is ODbL: see the "Service area data" section of the README for the
 // attribution this obliges us to carry.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { normalizeServiceAreas, isValidServiceArea } from './lib/services-normalize.mjs'
+import { normalizeServiceAreas, isValidServiceArea, overpassElements } from './lib/services-normalize.mjs'
 
 const SRC = new URL('../../erregai-notes/service-sources/', import.meta.url)
 const OUT = new URL('../src/core/services.data.ts', import.meta.url)
@@ -62,7 +62,7 @@ async function overpass(query, localName) {
         // Overpass reports overload as an HTML error page with a 200 status, so
         // a successful response is not enough — it has to actually be JSON.
         if (!text.trimStart().startsWith('{')) { console.warn(`${mirror}: non-JSON response (busy)`); continue }
-        return JSON.parse(text).elements ?? []
+        return overpassElements(JSON.parse(text))
       } catch (e) {
         console.warn(`${mirror}: ${e.message}`)
       }
@@ -71,7 +71,7 @@ async function overpass(query, localName) {
   const local = new URL(localName, SRC)
   if (existsSync(local)) {
     console.warn(`all mirrors failed - using local ${localName}`)
-    return JSON.parse(readFileSync(local, 'utf8')).elements ?? []
+    return overpassElements(JSON.parse(readFileSync(local, 'utf8')))
   }
   throw new Error(`no Overpass mirror answered for ${localName} and no local fallback`)
 }

@@ -3,6 +3,7 @@ import {
   dedupeRadars,
   normalizeDgt,
   normalizeEuskadi,
+  emptySources,
 } from '../scripts/lib/radar-normalize.mjs'
 
 describe('utmToWgs84 (EPSG:25831)', () => {
@@ -58,5 +59,13 @@ describe('normalizeDgt', () => {
     const rows = [{ Carretera: 'A-1', Latitud: '40,5', Longitud: '-3,7' }]
     const out = normalizeDgt(rows)
     expect(out[0]).toMatchObject({ via: 'A-1', lat: 40.5, lon: -3.7, source: 'dgt' })
+  })
+})
+
+describe('emptySources', () => {
+  it('names the source that yielded no rows even when the others are plentiful', () => {
+    const row = { id: 'x', lat: 40, lon: -3, via: '', source: 'dgt' }
+    expect(emptySources({ dgt: [row, row], catalunya: [row], euskadi: [] })).toEqual(['euskadi'])
+    expect(emptySources({ dgt: [row], catalunya: [row], euskadi: [row] })).toEqual([])
   })
 })

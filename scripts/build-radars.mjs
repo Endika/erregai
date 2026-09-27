@@ -12,6 +12,7 @@ import {
   normalizeEuskadi,
   normalizeCatalunya,
   dedupeRadars,
+  emptySources,
 } from './lib/radar-normalize.mjs'
 
 const SRC = new URL('../../erregai-notes/radar-sources/', import.meta.url)
@@ -127,6 +128,11 @@ const bySource = {
 }
 for (const [name, list] of Object.entries(bySource)) {
   console.log(`  ${name}: ${list.length} rows`)
+}
+const empty = emptySources(bySource)
+if (empty.length > 0) {
+  console.error(`no radars from ${empty.join(', ')} - aborting`)
+  process.exit(1)
 }
 
 const all = dedupeRadars(
