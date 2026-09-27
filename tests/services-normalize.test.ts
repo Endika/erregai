@@ -3,6 +3,7 @@ import {
   areaId,
   kindOf,
   isValidServiceArea,
+  overpassElements,
 } from '../scripts/lib/services-normalize.mjs'
 import { nearbyServiceAreas, type ServiceArea } from '../src/core/services'
 import fixture from './fixtures/overpass-services.json'
@@ -113,5 +114,18 @@ describe('nearbyServiceAreas', () => {
 
   it('caps the result at the limit', () => {
     expect(nearbyServiceAreas({ lat: 41.0, lon: -1.0 }, areas, 500, 1)).toHaveLength(1)
+  })
+})
+
+describe('overpassElements', () => {
+  it('returns the elements of a complete answer', () => {
+    expect(overpassElements({ elements: [{ id: 1 }] })).toEqual([{ id: 1 }])
+  })
+  it('rejects a timed-out answer that still carries partial elements', () => {
+    const partial = { elements: [{ id: 1 }], remark: 'runtime error: Query timed out' }
+    expect(() => overpassElements(partial)).toThrow('Query timed out')
+  })
+  it('rejects an answer without an elements array', () => {
+    expect(() => overpassElements({})).toThrow()
   })
 })

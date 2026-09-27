@@ -63,6 +63,14 @@ export function isValidServiceArea(area) {
   )
 }
 
+// Overpass answers a timeout or out-of-memory with 200 and whatever it had
+// gathered, flagged only by a `remark`: a partial answer, not a result.
+export function overpassElements(json) {
+  if (json?.remark) throw new Error(`Overpass: ${json.remark}`)
+  if (!Array.isArray(json?.elements)) throw new Error('Overpass: no elements array')
+  return json.elements
+}
+
 export function normalizeServiceAreas(areaElements, poiElements) {
   const areas = []
   for (const element of areaElements) {

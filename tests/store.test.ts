@@ -1,4 +1,5 @@
 import { Store } from '../src/app/store'
+import { fetchProvince } from '../src/adapters/api'
 import type { Kv, CacheEntry } from '../src/adapters/cache'
 import type { Station } from '../src/core/station'
 
@@ -106,5 +107,37 @@ describe('store.loadFor', () => {
     await store.loadFor({ lat: 40.4168, lon: -3.7038 }) // shows stale, revalidate fails
     expect(store.state.stations.length).toBe(1) // stale data still visible
     expect(store.state.error).toBeUndefined() // failure with cache present is not an error
+  })
+  it('a malformed ministry response keeps the good cache and, with nothing cached, sets error', async () => {
+    let body: unknown = {
+      Fecha: '14/09/2026',
+      ListaEESSPrecio: [{ IDEESS: '1', Latitud: '40,4', 'Longitud (WGS84)': '-3,7' }],
+    }
+    const fetchFn = (async () => ({
+      ok: true,
+      status: 200,
+      json: async () => body,
+    })) as unknown as typeof fetch
+    const kv = memKv()
+    let clock = 1000
+    const store = new Store({
+      fetchProvince: (id) => fetchProvince(id, fetchFn),
+      kv,
+      now: () => clock,
+    })
+    await store.loadFor({ lat: 40.4168, lon: -3.7038 })
+    body = { Fecha: '15/09/2026', ListaPreciosEESS: [] }
+    clock = 1000 + 7 * 60 * 60 * 1000
+    await store.refresh()
+    expect(store.state.stations.map((s) => s.id)).toEqual(['1'])
+    expect(store.state.dataDate).toBe('14/09/2026')
+    const reopened = new Store({
+      fetchProvince: (id) => fetchProvince(id, fetchFn),
+      kv: memKv(),
+      now: () => clock,
+    })
+    await reopened.loadFor({ lat: 40.4168, lon: -3.7038 })
+    expect(reopened.state.stations).toEqual([])
+    expect(reopened.state.error).toBe('unexpected response for province 28')
   })
 })
