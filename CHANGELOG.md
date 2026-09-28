@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.21.4](https://github.com/Endika/erregai/compare/v1.21.3...v1.21.4) (2026-09-28)
+
+
+### Bug Fixes
+
+* keep loading when IndexedDB fails and report it as a storage problem ([4e0e61f](https://github.com/Endika/erregai/commit/4e0e61f7ba71a8c67b2371f37d8facc4f9d16075))
+* tell the user when a refresh fails over cached data ([ac134cc](https://github.com/Endika/erregai/commit/ac134cc985fe99172382ecd9a2ced4781000e190))
+
 ## [1.21.3](https://github.com/Endika/erregai/compare/v1.21.2...v1.21.3) (2026-09-27)
 
 

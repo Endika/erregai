@@ -1,6 +1,6 @@
 {
   "name": "erregai",
-  "version": "1.21.3",
+  "version": "1.21.4",
   "description": "Nearby Spanish fuel stations with prices — offline-first PWA.",
   "type": "module",
   "scripts": {
