@@ -95,4 +95,5 @@ export const es: Record<string, string> = {
 
   'error.location': 'No se pudo obtener la ubicación',
   'error.network': 'Error de red',
+  'error.refreshFailed': 'No se pudo actualizar; se muestran los últimos datos guardados',
 }

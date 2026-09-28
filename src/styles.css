@@ -159,6 +159,11 @@ body {
   font-size: 0.875rem;
 }
 
+.app-error--notice {
+  background: var(--band-mid-bg);
+  color: var(--band-mid-fg);
+}
+
 .app-error[hidden] {
   display: none;
 }

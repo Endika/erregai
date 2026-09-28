@@ -106,7 +106,26 @@ describe('store.loadFor', () => {
     clock = 1000 + 7 * 60 * 60 * 1000 // now stale (past 6h TTL)
     await store.loadFor({ lat: 40.4168, lon: -3.7038 }) // shows stale, revalidate fails
     expect(store.state.stations.length).toBe(1) // stale data still visible
-    expect(store.state.error).toBeUndefined() // failure with cache present is not an error
+    expect(store.state.error).toBeUndefined() // failure with cache present is not the no-data error
+    expect(store.state.refreshError).toBe('offline') // but it is still reported
+  })
+  it('a failed refresh() over cached data reports refreshError, and the next good refresh clears it', async () => {
+    let online = true
+    const fake = async () => {
+      if (!online) throw new Error('offline')
+      return { fecha: 'f1', stations: [stn('1')] }
+    }
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
+    await store.loadFor({ lat: 40.4168, lon: -3.7038 })
+    online = false
+    await store.refresh()
+    expect(store.state.stations.map((s) => s.id)).toEqual(['1'])
+    expect(store.state.dataDate).toBe('f1')
+    expect(store.state.error).toBeUndefined()
+    expect(store.state.refreshError).toBe('offline')
+    online = true
+    await store.refresh()
+    expect(store.state.refreshError).toBeUndefined()
   })
   it('a malformed ministry response keeps the good cache and, with nothing cached, sets error', async () => {
     let body: unknown = {
@@ -131,6 +150,7 @@ describe('store.loadFor', () => {
     await store.refresh()
     expect(store.state.stations.map((s) => s.id)).toEqual(['1'])
     expect(store.state.dataDate).toBe('14/09/2026')
+    expect(store.state.refreshError).toBe('unexpected response for province 28')
     const reopened = new Store({
       fetchProvince: (id) => fetchProvince(id, fetchFn),
       kv: memKv(),

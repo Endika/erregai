@@ -95,4 +95,5 @@ export const ca: Record<string, string> = {
 
   'error.location': "No s'ha pogut obtenir la ubicació",
   'error.network': 'Error de xarxa',
+  'error.refreshFailed': "No s'ha pogut actualitzar; es mostren les últimes dades desades",
 }
