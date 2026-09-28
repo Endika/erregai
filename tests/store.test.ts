@@ -12,6 +12,14 @@ const memKv = (): Kv => {
     },
   }
 }
+const brokenKv = (): Kv => ({
+  get: async () => {
+    throw new Error('idb read failed')
+  },
+  put: async () => {
+    throw new Error('idb write failed')
+  },
+})
 const stn = (id: string): Station => ({
   id,
   brand: 'X',
@@ -159,5 +167,29 @@ describe('store.loadFor', () => {
     await reopened.loadFor({ lat: 40.4168, lon: -3.7038 })
     expect(reopened.state.stations).toEqual([])
     expect(reopened.state.error).toBe('unexpected response for province 28')
+  })
+  it('a broken IndexedDB still loads from the network and reports storageFailed, not a location or network error', async () => {
+    const fake = async () => ({ fecha: 'f1', stations: [stn('1')] })
+    const store = new Store({ fetchProvince: fake, kv: brokenKv(), now: () => 1000 })
+    await store.loadFor({ lat: 40.4168, lon: -3.7038 })
+    expect(store.state.stations.map((s) => s.id)).toEqual(['1'])
+    expect(store.state.dataDate).toBe('f1')
+    expect(store.state.error).toBeUndefined()
+    expect(store.state.storageFailed).toBe(true)
+  })
+  it('a cache write failure keeps the fetched data and reports storageFailed', async () => {
+    const m = new Map<string, CacheEntry>()
+    const readOnlyKv: Kv = {
+      get: async (id) => m.get(id),
+      put: async () => {
+        throw new Error('quota exceeded')
+      },
+    }
+    const fake = async () => ({ fecha: 'f1', stations: [stn('1')] })
+    const store = new Store({ fetchProvince: fake, kv: readOnlyKv, now: () => 1000 })
+    await store.ensureAround({ lat: 40.4168, lon: -3.7038 }, 0)
+    expect(store.state.stations.map((s) => s.id)).toEqual(['1'])
+    expect(store.state.error).toBeUndefined()
+    expect(store.state.storageFailed).toBe(true)
   })
 })

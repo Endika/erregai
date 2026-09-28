@@ -96,4 +96,5 @@ export const en: Record<string, string> = {
   'error.location': 'Could not get location',
   'error.network': 'Network error',
   'error.refreshFailed': 'Could not refresh; showing the last saved data',
+  'error.storage': "This device's storage is unavailable; data will not be kept for offline use",
 }

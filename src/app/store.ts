@@ -13,7 +13,13 @@ export interface AppState {
   loading: boolean
   error?: string
   refreshError?: string
+  storageFailed?: boolean
   settings: Settings
+}
+
+interface ProvinceOutcome {
+  fetchError?: string
+  storageFailed: boolean
 }
 
 export interface Deps {
@@ -85,13 +91,16 @@ export class Store {
   private async runBatch(ids: string[], force = false): Promise<void> {
     let error: string | undefined
     let refreshError: string | undefined
+    let storageFailed = false
     for (const id of ids) {
-      const failure = await this.ensureProvince(id, force)
-      if (!failure) continue
-      if (this.provinces.has(id)) refreshError = failure
-      else error = failure
+      const outcome = await this.ensureProvince(id, force)
+      if (outcome.fetchError) {
+        if (this.provinces.has(id)) refreshError = outcome.fetchError
+        else error = outcome.fetchError
+      }
+      if (outcome.storageFailed) storageFailed = true
     }
-    this.current = { ...this.current, error, refreshError }
+    this.current = { ...this.current, error, refreshError, storageFailed }
   }
 
   private updateDataDate(): void {
@@ -100,32 +109,45 @@ export class Store {
     this.current = { ...this.current, dataDate: entry?.fecha }
   }
 
-  // Loads a single province (cache-then-network). Returns the fetch error
-  // message when the network call fails, or undefined on success/no-fetch.
-  // Does NOT touch state.error itself — batch callers decide, at the end of
-  // the whole batch, whether the failure actually left this province with
-  // no data (see runBatch).
-  private async ensureProvince(id: string, force = false): Promise<string | undefined> {
+  // Loads a single province (cache-then-network). Does NOT touch state itself:
+  // runBatch decides, at the end of the whole batch, what the outcome means.
+  // A broken IndexedDB degrades to network-only instead of failing the load.
+  private async ensureProvince(id: string, force = false): Promise<ProvinceOutcome> {
     this.current = { ...this.current, loading: true }
     this.notify()
+    let storageFailed = false
     try {
-      const cached = await peekProvince(id, this.deps.kv)
+      let cached: CacheEntry | undefined
+      try {
+        cached = await peekProvince(id, this.deps.kv)
+      } catch {
+        storageFailed = true
+        cached = this.provinces.get(id)
+      }
       if (cached) {
         this.provinces.set(id, cached)
         this.rebuildStations()
         this.notify()
       }
       if (!cached || !isFresh(cached, this.deps.now()) || force) {
+        let result: ProvinceResult
         try {
-          const result: ProvinceResult = await this.deps.fetchProvince(id)
-          const entry = await putProvince(id, result, this.deps.now(), this.deps.kv)
-          this.provinces.set(id, entry)
-          this.rebuildStations()
+          result = await this.deps.fetchProvince(id)
         } catch (err) {
-          return err instanceof Error ? err.message : String(err)
+          return { fetchError: err instanceof Error ? err.message : String(err), storageFailed }
         }
+        const now = this.deps.now()
+        let entry: CacheEntry
+        try {
+          entry = await putProvince(id, result, now, this.deps.kv)
+        } catch {
+          storageFailed = true
+          entry = { id, fecha: result.fecha, stations: result.stations, storedAt: now }
+        }
+        this.provinces.set(id, entry)
+        this.rebuildStations()
       }
-      return undefined
+      return { storageFailed }
     } finally {
       this.current = { ...this.current, loading: false }
       this.notify()
