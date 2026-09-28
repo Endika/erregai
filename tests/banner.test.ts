@@ -32,4 +32,13 @@ describe('statusBanner', () => {
       tone: 'error',
     })
   })
+  it('a storage failure is a notice, shown alongside a refresh notice', () => {
+    expect(statusBanner(state({ storageFailed: true }))).toEqual({
+      text: t('error.storage'),
+      tone: 'notice',
+    })
+    expect(statusBanner(state({ refreshError: 'offline', storageFailed: true }))?.text).toBe(
+      `${t('error.refreshFailed')} · ${t('error.storage')}`,
+    )
+  })
 })

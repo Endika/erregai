@@ -96,4 +96,6 @@ export const va: Record<string, string> = {
   'error.location': "No s'ha pogut obtindre la ubicació",
   'error.network': 'Error de xarxa',
   'error.refreshFailed': "No s'ha pogut actualitzar; es mostren les últimes dades guardades",
+  'error.storage':
+    "L'emmagatzematge del dispositiu no està disponible; les dades no es guardaran per a usar-les sense connexió",
 }

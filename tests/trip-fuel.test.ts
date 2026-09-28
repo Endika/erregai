@@ -52,10 +52,10 @@ const fakeMap = (): MapView => {
   return view as unknown as MapView
 }
 
-function makeController(): TripController {
+function makeController(kv: Kv = memKv()): TripController {
   const store = new Store({
     fetchProvince: provinceWithStations as never,
-    kv: memKv(),
+    kv,
     now: () => 1000,
   })
   // fuel is the only alert under test; silence radar to keep dataset out of it.
@@ -117,5 +117,21 @@ describe('TripController fuel alerting', () => {
     await fix(c, near)
     const bodies = fuelAlerts().map((n) => n.body ?? '')
     expect(bodies.some((b) => b.includes(PRICEY.brand))).toBe(true)
+  })
+
+  it('a broken IndexedDB still alerts on the trip and reports storageFailed', async () => {
+    const brokenKv: Kv = {
+      get: async () => {
+        throw new Error('idb read failed')
+      },
+      put: async () => {
+        throw new Error('idb write failed')
+      },
+    }
+    const c = makeController(brokenKv)
+    await fix(c, behind)
+    await fix(c, near)
+    expect(fuelAlerts()).toHaveLength(1)
+    expect((c as unknown as { store: Store }).store.state.storageFailed).toBe(true)
   })
 })

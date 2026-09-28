@@ -96,4 +96,6 @@ export const gl: Record<string, string> = {
   'error.location': 'Non se puido obter a localización',
   'error.network': 'Erro de rede',
   'error.refreshFailed': 'Non se puido actualizar; móstranse os últimos datos gardados',
+  'error.storage':
+    'O almacenamento do dispositivo non está dispoñible; os datos non se gardarán para usalos sen conexión',
 }

@@ -138,13 +138,15 @@ function locate(): void {
   locating = true
   render()
   getOnce()
-    .then((pos) => {
-      locationError = undefined
-      return store.loadFor(pos)
-    })
-    .catch(() => {
-      locationError = t('error.location')
-    })
+    .then(
+      (pos) => {
+        locationError = undefined
+        return store.loadFor(pos)
+      },
+      () => {
+        locationError = t('error.location')
+      },
+    )
     .finally(() => {
       locating = false
       render()

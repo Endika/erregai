@@ -11,6 +11,8 @@ export interface Banner {
 export function statusBanner(state: AppState, locationError?: string): Banner | undefined {
   if (locationError) return { text: locationError, tone: 'error' }
   if (state.error) return { text: `${t('error.network')}: ${state.error}`, tone: 'error' }
-  if (state.refreshError) return { text: t('error.refreshFailed'), tone: 'notice' }
-  return undefined
+  const notices: string[] = []
+  if (state.refreshError) notices.push(t('error.refreshFailed'))
+  if (state.storageFailed) notices.push(t('error.storage'))
+  return notices.length > 0 ? { text: notices.join(' · '), tone: 'notice' } : undefined
 }
