@@ -95,4 +95,5 @@ export const eu: Record<string, string> = {
 
   'error.location': 'Ezin izan da kokapena lortu',
   'error.network': 'Sareko errorea',
+  'error.refreshFailed': 'Ezin izan da eguneratu; gordetako azken datuak erakusten dira',
 }

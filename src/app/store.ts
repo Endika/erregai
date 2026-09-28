@@ -12,6 +12,7 @@ export interface AppState {
   dataDate?: string
   loading: boolean
   error?: string
+  refreshError?: string
   settings: Settings
 }
 
@@ -77,16 +78,20 @@ export class Store {
     this.notify()
   }
 
-  // Runs ensureProvince for each id and derives a single batch-level error:
-  // truthy iff at least one requested province ended the batch with no
-  // cached/loaded data (a sibling province's success must not mask that).
+  // Runs ensureProvince for each id and derives batch-level feedback. A failed
+  // fetch is an error only when it left that province with no data (a sibling
+  // province's success must not mask that); over cached data it is a
+  // refreshError, so the stations stay visible and the user still hears of it.
   private async runBatch(ids: string[], force = false): Promise<void> {
     let error: string | undefined
+    let refreshError: string | undefined
     for (const id of ids) {
       const failure = await this.ensureProvince(id, force)
-      if (failure && !this.provinces.has(id)) error = failure
+      if (!failure) continue
+      if (this.provinces.has(id)) refreshError = failure
+      else error = failure
     }
-    this.current = { ...this.current, error }
+    this.current = { ...this.current, error, refreshError }
   }
 
   private updateDataDate(): void {

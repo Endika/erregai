@@ -11,6 +11,7 @@ import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
 import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
+import { statusBanner } from './ui/banner'
 import { nearbyRadars } from './core/radars'
 import { RADARS } from './core/radars.data'
 import { nearbyServiceAreas } from './core/services'
@@ -231,10 +232,10 @@ function render(): void {
   refreshButton.classList.toggle('is-busy', busy)
   refreshButton.disabled = busy
 
-  const errorMessage =
-    locationError ?? (state.error ? `${t('error.network')}: ${state.error}` : undefined)
-  errorEl.textContent = errorMessage ?? ''
-  errorEl.hidden = !errorMessage
+  const banner = statusBanner(state, locationError)
+  errorEl.textContent = banner?.text ?? ''
+  errorEl.classList.toggle('app-error--notice', banner?.tone === 'notice')
+  errorEl.hidden = !banner
 
   viewEl.classList.toggle('is-loading', state.loading)
   viewEl.replaceChildren()
