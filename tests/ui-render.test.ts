@@ -59,4 +59,15 @@ describe('renderRadarList', () => {
     const distances = [...el.querySelectorAll('.radar-list__distance')].map((d) => d.textContent)
     expect(distances).toEqual(['420 m', '1,3 km'])
   })
+  it('marks each row with the camera glyph the map uses for radars, hidden from readers', () => {
+    const el = renderRadarList([hit('1', 0.42), hit('2', 1.26)], 'radar.list.title', 5)
+    const rows = [...el.querySelectorAll('.radar-list__row')]
+    expect(rows).toHaveLength(2)
+    for (const row of rows) {
+      const icon = row.firstElementChild!
+      expect(icon.classList.contains('radar-list__icon')).toBe(true)
+      expect(icon.getAttribute('aria-hidden')).toBe('true')
+      expect(icon.querySelector('svg.map-glyph')).not.toBeNull()
+    }
+  })
 })
