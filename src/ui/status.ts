@@ -1,4 +1,5 @@
 import type { AppState } from '../app/store'
+import { TTL_MS } from '../adapters/cache'
 import { getLocale, intlLocale, t, type Locale } from '../i18n'
 import { formatDateTime, formatNumber, hasRelativeTimeData } from '../i18n/format'
 
@@ -57,6 +58,14 @@ export function viewNoticeText(notice: ViewNotice, offline: boolean): NoticeText
 
 export function joinNotice({ title, hint }: NoticeText): string {
   return hint ? `${title}. ${hint}` : title
+}
+
+// Worth a fetch when the connection comes back: the last load failed, or the
+// prices are older than the cache would keep them.
+export function needsRefreshOnReconnect(state: AppState, now: number): boolean {
+  if (!state.pos || state.loading) return false
+  if (state.error || state.refreshError) return true
+  return state.dataStoredAt !== undefined && now - state.dataStoredAt >= TTL_MS
 }
 
 // Ages from dataStoredAt, the same clock the cached-prices banner reads, so the
