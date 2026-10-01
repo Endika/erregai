@@ -130,4 +130,15 @@ export const eu: Record<string, string> = {
   'error.refreshFailed': 'Ezin izan da eguneratu; gordetako azken datuak erakusten dira',
   'error.storage':
     'Gailuaren biltegiratzea ez dago erabilgarri; datuak ez dira gordeko konexiorik gabe erabiltzeko',
+
+  'place.search.label': 'Bilatu udalerria',
+  'place.search.hint': 'Gutxienez gasolindegi bat duten udalerriak.',
+  'place.search.none': 'Ez dago «{query}» bilaketarekin bat datorren gasolindegidun udalerririk',
+  'place.manual': 'Kokapena: {place} (eskuz aukeratua)',
+  'place.useGps': 'Erabili nire kokapena',
+  'radar.offline.offer': 'Ikusi radarrak (konexiorik gabe ere badabiltza)',
+  'trip.needsLocation':
+    'Bidaiak zure kokapena behar du denbora errealean: eman kokapenerako baimena nabigatzailearen ezarpenetan.',
+  'trip.radarsOnly':
+    'Oraingoz ez dago preziorik: bidaiak radar finkoez ohartaraziko zaitu, konexiorik gabe ere badabiltza eta.',
 }

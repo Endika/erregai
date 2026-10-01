@@ -1,9 +1,16 @@
 import { DEFAULT_FUEL, type FuelId } from '../core/fuels'
 import type { SortKey } from '../core/pricing'
+import type { LatLon } from '../core/geo'
 import type { Locale } from '../i18n'
 
 export type Theme = 'light' | 'system' | 'dark'
 export type FuelAlertMode = 'cheap' | 'any' | 'off'
+
+export interface ManualPlace {
+  name: string
+  province: string
+  pos: LatLon
+}
 
 // locale is left unset by default: the app falls back to browser-detected
 // locale until the user explicitly picks one in settings (see main.ts).
@@ -27,6 +34,8 @@ export interface Settings {
   fuelAlertMode: FuelAlertMode
   fuelAlertDistanceM: number
   fuelSound: boolean
+  // Set while the user has picked a town by hand instead of sharing a location.
+  manualPlace?: ManualPlace
 }
 export const DEFAULT_SETTINGS: Settings = {
   fuel: DEFAULT_FUEL,

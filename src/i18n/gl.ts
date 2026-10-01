@@ -130,4 +130,15 @@ export const gl: Record<string, string> = {
   'error.refreshFailed': 'Non se puido actualizar; móstranse os últimos datos gardados',
   'error.storage':
     'O almacenamento do dispositivo non está dispoñible; os datos non se gardarán para usalos sen conexión',
+
+  'place.search.label': 'Buscar concello',
+  'place.search.hint': 'Concellos con polo menos unha gasolineira.',
+  'place.search.none': 'Ningún concello con gasolineira coincide con «{query}»',
+  'place.manual': 'Localización: {place} (escollida a man)',
+  'place.useGps': 'Usar a miña localización',
+  'radar.offline.offer': 'Ver radares (funcionan sen conexión)',
+  'trip.needsLocation':
+    'A viaxe necesita a túa localización en tempo real: permite o acceso á localización na configuración do navegador.',
+  'trip.radarsOnly':
+    'Sen prezos agora mesmo: a viaxe avisarate dos radares fixos, que funcionan sen conexión.',
 }

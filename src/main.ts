@@ -13,6 +13,8 @@ import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
 import { createAnnouncer } from './ui/announcer'
+import { renderPlaceSearch, renderPlaceStrip } from './ui/place-search'
+import { placesFromRows, type Place } from './core/places'
 import {
   freshnessStamp,
   freshnessText,
@@ -61,6 +63,10 @@ let selectedStation: Station | undefined
 let locationError: LocationProblem | undefined
 let locating = false
 let inlineError = false
+// Only a refusal blocks a trip: an unavailable fix may come back once moving.
+let gpsDenied = false
+let placeQuery = ''
+let places: Promise<readonly Place[]> | undefined
 let freshnessTimer: number | undefined
 
 const root: HTMLElement =
@@ -123,18 +129,20 @@ root.addEventListener('click', (e) => {
     return
   }
   const tabButton = target.closest<HTMLElement>('[data-tab]')
-  if (tabButton) {
-    const previousTab = activeTab
-    activeTab = tabButton.dataset.tab as Tab
-    render()
-    if (activeTab !== previousTab) viewEl.scrollTop = 0
-    if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
-    if (activeTab === 'trip') {
-      const tp = tripController.currentUpdate?.state.lastPos ?? store.state.pos
-      if (tp) mapView.focus(tp, TRIP_ZOOM)
-    }
-  }
+  if (tabButton) showTab(tabButton.dataset.tab as Tab)
 })
+
+function showTab(tab: Tab): void {
+  const previousTab = activeTab
+  activeTab = tab
+  render()
+  if (activeTab !== previousTab) viewEl.scrollTop = 0
+  if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
+  if (activeTab === 'trip') {
+    const tp = tripController.currentUpdate?.state.lastPos ?? store.state.pos
+    if (tp) mapView.focus(tp, TRIP_ZOOM)
+  }
+}
 
 function selectStation(station: Station): void {
   selectedStation = station
@@ -176,10 +184,13 @@ function locate(): void {
     .then(
       (pos) => {
         locationError = undefined
+        gpsDenied = false
+        if (store.state.settings.manualPlace) store.setSettings({ manualPlace: undefined })
         return store.loadFor(pos)
       },
       (err: unknown) => {
         locationError = locationProblem(err)
+        gpsDenied = locationError === 'denied'
       },
     )
     .finally(() => {
@@ -188,29 +199,96 @@ function locate(): void {
     })
 }
 
+// Lazy: the town list is only fetched by someone who needs it, and the
+// service worker precaches the chunk so it is there offline too.
+function loadPlaces(): Promise<readonly Place[]> {
+  places ??= import('./core/places.data').then((m) =>
+    placesFromRows(m.PLACE_ROWS, m.PLACE_PROVINCES),
+  )
+  return places
+}
+
+function usePlace(place: Place): void {
+  locationError = undefined
+  placeQuery = ''
+  const { name, province, pos } = place
+  store.setSettings({ manualPlace: { name, province, pos } })
+  void store.loadFor(pos)
+}
+
+function renderPlaceStripIn(container: HTMLElement): void {
+  const manual = store.state.settings.manualPlace
+  if (manual) container.appendChild(renderPlaceStrip({ name: manual.name, onUseGps: locate }))
+}
+
+function actionButton(label: string, primary: boolean, onClick: () => void): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = primary ? 'notice__action' : 'notice__action notice__action--secondary'
+  button.textContent = label
+  button.addEventListener('click', onClick)
+  return button
+}
+
+function showRadars(): void {
+  if (!store.state.settings.radarLayerEnabled) store.setSettings({ radarLayerEnabled: true })
+  showTab('map')
+}
+
+function hasRadarsAround(pos: LatLon): boolean {
+  return nearbyRadars(pos, RADARS, store.state.settings.radiusKm, 1).length > 0
+}
+
+// Loading and an empty radius are ordinary states and stay quiet; a failure
+// gets a toned box and a way forward, not just a sentence and Retry.
 function renderNotice(notice: ViewNotice): void {
   const { title, hint } = viewNoticeText(notice, !navigator.onLine)
-  const placeholder = document.createElement('p')
-  placeholder.className = 'placeholder'
-  placeholder.textContent = title
+  if (notice.kind !== 'location' && notice.kind !== 'loadFailed') {
+    const placeholder = document.createElement('p')
+    placeholder.className = 'placeholder'
+    placeholder.textContent = title
+    viewEl.appendChild(placeholder)
+    return
+  }
+  const box = document.createElement('section')
+  box.className = 'notice'
+  box.dataset.tone = notice.kind === 'location' ? 'warn' : 'error'
+  const heading = document.createElement('p')
+  heading.className = 'notice__title'
+  heading.textContent = title
+  box.appendChild(heading)
   if (hint) {
-    const detail = document.createElement('span')
-    detail.className = 'placeholder__hint'
+    const detail = document.createElement('p')
+    detail.className = 'notice__hint'
     detail.textContent = hint
-    placeholder.appendChild(detail)
+    box.appendChild(detail)
   }
-  viewEl.appendChild(placeholder)
-  if (notice.kind === 'location' || notice.kind === 'loadFailed') {
-    const retry = document.createElement('button')
-    retry.type = 'button'
-    retry.className = 'placeholder-retry'
-    retry.textContent = t('action.retry')
-    retry.addEventListener(
-      'click',
-      notice.kind === 'location' ? locate : () => void store.refresh(),
+  const actions = document.createElement('div')
+  actions.className = 'notice__actions'
+  if (notice.kind === 'location') {
+    box.appendChild(
+      renderPlaceSearch({
+        load: loadPlaces,
+        onPick: usePlace,
+        query: placeQuery,
+        onQuery: (q) => {
+          placeQuery = q
+        },
+      }),
     )
-    viewEl.appendChild(retry)
+    actions.appendChild(actionButton(t('action.retry'), false, locate))
+  } else {
+    const pos = store.state.pos
+    if (pos && hasRadarsAround(pos))
+      actions.appendChild(actionButton(t('radar.offline.offer'), true, showRadars))
+    actions.appendChild(
+      actionButton(t('action.retry'), false, () => {
+        void store.refresh()
+      }),
+    )
   }
+  box.appendChild(actions)
+  viewEl.appendChild(box)
 }
 
 function isInlineError(notice: ViewNotice | undefined): boolean {
@@ -334,6 +412,7 @@ function render(): void {
   if (activeTab === 'list') {
     const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
     notice = noticeFor(nearby.length)
+    renderPlaceStripIn(viewEl)
     if (notice) {
       renderNotice(notice)
     } else if (state.pos) {
@@ -359,6 +438,7 @@ function render(): void {
         : []
       notice = noticeFor(nearby.length + radarHits.length + serviceHits.length)
       if (notice) {
+        renderPlaceStripIn(viewEl)
         renderNotice(notice)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
@@ -369,6 +449,7 @@ function render(): void {
         mapWrap.appendChild(mapContainer)
         const listWrap = document.createElement('div')
         listWrap.className = 'map-split__list'
+        renderPlaceStripIn(listWrap)
         split.append(mapWrap, listWrap)
         viewEl.appendChild(split)
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, {
@@ -447,7 +528,10 @@ function render(): void {
     }
     const readout = document.createElement('div')
     viewEl.appendChild(readout)
-    tripController.render(readout, tripController.currentUpdate, selectedId)
+    tripController.render(readout, tripController.currentUpdate, selectedId, {
+      locationDenied: gpsDenied,
+      pricesUnavailable: state.error !== undefined && state.stations.length === 0,
+    })
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
   }
@@ -466,4 +550,19 @@ store.subscribe(render)
 render()
 document.addEventListener('visibilitychange', syncFreshnessTimer)
 syncFreshnessTimer()
-locate()
+
+// A town picked by hand outlives a reload: asking for the location again would
+// only bring back the prompt or the refusal the user already worked around.
+const manualPlace = store.state.settings.manualPlace
+if (manualPlace) {
+  void store.loadFor(manualPlace.pos)
+  void navigator.permissions
+    ?.query({ name: 'geolocation' })
+    .then((status) => {
+      gpsDenied = status.state === 'denied'
+      render()
+    })
+    .catch(() => {})
+} else {
+  locate()
+}
