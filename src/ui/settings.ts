@@ -11,6 +11,9 @@ const THEMES: readonly Theme[] = ['light', 'system', 'dark']
 const RADAR_DISTANCES_M: readonly number[] = [300, 500, 800, 1000, 1500]
 const FUEL_ALERT_MODES: readonly FuelAlertMode[] = ['cheap', 'any', 'off']
 const FUEL_DISTANCES_M: readonly number[] = [1000, 2000, 3000, 5000]
+// Prices come from one province per load, so a radius past ~50 km finds nothing
+// more; a free number let 500 through and looked like it meant something.
+const RADIUS_KM: readonly number[] = [5, 10, 15, 25, 50]
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
@@ -66,10 +69,13 @@ function toggleField(
 ): HTMLLabelElement {
   const input = document.createElement('input')
   input.type = 'checkbox'
+  input.setAttribute('role', 'switch')
   input.dataset.field = fieldName
   input.checked = checked
   input.addEventListener('change', () => onToggle(input.checked))
-  return field(labelText, input)
+  const row = field(labelText, input)
+  row.classList.add('settings-form__field--toggle')
+  return row
 }
 
 function buttonField(labelText: string, onClick: () => void): HTMLElement {
@@ -79,25 +85,6 @@ function buttonField(labelText: string, onClick: () => void): HTMLElement {
   button.textContent = labelText
   button.addEventListener('click', onClick)
   return button
-}
-
-function numberField(
-  labelText: string,
-  fieldName: string,
-  currentValue: number,
-  onCommit: (value: number) => void,
-): HTMLLabelElement {
-  const input = document.createElement('input')
-  input.type = 'number'
-  input.min = '1'
-  input.step = '1'
-  input.dataset.field = fieldName
-  input.value = String(currentValue)
-  input.addEventListener('change', () => {
-    const value = Number(input.value)
-    if (Number.isFinite(value) && value > 0) onCommit(value)
-  })
-  return field(labelText, input)
 }
 
 function rangeField(
@@ -134,6 +121,15 @@ function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement
   return section
 }
 
+// A radius saved before the fixed choices existed stays listed, so the control
+// shows what the app is actually using until the user picks another.
+function radiusOptions(current: number): SelectOption[] {
+  const values = RADIUS_KM.includes(current)
+    ? RADIUS_KM
+    : [...RADIUS_KM, current].sort((a, b) => a - b)
+  return values.map((km) => ({ value: String(km), label: `${formatNumber(km)} km` }))
+}
+
 function metersOptions(values: readonly number[]): SelectOption[] {
   return values.map((m) => ({
     value: String(m),
@@ -166,8 +162,12 @@ export function renderSettings(
       SORT_KEYS.map((key) => ({ value: key, label: t(`sort.${key}`) })),
       (value) => onChange({ sort: value as SortKey }),
     ),
-    numberField(t('settings.radius'), 'radiusKm', settings.radiusKm, (value) =>
-      onChange({ radiusKm: value }),
+    selectField(
+      t('settings.radius'),
+      'radiusKm',
+      String(settings.radiusKm),
+      radiusOptions(settings.radiusKm),
+      (value) => onChange({ radiusKm: Number(value) }),
     ),
     selectField(
       t('settings.locale'),
@@ -271,7 +271,7 @@ export function renderSettings(
   aboutTitle.textContent = t('settings.about')
   const legend = document.createElement('div')
   legend.className = 'legend'
-  for (const band of ['cheap', 'expensive'] as const) {
+  for (const band of ['cheap', 'mid', 'expensive'] as const) {
     const item = document.createElement('span')
     item.className = 'legend__item'
     item.dataset.band = band
