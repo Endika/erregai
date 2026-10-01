@@ -31,11 +31,11 @@ describe('renderList', () => {
     const far = { ...s('1', 1.739), pos: { lat: 40.0112, lon: -3 } }
     setLocale('en')
     renderList(el, [far], 'gasoleoA', { lat: 40, lon: -3 }, () => {})
-    expect(el.querySelector('.station-row__price')?.textContent).toBe('1.739')
+    expect(el.querySelector('.station-row__price-value')?.textContent).toBe('1.739')
     expect(el.querySelector('.station-row__distance')?.textContent).toBe('1.2 km')
     setLocale('eu')
     renderList(el, [far], 'gasoleoA', { lat: 40, lon: -3 }, () => {})
-    expect(el.querySelector('.station-row__price')?.textContent).toBe('1,739')
+    expect(el.querySelector('.station-row__price-value')?.textContent).toBe('1,739')
     expect(el.querySelector('.station-row__distance')?.textContent).toBe('1,2 km')
     setLocale('es')
   })
@@ -46,6 +46,43 @@ describe('renderList', () => {
     const price = el.querySelector('.station-row__price')!
     expect(price.getAttribute('aria-label')).toBe('1,739 €/l, barata')
     expect(price.getAttribute('title')).toBe('Barata')
+  })
+
+  it('puts the brand and the price on the first line', () => {
+    const el = document.createElement('div')
+    renderList(el, [s('1', 1.739)], 'gasoleoA', { lat: 40, lon: -3 }, () => {})
+    const row = el.querySelector('.station-row')!
+    const [head, meta] = [...row.children]
+    expect(head.className).toBe('station-row__head')
+    expect([...head.children].map((c) => c.className)).toEqual([
+      'station-row__brand',
+      'station-row__price',
+    ])
+    expect(meta.className).toBe('station-row__meta')
+  })
+
+  it('shows the unit in the pill without voicing it twice', () => {
+    const el = document.createElement('div')
+    renderList(el, [s('1', 1.739)], 'gasoleoA', { lat: 40, lon: -3 }, () => {})
+    const unit = el.querySelector('.station-row__price .station-row__price-unit')!
+    expect(unit.textContent).toBe('€/l')
+    expect(unit.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('puts the town, the distance and the schedule on the second line', () => {
+    const el = document.createElement('div')
+    const closed = { ...s('1', 1.739), schedule: 'L-D: 06:00-22:00' }
+    renderList(el, [closed], 'gasoleoA', { lat: 40, lon: -3 }, () => {}, {
+      now: new Date(2026, 0, 7, 23, 30),
+    })
+    const meta = el.querySelector('.station-row__meta')!
+    const parts = [...meta.children].filter((c) => c.getAttribute('aria-hidden') !== 'true')
+    expect(parts.map((c) => c.className)).toEqual([
+      'station-row__town',
+      'station-row__distance',
+      'station-row__schedule',
+    ])
+    expect(meta.textContent).toBe('Madrid·0,0 kmCerrado ahora')
   })
 })
 
