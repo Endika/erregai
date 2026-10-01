@@ -155,13 +155,14 @@ export class MapView {
 
     this.aheadDeg = opts.aheadDeg
     if (opts.recenter) this.centerOn(pos, this.map.getZoom())
-    this.userMarker?.setLatLng([pos.lat, pos.lon])
+    const colors = readMarkerColors()
+    // Re-read each time: the dark theme lifts the dot's blue for the dark tiles.
+    this.userMarker?.setLatLng([pos.lat, pos.lon]).setStyle({ fillColor: colors.user })
     if (opts.radiusKm !== undefined) this.showRadius(this.map, pos, opts.radiusKm)
     else this.hideRadius()
     this.markers.clearLayers()
 
     const reference = opts.reference ?? priceReference(stations, fuel)
-    const colors = readMarkerColors()
 
     for (const station of stations) {
       const price = priceOf(station, fuel)

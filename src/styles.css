@@ -19,9 +19,11 @@
   /* Raspberry, not the error red: dear is a fact about a price, not a danger. */
   --band-expensive-fg: #a0365e;
 
-  /* Map marker colours: fixed (not theme-conditional) because OSM tiles are
-     always light — these need contrast against a light basemap regardless
-     of the app's light/dark theme. */
+  /* Map marker colours, tuned against the light OSM basemap. The dark theme
+     darkens the tiles with --map-tile-filter and lifts the four fills that fell
+     under 3:1 there; the white ring on every pin keeps its edge either way. */
+  --map-tile-filter: none;
+  --map-ground: #dddddd;
   --map-marker-cheap: #1e7d32;
   --map-marker-mid: #b06d00;
   --map-marker-expensive: #a0365e;
@@ -55,6 +57,17 @@
     --band-mid-fg: #e6bf5a;
     --band-expensive-bg: #3a1414;
     --band-expensive-fg: #f2a7bd;
+
+    /* OSM has no dark style; inverting and turning the hue back keeps water
+       blue and parks green, and the brightness and contrast trims keep the
+       labels light grey rather than a glaring white. */
+    --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+    /* What shows before a tile lands; Leaflet's light grey flashes at night. */
+    --map-ground: var(--color-bg);
+    --map-marker-cheap: #2c853e;
+    --map-marker-expensive: #af5678;
+    --map-marker-unknown: #747474;
+    --map-marker-user: #3272d8;
   }
 }
 
@@ -74,6 +87,13 @@
   --band-mid-fg: #e6bf5a;
   --band-expensive-bg: #3a1414;
   --band-expensive-fg: #f2a7bd;
+
+  --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+  --map-ground: var(--color-bg);
+  --map-marker-cheap: #2c853e;
+  --map-marker-expensive: #af5678;
+  --map-marker-unknown: #747474;
+  --map-marker-user: #3272d8;
 }
 
 * {
@@ -196,6 +216,16 @@ body {
 .map-view {
   width: 100%;
   height: 100%;
+}
+
+/* Tiles only: markers, popups, controls and the attribution sit in other
+   panes and keep their own colours. */
+.leaflet-tile-pane {
+  filter: var(--map-tile-filter);
+}
+
+.map-view.leaflet-container {
+  background: var(--map-ground);
 }
 
 .trip-map {
