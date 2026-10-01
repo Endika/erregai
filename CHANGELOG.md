@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.1](https://github.com/Endika/erregai/compare/v1.22.0...v1.22.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* make trip alerts glanceable with hazard styling, live distances and GPS status ([7c907f0](https://github.com/Endika/erregai/commit/7c907f000c5e190f82ad938d9091ed16d1146515))
+
 ## [1.22.0](https://github.com/Endika/erregai/compare/v1.21.4...v1.22.0) (2026-10-01)
 
 
