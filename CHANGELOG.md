@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.22.0](https://github.com/Endika/erregai/compare/v1.21.4...v1.22.0) (2026-10-01)
+
+
+### Features
+
+* lead the station card with the chosen fuel price and directions ([8091576](https://github.com/Endika/erregai/commit/8091576f8f13a4672794c5b215b415e5c8905a19))
+
+
+### Bug Fixes
+
+* show a human offline/location error with retry instead of a false empty state ([bd96fae](https://github.com/Endika/erregai/commit/bd96fae55e1affe8871298fadd1d9de8108afbb9))
+
 ## [1.21.4](https://github.com/Endika/erregai/compare/v1.21.3...v1.21.4) (2026-09-28)
 
 
