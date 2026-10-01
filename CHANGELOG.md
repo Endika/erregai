@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.27.0](https://github.com/Endika/erregai/compare/v1.26.0...v1.27.0) (2026-10-01)
+
+
+### Features
+
+* add a collapsible legend to the map ([b8af30c](https://github.com/Endika/erregai/commit/b8af30cecd959d473c92f427856b025aed529573))
+
+
+### Bug Fixes
+
+* darken the map tiles in the dark theme and lift the pins that lost contrast ([db22fe9](https://github.com/Endika/erregai/commit/db22fe93b93e48387f6ec2e67879943376cb3b06))
+* frame the radius on entering the map tab, with a circle and a reframe control ([7a83df2](https://github.com/Endika/erregai/commit/7a83df2c64ea3fef6fd10d2f45d4b824482448e5))
+
 ## [1.26.0](https://github.com/Endika/erregai/compare/v1.25.0...v1.26.0) (2026-10-01)
 
 
