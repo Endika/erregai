@@ -58,6 +58,8 @@ export const eu: Record<string, string> = {
   'trip.mediaSession.title': 'Bidaia modua',
   'trip.cheapestAhead': '{fuel} merkeena aurrean',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
+  'trip.ahead.showAll': 'Ikusi guztiak ({n})',
+  'trip.ahead.showFewer': 'Ikusi gutxiago',
   'trip.slot.radar': 'Radarra',
   'trip.slot.more.cheapest': 'Merkeena',
   'trip.slot.more.fuel': 'Gertu',

@@ -35,7 +35,7 @@ export function renderSortBar(
 
 // A native select: the phone's own picker is one-handed and accessible, and
 // the optgroups keep the four usual fuels ahead of the rare ones.
-function renderFuelControl(fuel: FuelControl): HTMLElement {
+export function renderFuelControl(fuel: FuelControl): HTMLElement {
   const wrap = document.createElement('div')
   wrap.className = 'sort-bar__fuel'
 

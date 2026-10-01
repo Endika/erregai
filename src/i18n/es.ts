@@ -57,6 +57,8 @@ export const es: Record<string, string> = {
   'trip.mediaSession.title': 'Modo viaje',
   'trip.cheapestAhead': 'Más barata en {fuel} por delante',
   'trip.noneAhead': 'Aún no hay gasolineras por delante',
+  'trip.ahead.showAll': 'Ver todas ({n})',
+  'trip.ahead.showFewer': 'Ver menos',
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Más barata',
   'trip.slot.more.fuel': 'Cerca',

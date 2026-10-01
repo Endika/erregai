@@ -58,6 +58,8 @@ export const ca: Record<string, string> = {
   'trip.mediaSession.title': 'Mode viatge',
   'trip.cheapestAhead': 'La més barata en {fuel} al davant',
   'trip.noneAhead': 'Encara no hi ha benzineres al davant',
+  'trip.ahead.showAll': 'Veure-les totes ({n})',
+  'trip.ahead.showFewer': "Veure'n menys",
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Més barata',
   'trip.slot.more.fuel': 'A prop',

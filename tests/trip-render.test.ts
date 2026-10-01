@@ -304,9 +304,9 @@ describe('trip fuel name', () => {
     expect(label.textContent).toBe('Más barata en Gasóleo A por delante')
   })
 
-  it('switches fuel from the trip sort bar before the trip starts', () => {
+  it('switches fuel from the trip view before the trip starts', () => {
     const c = makeController([CHEAP, PRICEY])
-    const select = draw(c).querySelector<HTMLSelectElement>('.sort-bar select')!
+    const select = draw(c).querySelector<HTMLSelectElement>('.trip-view select')!
     expect(select.value).toBe('gasoleoA')
     select.value = 'gasolina95'
     select.dispatchEvent(new Event('change'))
@@ -378,10 +378,17 @@ describe('trip layout', () => {
     c.stop()
   })
 
+  it('offers the fuel but no order before the trip starts', () => {
+    const el = draw(makeController([CHEAP, PRICEY]))
+    expect(el.querySelector('.trip-view select')).not.toBeNull()
+    expect(el.querySelector('.sort-bar')).toBeNull()
+    expect(el.querySelector('[aria-pressed]')).toBeNull()
+    for (const key of ['sort.price', 'sort.distance']) expect(el.textContent).not.toContain(t(key))
+  })
+
   it('leaves sorting and the fuel picker out of an active trip', async () => {
     installGeolocation()
     const c = makeController([CHEAP, PRICEY])
-    expect(draw(c).querySelector('.sort-bar')).not.toBeNull()
     await c.start()
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
@@ -390,6 +397,65 @@ describe('trip layout', () => {
     expect(el.querySelector('select')).toBeNull()
     expect(el.querySelector('.trip-view__gps')).not.toBeNull()
     expect(el.querySelectorAll('.trip-view__row').length).toBeGreaterThan(0)
+    c.stop()
+  })
+})
+
+describe('trip rows ahead', () => {
+  const FAR_CHEAP = st('far-cheap', 40.1, 0.9)
+  const NEAR_DEAR = st('near-dear', 40.021, 2.5)
+  const FIVE = [CHEAP, MID, PRICEY, FAR_CHEAP, NEAR_DEAR]
+  const ids = (el: HTMLElement) =>
+    [...el.querySelectorAll<HTMLElement>('.trip-view__row')].map((r) => r.dataset.station)
+  const toggleOf = (el: HTMLElement) =>
+    el.querySelector<HTMLButtonElement>('.trip-view__ahead-toggle')
+
+  async function aheadOf(stations: Station[]): Promise<TripController> {
+    const c = await running(stations)
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    return c
+  }
+
+  it('lists the cheapest three first, whatever order was kept in settings', async () => {
+    const c = await aheadOf(FIVE)
+    c['store'].setSettings({ tripSort: 'distance' })
+    expect(ids(draw(c))).toEqual(['far-cheap', 'cheap', 'mid'])
+    c.stop()
+  })
+
+  it('shows every station behind a toggle that says how many there are', async () => {
+    const c = await aheadOf(FIVE)
+    const collapsed = draw(c)
+    const toggle = toggleOf(collapsed)!
+    expect(toggle.textContent).toBe(t('trip.ahead.showAll').replace('{n}', '5'))
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    toggle.click()
+    const expanded = draw(c)
+    expect(ids(expanded)).toEqual(['far-cheap', 'cheap', 'mid', 'pricey', 'near-dear'])
+    expect(toggleOf(expanded)!.getAttribute('aria-expanded')).toBe('true')
+    expect(toggleOf(expanded)!.textContent).toBe(t('trip.ahead.showFewer'))
+    toggleOf(expanded)!.click()
+    expect(ids(draw(c))).toHaveLength(3)
+    c.stop()
+  })
+
+  it('needs no toggle when three or fewer stations are ahead', async () => {
+    const c = await aheadOf([CHEAP, MID, PRICEY])
+    const el = draw(c)
+    expect(ids(el)).toHaveLength(3)
+    expect(toggleOf(el)).toBeNull()
+    c.stop()
+  })
+
+  it('starts the next trip collapsed again', async () => {
+    const c = await aheadOf(FIVE)
+    toggleOf(draw(c))!.click()
+    c.stop()
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    expect(ids(draw(c))).toHaveLength(3)
     c.stop()
   })
 })
@@ -585,7 +651,19 @@ describe('trip start without a usable location or prices', () => {
     const view = el.querySelector('.trip-view')!
     expect(view.firstElementChild!.classList.contains('trip-view__toggle')).toBe(true)
     expect(el.querySelector('.trip-view__intro')).toBeNull()
-    expect(el.querySelector('.sort-bar')).toBeNull()
+    expect(el.querySelector('select')).toBeNull()
+    expect(el.querySelectorAll('.trip-view__note')).toHaveLength(1)
     expect(el.querySelector('.trip-view__note')!.textContent).toBe(t('trip.radarsOnly'))
+  })
+
+  it('says once, mid-trip too, that without prices only radars are left', async () => {
+    const c = await running()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const el = drawWith(c, { pricesUnavailable: true })
+    expect(el.querySelectorAll('.trip-view__note')).toHaveLength(1)
+    expect(el.querySelector('.trip-view__note')!.textContent).toBe(t('trip.radarsOnly'))
+    expect(el.querySelector('.trip-view__empty')).toBeNull()
+    c.stop()
   })
 })
