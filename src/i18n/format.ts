@@ -53,6 +53,13 @@ export function formatDistance(km: number, locale: Locale = getLocale()): string
   return `${numberFormat(locale, 'm', { maximumFractionDigits: 0 }).format(m)} m`
 }
 
+// Whole percent with the locale's own spacing and sign order: "70 %", "% 70".
+export function formatPercent(fraction: number, locale: Locale = getLocale()): string {
+  return numberFormat(locale, 'percent', { style: 'percent', maximumFractionDigits: 0 }).format(
+    fraction,
+  )
+}
+
 export function formatNumber(n: number, locale: Locale = getLocale()): string {
   return numberFormat(locale, 'plain', {}).format(n)
 }

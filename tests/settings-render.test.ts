@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { renderSettings } from '../src/ui/settings'
 import { DEFAULT_SETTINGS } from '../src/app/settings'
-import { setLocale, t } from '../src/i18n'
+import { LOCALE_ORDER, setLocale, t } from '../src/i18n'
+import { formatPercent } from '../src/i18n/format'
 
 describe('renderSettings', () => {
   it('renders the general, services, radar and fuel section headings in order', () => {
@@ -144,5 +145,48 @@ describe('renderSettings', () => {
       expect(label.classList.contains('settings-form__field--toggle')).toBe(true)
       expect(label.querySelector('.settings-form__label')!.textContent).not.toBe('')
     }
+  })
+})
+
+describe('settings labels', () => {
+  const squash = (s: string | null) => (s ?? '').toLowerCase().replace(/[^\p{L}]/gu, '')
+
+  it.each(LOCALE_ORDER)('never repeat their section title as a field label (%s)', (locale) => {
+    setLocale(locale)
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    for (const section of el.querySelectorAll('.settings-section')) {
+      const title = squash(section.querySelector('.settings-section__title')!.textContent)
+      const labels = [...section.querySelectorAll('.settings-form__label')].map((l) =>
+        squash(l.textContent),
+      )
+      expect(labels).not.toContain(title)
+    }
+    setLocale('es')
+  })
+})
+
+describe('volume slider', () => {
+  const draw = (volume: number) => {
+    const el = document.createElement('div')
+    renderSettings(el, { ...DEFAULT_SETTINGS, alertVolume: volume }, () => {})
+    const input = el.querySelector<HTMLInputElement>('[data-field="alertVolume"]')!
+    const shown = input.closest('label')!.querySelector('.settings-form__value')!
+    return { input, shown }
+  }
+
+  it('shows its level as a percentage in the reader locale', () => {
+    const { input, shown } = draw(0.7)
+    expect(shown.textContent).toBe(formatPercent(0.7))
+    expect(shown.textContent).toBe('70 %')
+    expect(input.getAttribute('aria-valuetext')).toBe(formatPercent(0.7))
+  })
+
+  it('follows the thumb while it is dragged', () => {
+    const { input, shown } = draw(0.7)
+    input.value = '0.4'
+    input.dispatchEvent(new Event('input'))
+    expect(shown.textContent).toBe(formatPercent(0.4))
+    expect(input.getAttribute('aria-valuetext')).toBe(formatPercent(0.4))
   })
 })

@@ -2,7 +2,7 @@ import { FUELS } from '../core/fuels'
 import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
-import { formatDistance, formatNumber } from '../i18n/format'
+import { formatDistance, formatNumber, formatPercent } from '../i18n/format'
 import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 
@@ -102,13 +102,30 @@ function rangeField(
   input.step = '0.1'
   input.dataset.field = fieldName
   input.value = String(currentValue)
+  // The level in words next to the label; the slider itself voices the same
+  // text, so the visible copy stays out of the accessibility tree.
+  const shown = document.createElement('span')
+  shown.className = 'settings-form__value'
+  shown.setAttribute('aria-hidden', 'true')
+  const show = (): void => {
+    const text = formatPercent(Number(input.value))
+    shown.textContent = text
+    input.setAttribute('aria-valuetext', text)
+  }
+  show()
+  input.addEventListener('input', show)
   // 'change', not 'input': commit once on release rather than on every pixel of
   // the drag, so the level is not saved (and previewed) dozens of times.
   input.addEventListener('change', () => {
     const value = Number(input.value)
     if (Number.isFinite(value)) onCommit(value)
   })
-  return field(labelText, input)
+  const row = field(labelText, input)
+  const head = document.createElement('span')
+  head.className = 'settings-form__head'
+  head.append(row.querySelector('.settings-form__label')!, shown)
+  row.prepend(head)
+  return row
 }
 
 function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement {

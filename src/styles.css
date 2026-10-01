@@ -196,7 +196,6 @@ body {
 .map-view {
   width: 100%;
   height: 100%;
-  min-height: 20rem;
 }
 
 .trip-map {
@@ -1227,6 +1226,20 @@ body {
 .settings-form__label {
   color: var(--color-muted);
   font-size: 0.875rem;
+}
+
+.settings-form__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.settings-form__value {
+  color: var(--color-fg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .settings-form select,

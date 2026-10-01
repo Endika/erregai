@@ -144,14 +144,23 @@ function showTab(tab: Tab): void {
   }
 }
 
+// Set when a card opens, so only that render moves focus into it.
+let focusCard = false
+
 function selectStation(station: Station): void {
   selectedStation = station
+  focusCard = true
   render()
 }
 
+// Focus goes back to the row the card was opened from, found again by id
+// because the render just rebuilt every row.
 function closeCard(): void {
+  const id = selectedStation?.id
   selectedStation = undefined
   render()
+  const rows = viewEl.querySelectorAll<HTMLElement>('[data-station]')
+  ;[...rows].find((row) => row.dataset.station === id)?.focus()
 }
 
 function renderCard(reference: PriceReference | undefined): void {
@@ -160,10 +169,12 @@ function renderCard(reference: PriceReference | undefined): void {
     cardEl.replaceChildren()
     return
   }
+  // Every render rebuilds the card; whoever was on its close button stays there.
+  const closeHadFocus = document.activeElement?.classList.contains('detail-card__close') ?? false
   const close = document.createElement('button')
   close.type = 'button'
   close.className = 'detail-card__close'
-  close.setAttribute('aria-label', t('nav.back'))
+  close.setAttribute('aria-label', t('nav.close'))
   close.textContent = '×'
   close.addEventListener('click', closeCard)
   const detailContainer = document.createElement('div')
@@ -175,6 +186,16 @@ function renderCard(reference: PriceReference | undefined): void {
   })
   cardEl.replaceChildren(close, detailContainer)
   cardEl.hidden = false
+  if (focusCard) {
+    focusCard = false
+    const heading = cardEl.querySelector<HTMLElement>('.station-detail__brand')
+    if (heading) {
+      heading.tabIndex = -1
+      heading.focus()
+    }
+  } else if (closeHadFocus) {
+    close.focus()
+  }
 }
 
 function locate(): void {
