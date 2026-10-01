@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.23.0](https://github.com/Endika/erregai/compare/v1.22.4...v1.23.0) (2026-10-01)
+
+
+### Features
+
+* show the selected fuel in the sort bar and switch it from there ([bc87809](https://github.com/Endika/erregai/commit/bc8780932015ac04018a34afc61125936b17a78a))
+
+
+### Bug Fixes
+
+* keep trip alerts above the fold, distinct from buttons and announced once ([ff4f0e4](https://github.com/Endika/erregai/commit/ff4f0e49084daa4795a60ba89546a24838b6690b))
+
 ## [1.22.4](https://github.com/Endika/erregai/compare/v1.22.3...v1.22.4) (2026-10-01)
 
 
