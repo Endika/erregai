@@ -96,6 +96,46 @@ describe('price reference', () => {
     expect(stationBand(mk('none', 5), 'gasoleoA', ref)).toBeUndefined()
     expect(stationBand(mk('lone', 5, 1.2), 'gasoleoA', undefined)).toBeUndefined()
   })
+
+  it('cuts the upper tercile as the mirror of the lower one', () => {
+    const thresholds = bandThresholds([1.4, 1.5, 1.6])
+    expect(thresholds).toEqual({ low: 1.4, high: 1.6 })
+    expect(bandForThresholds(1.4, thresholds)).toBe('cheap')
+    expect(bandForThresholds(1.5, thresholds)).toBe('mid')
+    expect(bandForThresholds(1.6, thresholds)).toBe('expensive')
+    const six = bandThresholds([1.0, 1.1, 1.2, 1.3, 1.4, 1.5])
+    expect(six).toEqual({ low: 1.1, high: 1.4 })
+    // Prices tied at the top stay together in the upper band.
+    expect(bandThresholds([1.2, 1.3, 1.4, 1.5, 1.5, 1.5]).high).toBe(1.5)
+  })
+
+  it('never calls a station at the average expensive, nor cheap', () => {
+    const band = (prices: number[], price: number) =>
+      stationBand(
+        mk('x', 0, price),
+        'gasoleoA',
+        priceReference(
+          prices.map((p, i) => mk(`s${i}`, 0, p)),
+          'gasoleoA',
+        ),
+      )
+    // Bilbao: 1,459 sat on the upper tercile, a fifth of a cent under the average.
+    const bilbao = [1.399, 1.429, 1.459, 1.489, 1.529]
+    expect(band(bilbao, 1.459)).toBe('mid')
+    expect(band(bilbao, 1.529)).toBe('expensive')
+    // Both terciles fall on the same price, which is also the average.
+    const equalThresholds = [1.4, 1.5, 1.5, 1.5, 1.6]
+    expect(bandThresholds(equalThresholds)).toEqual({ low: 1.5, high: 1.5 })
+    expect(band(equalThresholds, 1.5)).toBe('mid')
+    expect(band(equalThresholds, 1.4)).toBe('cheap')
+    expect(band(equalThresholds, 1.6)).toBe('expensive')
+    // Every price the same: nothing is cheaper or dearer than the rest.
+    expect(band([1.459, 1.459, 1.459, 1.459], 1.459)).toBe('mid')
+    // Two thirds tied at the bottom put the upper tercile below the average.
+    const skewed = [1.0, 1.0, 1.0, 1.0, 1.2, 2.0]
+    expect(band(skewed, 1.2)).toBe('mid')
+    expect(band(skewed, 2.0)).toBe('expensive')
+  })
 })
 
 describe('centsFromAverage', () => {
