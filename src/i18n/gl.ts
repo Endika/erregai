@@ -56,7 +56,7 @@ export const gl: Record<string, string> = {
   'trip.gps.heading': 'Comeza a moverte para saber cara a onde vas',
   'trip.gps.lost': 'Sen sinal GPS',
   'trip.mediaSession.title': 'Modo viaxe',
-  'trip.cheapestAhead': 'A máis barata en {fuel} diante',
+  'trip.cheapestAhead': 'Máis barata · {fuel}',
   'trip.noneAhead': 'Aínda non hai gasolineiras diante',
   'trip.ahead.showAll': 'Ver todas ({n})',
   'trip.ahead.showFewer': 'Ver menos',

@@ -55,7 +55,7 @@ export const en: Record<string, string> = {
   'trip.gps.heading': "Start moving so it can tell which way you're going",
   'trip.gps.lost': 'No GPS signal',
   'trip.mediaSession.title': 'Trip mode',
-  'trip.cheapestAhead': 'Cheapest {fuel} ahead',
+  'trip.cheapestAhead': 'Cheapest · {fuel}',
   'trip.noneAhead': 'No stations ahead yet',
   'trip.ahead.showAll': 'Show all ({n})',
   'trip.ahead.showFewer': 'Show fewer',

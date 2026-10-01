@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  cheapestLabel,
   composeSlot,
   fuelKey,
   radarKey,
@@ -8,13 +9,14 @@ import {
   slotId,
   type SlotAlert,
 } from '../src/ui/alert-slot'
-import { setLocale, t } from '../src/i18n'
+import { LOCALE_ORDER, setLocale, t } from '../src/i18n'
+import { COMMON_FUELS } from '../src/core/fuels'
 
 const radar: SlotAlert = { kind: 'radar', key: 'Radar · 600 m', label: 'Radar fijo en A-2' }
 const cheapest: SlotAlert = {
   kind: 'cheapest',
   key: 'REPSOL 1,329 · 1,4 km',
-  label: 'Más barata en Gasóleo A por delante',
+  label: 'Más barata · Gasóleo A',
 }
 const nearby: SlotAlert = { kind: 'fuel', key: 'EROSKI 1,349 · 900 m', label: 'Gasolinera cerca' }
 
@@ -64,6 +66,20 @@ describe('alert key lines', () => {
   it('names brand and price before the distance for a station', () => {
     expect(fuelKey('REPSOL', 1.329, 1.437)).toBe('REPSOL 1,329 · 1,4 km')
     expect(fuelKey('EROSKI', 1.349, 0.9036)).toBe('EROSKI 1,349 · 900 m')
+  })
+
+  // 29 characters is what the slot holds at 390 px in the label's 1.125rem
+  // semibold, measured in the browser; the old 35-character copy was cut.
+  it('fits the cheapest label on one line at 390 px for every common fuel and locale', () => {
+    for (const locale of LOCALE_ORDER) {
+      setLocale(locale)
+      for (const fuel of COMMON_FUELS) {
+        const label = cheapestLabel(fuel)
+        expect(label).toContain(t(`fuel.${fuel}`))
+        expect(label.startsWith(t('trip.slot.more.cheapest'))).toBe(true)
+        expect(label.length, `${locale}: ${label}`).toBeLessThanOrEqual(29)
+      }
+    }
   })
 })
 

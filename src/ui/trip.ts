@@ -31,6 +31,7 @@ import { t } from '../i18n'
 import { formatDate, formatKm, formatPrice, priceWithBand } from '../i18n/format'
 import { renderFuelControl } from './sortBar'
 import {
+  cheapestLabel,
   composeSlot,
   fuelKey,
   radarKey,
@@ -420,7 +421,7 @@ export class TripController {
       id: station.id,
       brand: station.brand,
       key: fuelKey(station.brand, priceOf(station, fuel)!, haversineKm(pos, station.pos)),
-      label: t('trip.cheapestAhead').replace('{fuel}', t(`fuel.${fuel}`)),
+      label: cheapestLabel(fuel),
     }
   }
 

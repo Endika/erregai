@@ -1,5 +1,6 @@
 import { t } from '../i18n'
 import { formatDistance, formatPrice } from '../i18n/format'
+import type { FuelId } from '../core/fuels'
 
 export type AlertKind = 'radar' | 'cheapest' | 'fuel'
 
@@ -29,6 +30,10 @@ export function composeSlot(alerts: readonly SlotAlert[]): AlertSlot | undefined
 
 export function radarKey(km: number): string {
   return `${t('trip.slot.radar')} · ${formatDistance(km)}`
+}
+
+export function cheapestLabel(fuel: FuelId): string {
+  return t('trip.cheapestAhead').replace('{fuel}', t(`fuel.${fuel}`))
 }
 
 export function fuelKey(brand: string, price: number, km: number): string {
