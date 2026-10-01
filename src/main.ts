@@ -406,12 +406,16 @@ function render(): void {
       mapWrap.className = 'trip-map'
       mapWrap.appendChild(mapContainer)
       viewEl.appendChild(mapWrap)
+      // Mid-trip the car sits low on the map, facing what lies ahead.
+      const aheadDeg = tripController.isActive
+        ? tripController.currentUpdate?.state.headingDeg
+        : undefined
       mapView.render(
         tripPos,
         tripController.stationsForMap(nearby),
         state.settings.fuel,
         selectStation,
-        { recenter: true, selectedId },
+        { recenter: true, selectedId, aheadDeg },
       )
       // While a trip is active, onFix owns the radar layer (per GPS fix); when it
       // is not, keep the preview map's radar layer in sync with the toggle so
