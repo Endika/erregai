@@ -93,8 +93,16 @@ export const en: Record<string, string> = {
   'about.data': 'Prices: Spanish Ecological Transition Ministry',
   'about.map': 'Map: OpenStreetMap',
 
-  'error.location': 'Could not get location',
-  'error.network': 'Network error',
+  'error.location.denied': "Erregai isn't allowed to use your location",
+  'error.location.deniedHint':
+    'Allow location for this site in your browser settings, then try again.',
+  'error.location.unavailable': "Couldn't find where you are",
+  'error.location.unavailableHint': "Check that your device's location is on, then try again.",
+  'error.load.title': "Couldn't load prices",
+  'error.load.offline': "You're offline; try again when you have a connection.",
+  'error.load.server': "The price service isn't responding; try again in a few minutes.",
+  'status.cached.offline': 'Prices from {age} · offline',
+  'status.cached.failed': "Prices from {age} · couldn't update",
   'error.refreshFailed': 'Could not refresh; showing the last saved data',
   'error.storage': "This device's storage is unavailable; data will not be kept for offline use",
 }

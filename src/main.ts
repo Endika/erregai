@@ -12,6 +12,15 @@ import { MapView } from './ui/map'
 import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
+import {
+  freshnessText,
+  joinNotice,
+  locationProblem,
+  viewNotice,
+  viewNoticeText,
+  type LocationProblem,
+  type ViewNotice,
+} from './ui/status'
 import { nearbyRadars } from './core/radars'
 import { RADARS } from './core/radars.data'
 import { nearbyServiceAreas } from './core/services'
@@ -39,7 +48,7 @@ applyTheme(store.state.settings.theme)
 
 let activeTab: Tab = 'list'
 let selectedStation: Station | undefined
-let locationError: string | undefined
+let locationError: LocationProblem | undefined
 let locating = false
 
 const root: HTMLElement =
@@ -54,7 +63,10 @@ root.innerHTML = `
     <span class="app-header__freshness" data-freshness></span>
     <button type="button" class="app-header__refresh" data-refresh></button>
   </header>
-  <p class="app-error" data-error hidden></p>
+  <div class="app-status" role="status" data-status>
+    <p class="app-error" data-error hidden></p>
+    <span class="visually-hidden" data-announce></span>
+  </div>
   <main class="app-main" data-view></main>
   <aside class="detail-card" data-card hidden></aside>
   <nav class="tab-bar" role="tablist">
@@ -71,6 +83,7 @@ function requireEl<T extends Element>(selector: string): T {
 const titleEl = requireEl<HTMLElement>('[data-title]')
 const freshnessEl = requireEl<HTMLElement>('[data-freshness]')
 const errorEl = requireEl<HTMLElement>('[data-error]')
+const announceEl = requireEl<HTMLElement>('[data-announce]')
 const viewEl = requireEl<HTMLElement>('[data-view]')
 const cardEl = requireEl<HTMLElement>('[data-card]')
 const refreshButton = requireEl<HTMLButtonElement>('[data-refresh]')
@@ -143,8 +156,8 @@ function locate(): void {
         locationError = undefined
         return store.loadFor(pos)
       },
-      () => {
-        locationError = t('error.location')
+      (err: unknown) => {
+        locationError = locationProblem(err)
       },
     )
     .finally(() => {
@@ -153,26 +166,33 @@ function locate(): void {
     })
 }
 
-function renderPositionPlaceholder(): void {
+function renderNotice(notice: ViewNotice): void {
+  const { title, hint } = viewNoticeText(notice, !navigator.onLine)
   const placeholder = document.createElement('p')
   placeholder.className = 'placeholder'
-  placeholder.textContent = locating ? t('app.loading') : (locationError ?? t('app.loading'))
+  placeholder.textContent = title
+  if (hint) {
+    const detail = document.createElement('span')
+    detail.className = 'placeholder__hint'
+    detail.textContent = hint
+    placeholder.appendChild(detail)
+  }
   viewEl.appendChild(placeholder)
-  if (locationError && !locating) {
+  if (notice.kind === 'location' || notice.kind === 'loadFailed') {
     const retry = document.createElement('button')
     retry.type = 'button'
     retry.className = 'placeholder-retry'
     retry.textContent = t('action.retry')
-    retry.addEventListener('click', locate)
+    retry.addEventListener(
+      'click',
+      notice.kind === 'location' ? locate : () => void store.refresh(),
+    )
     viewEl.appendChild(retry)
   }
 }
 
-function renderEmptyState(radiusKm: number): void {
-  const placeholder = document.createElement('p')
-  placeholder.className = 'placeholder'
-  placeholder.textContent = t('list.empty').replace('{radius}', String(radiusKm))
-  viewEl.appendChild(placeholder)
+function isInlineError(notice: ViewNotice | undefined): boolean {
+  return notice?.kind === 'location' || notice?.kind === 'loadFailed'
 }
 
 function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): Station[] {
@@ -226,42 +246,41 @@ function render(): void {
   }
 
   const busy = state.loading || locating
-  freshnessEl.textContent = busy
-    ? t('app.refreshing')
-    : state.dataDate
-      ? `${t('app.updated')} ${state.dataDate}`
-      : t('app.loading')
+  freshnessEl.textContent = freshnessText(state, busy)
   refreshButton.classList.toggle('is-busy', busy)
   refreshButton.disabled = busy
-
-  const banner = statusBanner(state, locationError)
-  errorEl.textContent = banner?.text ?? ''
-  errorEl.classList.toggle('app-error--notice', banner?.tone === 'notice')
-  errorEl.hidden = !banner
 
   viewEl.classList.toggle('is-loading', state.loading)
   viewEl.replaceChildren()
 
   const selectedId = selectedStation?.id
+  const noticeFor = (nearby: number): ViewNotice | undefined =>
+    viewNotice({
+      hasPos: state.pos !== undefined,
+      nearby,
+      radiusKm: state.settings.radiusKm,
+      loading: state.loading,
+      locating,
+      error: state.error,
+      locationError,
+    })
+  let notice: ViewNotice | undefined
 
   if (activeTab === 'list') {
-    if (state.pos) {
-      const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
-      if (nearby.length === 0) {
-        renderEmptyState(state.settings.radiusKm)
-      } else {
-        const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        renderStationList(
-          viewEl,
-          sorted,
-          state.settings.fuel,
-          state.pos,
-          state.settings.sort,
-          selectedId,
-        )
-      }
-    } else {
-      renderPositionPlaceholder()
+    const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
+    notice = noticeFor(nearby.length)
+    if (notice) {
+      renderNotice(notice)
+    } else if (state.pos) {
+      const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
+      renderStationList(
+        viewEl,
+        sorted,
+        state.settings.fuel,
+        state.pos,
+        state.settings.sort,
+        selectedId,
+      )
     }
   } else if (activeTab === 'map') {
     if (state.pos) {
@@ -272,8 +291,9 @@ function render(): void {
       const serviceHits = state.settings.servicesLayerEnabled
         ? nearbyServiceAreas(state.pos, SERVICE_AREAS, state.settings.radiusKm, SERVICE_MARKER_CAP)
         : []
-      if (nearby.length === 0 && radarHits.length === 0 && serviceHits.length === 0) {
-        renderEmptyState(state.settings.radiusKm)
+      notice = noticeFor(nearby.length + radarHits.length + serviceHits.length)
+      if (notice) {
+        renderNotice(notice)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
         const split = document.createElement('div')
@@ -305,7 +325,8 @@ function render(): void {
           listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
       }
     } else {
-      renderPositionPlaceholder()
+      notice = noticeFor(0)
+      renderNotice(notice ?? { kind: 'loading' })
     }
   } else if (activeTab === 'trip') {
     const tripPos = tripController.currentUpdate?.state.lastPos ?? state.pos
@@ -353,6 +374,20 @@ function render(): void {
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
   }
+
+  const inline = isInlineError(notice)
+  const banner = statusBanner(state, {
+    online: navigator.onLine,
+    now: Date.now(),
+    locationError,
+    inline,
+  })
+  errorEl.textContent = banner?.text ?? ''
+  errorEl.classList.toggle('app-error--notice', banner?.tone === 'notice')
+  errorEl.hidden = !banner
+  // The inline error sits in the view, outside the live region; voice it once here.
+  const announcement = inline && notice ? joinNotice(viewNoticeText(notice, !navigator.onLine)) : ''
+  if (announceEl.textContent !== announcement) announceEl.textContent = announcement
 
   renderCard()
 }

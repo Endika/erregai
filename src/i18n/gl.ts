@@ -93,8 +93,17 @@ export const gl: Record<string, string> = {
   'about.data': 'Prezos: Ministerio de Transición Ecolóxica',
   'about.map': 'Mapa: OpenStreetMap',
 
-  'error.location': 'Non se puido obter a localización',
-  'error.network': 'Erro de rede',
+  'error.location.denied': 'Erregai non ten permiso para usar a túa localización',
+  'error.location.deniedHint':
+    'Permite a localización para este sitio na configuración do navegador e volve tentalo.',
+  'error.location.unavailable': 'Non se puido saber onde estás',
+  'error.location.unavailableHint':
+    'Comproba que a localización do dispositivo está activada e volve tentalo.',
+  'error.load.title': 'Non se puideron cargar os prezos',
+  'error.load.offline': 'Non hai conexión a internet; volve tentalo cando teñas cobertura.',
+  'error.load.server': 'O servizo de prezos non responde; volve tentalo dentro duns minutos.',
+  'status.cached.offline': 'Prezos de {age} · sen conexión',
+  'status.cached.failed': 'Prezos de {age} · non se puideron actualizar',
   'error.refreshFailed': 'Non se puido actualizar; móstranse os últimos datos gardados',
   'error.storage':
     'O almacenamento do dispositivo non está dispoñible; os datos non se gardarán para usalos sen conexión',

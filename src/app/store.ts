@@ -10,6 +10,7 @@ export interface AppState {
   pos?: LatLon
   stations: Station[]
   dataDate?: string
+  dataStoredAt?: number
   loading: boolean
   error?: string
   refreshError?: string
@@ -78,8 +79,12 @@ export class Store {
     this.notify()
   }
 
+  // Includes the current province even when its first load failed with
+  // nothing cached, so Retry/Refresh recovers instead of doing nothing.
   async refresh(): Promise<void> {
-    await this.runBatch([...this.provinces.keys()], true)
+    const ids = new Set(this.provinces.keys())
+    if (this.currentProvinceId) ids.add(this.currentProvinceId)
+    await this.runBatch([...ids], true)
     this.updateDataDate()
     this.notify()
   }
@@ -106,7 +111,7 @@ export class Store {
   private updateDataDate(): void {
     if (!this.currentProvinceId) return
     const entry = this.provinces.get(this.currentProvinceId)
-    this.current = { ...this.current, dataDate: entry?.fecha }
+    this.current = { ...this.current, dataDate: entry?.fecha, dataStoredAt: entry?.storedAt }
   }
 
   // Loads a single province (cache-then-network). Does NOT touch state itself:
