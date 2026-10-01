@@ -119,6 +119,7 @@ export const gl: Record<string, string> = {
   'settings.about': 'Acerca de',
   'about.data': 'Prezos: Ministerio de Transición Ecolóxica',
   'about.map': 'Mapa: OpenStreetMap',
+  'map.fit': 'Amosar todo o teu radio',
 
   'error.location.denied': 'Erregai non ten permiso para usar a túa localización',
   'error.location.deniedHint':

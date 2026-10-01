@@ -119,6 +119,7 @@ export const eu: Record<string, string> = {
   'settings.about': 'Honi buruz',
   'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',
   'about.map': 'Mapa: OpenStreetMap',
+  'map.fit': 'Ikusi zure erradio osoa',
 
   'error.location.denied': 'Erregaik ez du zure kokapena erabiltzeko baimenik',
   'error.location.deniedHint':

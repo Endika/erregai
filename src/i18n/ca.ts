@@ -119,6 +119,7 @@ export const ca: Record<string, string> = {
   'settings.about': 'Quant a',
   'about.data': 'Preus: Ministeri de Transició Ecològica',
   'about.map': 'Mapa: OpenStreetMap',
+  'map.fit': 'Mostra tot el teu radi',
 
   'error.location.denied': 'Erregai no té permís per fer servir la teva ubicació',
   'error.location.deniedHint':

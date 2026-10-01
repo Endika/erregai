@@ -14,6 +14,7 @@ import {
 } from '../core/pricing'
 import { glyphSvg, serviceGlyph, type Glyph } from './map-icons'
 import { aheadOffset } from './map-ahead'
+import { radiusBounds } from './map-frame'
 import { t } from '../i18n'
 import { formatPrice } from '../i18n/format'
 
@@ -38,6 +39,8 @@ const PIN_SIZE = 26
 const PIN_SIZE_SELECTED = 34
 const PIN_RADAR_SIZE = 24
 const PIN_SERVICE_SIZE = 24
+// Room for the edge pins' discs, so a station right on the radius is not cut.
+const FIT_PADDING_PX = 16
 // Every layer is now an L.Marker, and markers in one pane stack by latitude, so
 // without panes of their own a dense cluster of station pins would bury the
 // radars and service areas. Both stay above the stations, below the tooltips
@@ -119,6 +122,11 @@ export class MapView {
   private radarMarkers?: L.LayerGroup
   private serviceMarkers?: L.LayerGroup
   private userMarker?: L.CircleMarker
+  private radiusCircle?: L.Circle
+  private fitControl?: L.Control
+  private fitButton?: HTMLButtonElement
+  // The radius the Map tab last drew, so the fit control frames the current one.
+  private frame?: { pos: LatLon; radiusKm: number }
   // Heading the view leads towards; set by the latest render, so a later
   // focus() keeps what lies ahead on screen too.
   private aheadDeg?: number
@@ -137,6 +145,9 @@ export class MapView {
       selectedId?: string
       reference?: PriceReference
       aheadDeg?: number
+      // Drawn as a circle with a control to frame it; left out on the trip map,
+      // whose radius moves with the car.
+      radiusKm?: number
     } = {},
   ): void {
     if (!this.map) this.init(pos)
@@ -145,6 +156,8 @@ export class MapView {
     this.aheadDeg = opts.aheadDeg
     if (opts.recenter) this.centerOn(pos, this.map.getZoom())
     this.userMarker?.setLatLng([pos.lat, pos.lon])
+    if (opts.radiusKm !== undefined) this.showRadius(this.map, pos, opts.radiusKm)
+    else this.hideRadius()
     this.markers.clearLayers()
 
     const reference = opts.reference ?? priceReference(stations, fuel)
@@ -237,6 +250,65 @@ export class MapView {
     this.map?.invalidateSize()
   }
 
+  fitRadius(pos: LatLon, radiusKm: number): void {
+    const { south, west, north, east } = radiusBounds(pos, radiusKm)
+    this.map?.fitBounds(
+      [
+        [south, west],
+        [north, east],
+      ],
+      { padding: [FIT_PADDING_PX, FIT_PADDING_PX], animate: false },
+    )
+  }
+
+  private showRadius(map: L.Map, pos: LatLon, radiusKm: number): void {
+    this.frame = { pos, radiusKm }
+    const center = L.latLng(pos.lat, pos.lon)
+    if (this.radiusCircle) {
+      this.radiusCircle.setLatLng(center).setRadius(radiusKm * 1000)
+    } else {
+      this.radiusCircle = L.circle(center, {
+        radius: radiusKm * 1000,
+        className: 'map-radius',
+        interactive: false,
+        fill: false,
+        weight: 2,
+        dashArray: '6 6',
+      }).addTo(map)
+    }
+    if (!this.fitControl) {
+      const control = new L.Control({ position: 'topright' })
+      control.onAdd = () => this.buildFitControl()
+      this.fitControl = control.addTo(map)
+    }
+    if (this.fitButton) {
+      this.fitButton.setAttribute('aria-label', t('map.fit'))
+      this.fitButton.title = t('map.fit')
+    }
+  }
+
+  private hideRadius(): void {
+    this.frame = undefined
+    this.radiusCircle?.remove()
+    this.radiusCircle = undefined
+    this.fitControl?.remove()
+    this.fitControl = undefined
+    this.fitButton = undefined
+  }
+
+  private buildFitControl(): HTMLElement {
+    const wrapper = L.DomUtil.create('div', 'leaflet-control map-control')
+    const button = L.DomUtil.create('button', 'map-control__button map-fit', wrapper)
+    button.type = 'button'
+    button.innerHTML = glyphSvg('frame', 22)
+    button.addEventListener('click', () => {
+      if (this.frame) this.fitRadius(this.frame.pos, this.frame.radiusKm)
+    })
+    L.DomEvent.disableClickPropagation(wrapper)
+    this.fitButton = button
+    return wrapper
+  }
+
   focus(pos: LatLon, zoom: number): void {
     this.centerOn(pos, zoom)
   }
@@ -263,6 +335,10 @@ export class MapView {
     this.radarMarkers = undefined
     this.serviceMarkers = undefined
     this.userMarker = undefined
+    this.radiusCircle = undefined
+    this.fitControl = undefined
+    this.fitButton = undefined
+    this.frame = undefined
   }
 
   private init(pos: LatLon): void {
