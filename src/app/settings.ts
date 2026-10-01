@@ -20,7 +20,6 @@ export interface ManualPlace {
 export interface Settings {
   fuel: FuelId
   sort: SortKey
-  tripSort: SortKey
   radiusKm: number
   locale?: Locale
   theme: Theme
@@ -40,7 +39,6 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   fuel: DEFAULT_FUEL,
   sort: 'price',
-  tripSort: 'price',
   radiusKm: 15,
   theme: 'system',
   alertVolume: 1,
@@ -55,12 +53,16 @@ export const DEFAULT_SETTINGS: Settings = {
   fuelSound: true,
 }
 export const SETTINGS_KEY = 'erregai.settings'
+// Older saves still carry these; they are dropped on the next save.
+const RETIRED_KEYS = ['tripSort']
 
 export function loadSettings(store: Storage = localStorage): Settings {
   try {
     const raw = store.getItem(SETTINGS_KEY)
     if (!raw) return { ...DEFAULT_SETTINGS }
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }
+    const saved = JSON.parse(raw) as Partial<Settings> & Record<string, unknown>
+    for (const key of RETIRED_KEYS) delete saved[key]
+    return { ...DEFAULT_SETTINGS, ...saved }
   } catch {
     return { ...DEFAULT_SETTINGS }
   }

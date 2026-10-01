@@ -417,9 +417,9 @@ describe('trip rows ahead', () => {
     return c
   }
 
-  it('lists the cheapest three first, whatever order was kept in settings', async () => {
+  it('lists the cheapest three first, whatever order the list is sorted by', async () => {
     const c = await aheadOf(FIVE)
-    c['store'].setSettings({ tripSort: 'distance' })
+    c['store'].setSettings({ sort: 'distance' })
     expect(ids(draw(c))).toEqual(['far-cheap', 'cheap', 'mid'])
     c.stop()
   })
