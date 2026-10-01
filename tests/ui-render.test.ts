@@ -191,6 +191,43 @@ describe('renderRadarList', () => {
     const distances = [...el.querySelectorAll('.radar-list__distance')].map((d) => d.textContent)
     expect(distances).toEqual(['420 m', '1,3 km'])
   })
+  // Seven rows of "A-8" are only told apart by where each one lies from here.
+  it('says how far and toward which compass point each radar lies from the origin', () => {
+    setLocale('es')
+    const origin = { lat: 43, lon: -3 }
+    const at = (id: string, lat: number, lon: number, distanceKm: number): RadarHit =>
+      ({ radar: { id, via: 'A-8', lat, lon }, distanceKm }) as RadarHit
+    const el = renderRadarList(
+      [at('n', 43.02, -3, 2.2), at('se', 42.99, -2.985, 1.6), at('w', 43, -3.03, 2.5)],
+      'radar.nearby.title',
+      5,
+      origin,
+    )
+    const rows = [...el.querySelectorAll('.radar-list__row')].map((r) => [
+      r.querySelector('.radar-list__via')?.textContent,
+      r.querySelector('.radar-list__distance')?.textContent,
+    ])
+    expect(rows).toEqual([
+      ['A-8', '2,2 km al norte'],
+      ['A-8', '1,6 km al sureste'],
+      ['A-8', '2,5 km al oeste'],
+    ])
+  })
+
+  it("names the compass point in the reader's language", () => {
+    setLocale('eu')
+    const el = renderRadarList(
+      [{ radar: { id: 'e', via: 'A-8', lat: 43, lon: -2.97 }, distanceKm: 2.4 } as RadarHit],
+      'radar.nearby.title',
+      5,
+      { lat: 43, lon: -3 },
+    )
+    expect(el.querySelector('.radar-list__distance')?.textContent).toBe(
+      t('radar.toward.e').replace('{distance}', '2,4 km'),
+    )
+    setLocale('es')
+  })
+
   it('marks each row with the camera glyph the map uses for radars, hidden from readers', () => {
     const el = renderRadarList([hit('1', 0.42), hit('2', 1.26)], 'radar.list.title', 5)
     const rows = [...el.querySelectorAll('.radar-list__row')]
