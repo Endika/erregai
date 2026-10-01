@@ -13,6 +13,7 @@ import {
   type PriceReference,
 } from '../core/pricing'
 import { glyphSvg, serviceGlyph, type Glyph } from './map-icons'
+import { aheadOffset } from './map-ahead'
 import { t } from '../i18n'
 import { formatPrice } from '../i18n/format'
 
@@ -118,6 +119,9 @@ export class MapView {
   private radarMarkers?: L.LayerGroup
   private serviceMarkers?: L.LayerGroup
   private userMarker?: L.CircleMarker
+  // Heading the view leads towards; set by the latest render, so a later
+  // focus() keeps what lies ahead on screen too.
+  private aheadDeg?: number
 
   constructor(private container: HTMLElement) {}
 
@@ -128,12 +132,18 @@ export class MapView {
     onSelect: (s: Station) => void,
     // Pass the radius reference whenever the map draws a different set than the
     // list, or a pin's colour will disagree with its row.
-    opts: { recenter?: boolean; selectedId?: string; reference?: PriceReference } = {},
+    opts: {
+      recenter?: boolean
+      selectedId?: string
+      reference?: PriceReference
+      aheadDeg?: number
+    } = {},
   ): void {
     if (!this.map) this.init(pos)
     if (!this.map || !this.markers) return
 
-    if (opts.recenter) this.map.setView([pos.lat, pos.lon], this.map.getZoom(), { animate: false })
+    this.aheadDeg = opts.aheadDeg
+    if (opts.recenter) this.centerOn(pos, this.map.getZoom())
     this.userMarker?.setLatLng([pos.lat, pos.lon])
     this.markers.clearLayers()
 
@@ -228,7 +238,18 @@ export class MapView {
   }
 
   focus(pos: LatLon, zoom: number): void {
-    this.map?.setView([pos.lat, pos.lon], zoom, { animate: false })
+    this.centerOn(pos, zoom)
+  }
+
+  private centerOn(pos: LatLon, zoom: number): void {
+    const map = this.map
+    if (!map) return
+    let center = L.latLng(pos.lat, pos.lon)
+    if (this.aheadDeg !== undefined) {
+      const offset = aheadOffset(this.aheadDeg, map.getSize())
+      center = map.unproject(map.project(center, zoom).add([offset.x, offset.y]), zoom)
+    }
+    map.setView(center, zoom, { animate: false })
   }
 
   panTo(pos: LatLon): void {
