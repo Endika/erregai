@@ -65,37 +65,58 @@ export function renderList(
     brand.className = 'station-row__brand'
     brand.textContent = station.brand
 
+    const priceEl = document.createElement('span')
+    priceEl.className = 'station-row__price'
+    const value = document.createElement('span')
+    value.className = 'station-row__price-value'
+    value.textContent = price !== undefined ? formatPrice(price) : '—'
+    priceEl.appendChild(value)
+
+    const band = stationBand(station, fuel, reference)
+    if (price !== undefined) {
+      // The aria-label already says "€/l", so the visible unit stays silent.
+      const unit = document.createElement('span')
+      unit.className = 'station-row__price-unit'
+      unit.setAttribute('aria-hidden', 'true')
+      unit.textContent = '€/l'
+      priceEl.append(' ', unit)
+      if (band) {
+        row.dataset.band = band
+        priceEl.title = t(`band.${band}`)
+        priceEl.setAttribute('aria-label', priceWithBand(price, band))
+      }
+    }
+
+    const head = document.createElement('span')
+    head.className = 'station-row__head'
+    head.append(brand, priceEl)
+
     const town = document.createElement('span')
     town.className = 'station-row__town'
     town.textContent = station.town
+
+    const separator = document.createElement('span')
+    separator.className = 'station-row__sep'
+    separator.setAttribute('aria-hidden', 'true')
+    separator.textContent = '·'
 
     const distance = document.createElement('span')
     distance.className = 'station-row__distance'
     distance.textContent = formatKm(haversineKm(origin, station.pos))
 
-    const priceEl = document.createElement('span')
-    priceEl.className = 'station-row__price'
-    priceEl.textContent = price !== undefined ? formatPrice(price) : '—'
-
-    const band = stationBand(station, fuel, reference)
-    if (price !== undefined && band) {
-      row.dataset.band = band
-      priceEl.title = t(`band.${band}`)
-      priceEl.setAttribute('aria-label', priceWithBand(price, band))
-    }
-
-    const cells: HTMLElement[] = [brand, town, distance]
+    const meta = document.createElement('span')
+    meta.className = 'station-row__meta'
+    meta.append(town, separator, distance)
     const status = scheduleStatus(parseSchedule(station.schedule), now)
     if (status === 'closed' || status === 'closing-soon') {
       const badge = document.createElement('span')
       badge.className = 'station-row__schedule'
       badge.dataset.schedule = status
       badge.textContent = t(status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon')
-      cells.push(badge)
+      meta.appendChild(badge)
     }
-    cells.push(priceEl)
 
-    row.append(...cells)
+    row.append(head, meta)
     row.addEventListener('click', () => onSelect(station))
     list.appendChild(row)
   }
