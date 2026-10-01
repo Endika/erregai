@@ -27,6 +27,20 @@ describe('statusBanner', () => {
         ?.text,
     ).toBe(t('status.cached.offline').replace('{age}', 'hace 3 horas'))
   })
+  it('says it is offline over fresh prices that had no reason to refetch', () => {
+    const fresh = state({
+      pos: { lat: 43.263, lon: -2.935 },
+      dataStoredAt: 10 * HOUR - 25 * 60_000,
+    })
+    expect(statusBanner(fresh, ctx)).toBeUndefined()
+    expect(statusBanner(fresh, { ...ctx, online: false })).toEqual({
+      text: t('status.cached.offline').replace('{age}', 'hace 25 minutos'),
+      tone: 'notice',
+    })
+  })
+  it('stays quiet offline while there are no prices yet to qualify', () => {
+    expect(statusBanner(state({}), { ...ctx, online: false })).toBeUndefined()
+  })
   it('falls back to the plain refresh notice when the cache age is unknown', () => {
     expect(statusBanner(state({ refreshError: 'x' }), ctx)?.text).toBe(t('error.refreshFailed'))
   })

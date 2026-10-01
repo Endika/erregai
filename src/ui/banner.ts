@@ -16,8 +16,8 @@ export interface BannerContext {
 }
 
 // Errors mean prices could not load; notices report a failure the user can
-// work around: cached stations still on screen, or a refused location that a
-// town picked by hand replaces.
+// work around: cached stations still on screen, prices that cannot update while
+// offline, or a refused location that a town picked by hand replaces.
 export function statusBanner(state: AppState, ctx: BannerContext): Banner | undefined {
   if (!ctx.inline) {
     if (ctx.locationError) {
@@ -34,7 +34,9 @@ export function statusBanner(state: AppState, ctx: BannerContext): Banner | unde
     }
   }
   const notices: string[] = []
-  if (state.refreshError) notices.push(cachedNotice(state, ctx))
+  // Fresh prices are not refetched, so nothing would fail to tell of a lost connection.
+  if (state.refreshError || (!ctx.online && state.dataStoredAt !== undefined))
+    notices.push(cachedNotice(state, ctx))
   if (state.storageFailed) notices.push(t('error.storage'))
   return notices.length > 0 ? { text: notices.join(' · '), tone: 'notice' } : undefined
 }
