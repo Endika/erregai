@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.25.0](https://github.com/Endika/erregai/compare/v1.24.0...v1.25.0) (2026-10-01)
+
+
+### Features
+
+* give location and price failures a way forward with a town search and offline radars ([b0639a0](https://github.com/Endika/erregai/commit/b0639a0b71ece9be60e17da94f140fa2fc43a842))
+
+
+### Bug Fixes
+
+* band trip rows and the trip map against the shared radius reference ([72ad723](https://github.com/Endika/erregai/commit/72ad723906935dac97f7bbfb7adc925e2beba32c))
+* move focus into the station card and back, and tidy the map, labels and volume ([8b788ea](https://github.com/Endika/erregai/commit/8b788ea771ac0bf1984f38f49ef77562cba19f73))
+
 ## [1.24.0](https://github.com/Endika/erregai/compare/v1.23.1...v1.24.0) (2026-10-01)
 
 
