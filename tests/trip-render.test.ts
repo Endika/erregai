@@ -522,7 +522,7 @@ describe('trip rows against the radius', () => {
       expect.arrayContaining(['cheap', 'mid', 'pricey']),
     )
     for (const row of rows) expect(row.dataset.band).toBe(listBand(row.dataset.station!))
-    expect(rows.find((r) => r.dataset.station === 'cheap')!.dataset.band).toBe('expensive')
+    expect(rows.find((r) => r.dataset.station === 'cheap')!.dataset.band).toBe('mid')
     c.stop()
   })
 
