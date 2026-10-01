@@ -7,7 +7,7 @@ import type { Kv, CacheEntry } from '../src/adapters/cache'
 import { haversineKm, type LatLon } from '../src/core/geo'
 import type { Station } from '../src/core/station'
 import { RADARS, RADARS_DATASET_DATE } from '../src/core/radars.data'
-import { t } from '../src/i18n'
+import { setLocale, t } from '../src/i18n'
 import { formatDate, formatDistance, formatKm } from '../src/i18n/format'
 import { bandFor } from '../src/core/pricing'
 
@@ -154,7 +154,6 @@ describe('trip fuel banners', () => {
     const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--cheapest')!
     expect(banner).not.toBeNull()
     expect(banner.getAttribute('aria-live')).toBe('polite')
-    expect(banner.textContent).toContain(t('trip.cheapestAhead'))
     expect(banner.textContent).toContain(CHEAP.brand)
     const km = formatKm(haversineKm({ lat: 40.025, lon: 0 }, CHEAP.pos))
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(`1,000 · ${km}`)
@@ -170,6 +169,49 @@ describe('trip fuel banners', () => {
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toMatch(
       /^.+ a (\d+ m|\d+,\d km)$/,
     )
+  })
+})
+
+describe('trip fuel name', () => {
+  it('names the fuel in the cheapest-ahead banner', async () => {
+    setLocale('es')
+    const c = makeController([CHEAP, PRICEY])
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const label = draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')!
+    expect(label.textContent).toBe(`Más barata en Gasóleo A por delante: ${CHEAP.brand}`)
+  })
+
+  it('switches fuel from the trip sort bar', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, PRICEY])
+    await c.start()
+    const select = draw(c).querySelector<HTMLSelectElement>('.sort-bar select')!
+    expect(select.value).toBe('gasoleoA')
+    select.value = 'gasolina95'
+    select.dispatchEvent(new Event('change'))
+    expect(c['store'].state.settings.fuel).toBe('gasolina95')
+    c.stop()
+  })
+
+  it('prices the cheapest-ahead banner afresh after a switch, even when the new fuel costs more', async () => {
+    setLocale('es')
+    installGeolocation()
+    const both: Station = { ...CHEAP, prices: { gasoleoA: 1.0, gasolina95: 1.6 } }
+    const c = makeController([both])
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.01, lon: 0 })
+    const label = () =>
+      draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')?.textContent
+    expect(label()).toBe(`Más barata en Gasóleo A por delante: ${both.brand}`)
+    const select = draw(c).querySelector<HTMLSelectElement>('.sort-bar select')!
+    select.value = 'gasolina95'
+    select.dispatchEvent(new Event('change'))
+    expect(label()).toBeUndefined()
+    await fix(c, { lat: 40.015, lon: 0 })
+    expect(label()).toBe(`Más barata en Gasolina 95 por delante: ${both.brand}`)
+    c.stop()
   })
 })
 

@@ -278,7 +278,7 @@ body {
 .sort-bar__btn {
   flex: 1 1 0;
   min-height: 2.5rem;
-  padding: 0.4rem 0.75rem;
+  padding: 0.4rem 0.5rem;
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   background: transparent;
@@ -292,6 +292,47 @@ body {
   background: var(--color-accent);
   color: var(--color-accent-fg);
   font-weight: 600;
+}
+
+/* Every price on screen is for this fuel, so it leads the bar; outlined in
+   the accent to read as a picker, not as a third sort option. */
+.sort-bar__fuel {
+  position: relative;
+  flex: 2 1 0;
+  min-width: 0;
+  color: var(--color-accent);
+}
+
+.sort-bar__fuel-select {
+  appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.4rem 1.625rem 0.4rem 0.625rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.5rem;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font: inherit;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.sort-bar__fuel-chevron {
+  position: absolute;
+  top: 50%;
+  right: 0.625rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 
 .station-list {

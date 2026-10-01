@@ -7,6 +7,8 @@ export const va: Record<string, string> = {
   'fuel.glp': 'GLP',
   'fuel.gnc': 'Gas Natural Comprimit',
   'fuel.gnl': 'Gas Natural Liquat',
+  'fuel.group.common': 'Més habituals',
+  'fuel.group.other': 'Altres',
 
   'app.title': 'Erregai',
   'app.updated': 'Actualitzat',
@@ -46,7 +48,7 @@ export const va: Record<string, string> = {
   'trip.gps.heading': 'Esperant direcció…',
   'trip.gps.lost': 'Sense senyal GPS',
   'trip.mediaSession.title': 'Mode viatge',
-  'trip.cheapestAhead': 'La més barata per davant',
+  'trip.cheapestAhead': 'La més barata en {fuel} per davant',
   'trip.noneAhead': 'Encara no hi ha gasolineres per davant',
 
   'detail.directions': 'Com arribar-hi',
