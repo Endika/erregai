@@ -64,7 +64,9 @@ function installGeolocation(): FakeGeo {
 
 const fakeMap = (): MapView => ({ renderRadars() {}, clearRadars() {} }) as unknown as MapView
 
-function makeController(stations: Station[] = []): TripController {
+type Spoken = { text: string; politeness: 'polite' | 'assertive' }
+
+function makeController(stations: Station[] = [], spoken: Spoken[] = []): TripController {
   const store = new Store({
     fetchProvince: (async () => ({ fecha: 'x', stations })) as never,
     kv: memKv(),
@@ -76,6 +78,7 @@ function makeController(stations: Station[] = []): TripController {
     fakeMap(),
     () => {},
     () => {},
+    (text, politeness) => spoken.push({ text, politeness }),
   )
 }
 
@@ -110,7 +113,7 @@ describe('trip radar banner', () => {
   const radarBanner = (c: TripController) =>
     draw(c).querySelector<HTMLElement>('.trip-view__banner--radar')
 
-  it('renders as a hazard, not as a fuel banner, with distance and road, announced assertively', async () => {
+  it('renders as a hazard, not as a fuel banner, with distance and road', async () => {
     const c = makeController()
     await fix(c, behind)
     await fix(c, near)
@@ -118,19 +121,33 @@ describe('trip radar banner', () => {
     expect(banner).not.toBeNull()
     expect(banner.classList.contains('trip-view__banner--fuel')).toBe(false)
     expect(banner.classList.contains('trip-view__banner--cheapest')).toBe(false)
-    expect(banner.getAttribute('aria-live')).toBe('assertive')
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(metersTo(near))
     expect(banner.textContent).toContain(RADAR.via)
   })
 
-  it('tracks the distance on every fix but keeps the announced text from the alert', async () => {
+  it('tracks the distance on every fix but announces the alert once, assertively', async () => {
+    const spoken: Spoken[] = []
+    const c = makeController([], spoken)
+    await fix(c, behind)
+    await fix(c, near)
+    draw(c)
+    await fix(c, nearer)
+    draw(c)
+    draw(c)
+    const banner = radarBanner(c)!
+    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(metersTo(nearer))
+    expect(spoken).toHaveLength(1)
+    expect(spoken[0].politeness).toBe('assertive')
+    expect(spoken[0].text).toContain(metersTo(near))
+    expect(spoken[0].text).toContain(RADAR.via)
+  })
+
+  it('leaves announcing to the persistent regions, not to the re-rendered banner', async () => {
     const c = makeController()
     await fix(c, behind)
     await fix(c, near)
-    await fix(c, nearer)
-    const banner = radarBanner(c)!
-    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(metersTo(nearer))
-    expect(banner.querySelector('.visually-hidden')!.textContent).toContain(metersTo(near))
+    const el = draw(c)
+    expect(el.querySelector('[aria-live]')).toBeNull()
   })
 
   it('goes away once the radar has been passed', async () => {
@@ -146,26 +163,34 @@ describe('trip fuel banners', () => {
   const behind: LatLon = { lat: 40.0, lon: 0 }
   const near: LatLon = { lat: 40.02, lon: 0 }
 
-  it('cheapest-ahead banner shows price and distance and is a polite live region', async () => {
-    const c = makeController([CHEAP, PRICEY])
+  it('cheapest-ahead banner shows price and distance and is announced politely once', async () => {
+    const spoken: Spoken[] = []
+    const c = makeController([CHEAP, PRICEY], spoken)
     await fix(c, behind) // first fix: no heading yet, so nothing alerts
     await fix(c, near) // heading north: CHEAP is the cheapest ahead
     await fix(c, { lat: 40.025, lon: 0 }) // the distance follows the latest fix, not the one that alerted
     const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--cheapest')!
     expect(banner).not.toBeNull()
-    expect(banner.getAttribute('aria-live')).toBe('polite')
     expect(banner.textContent).toContain(CHEAP.brand)
+    const cheapest = spoken.filter((s) => s.text.includes(t('fuel.gasoleoA')))
+    expect(cheapest).toHaveLength(1)
+    expect(cheapest[0].politeness).toBe('polite')
     const km = formatKm(haversineKm({ lat: 40.025, lon: 0 }, CHEAP.pos))
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(`1,000 · ${km}`)
   })
 
-  it('proximity fuel banner keeps its distance and is a polite live region', async () => {
-    const c = makeController([CHEAP, PRICEY])
+  it('proximity fuel banner keeps its distance and is announced politely once', async () => {
+    const spoken: Spoken[] = []
+    const c = makeController([CHEAP, PRICEY], spoken)
     await fix(c, behind)
     await fix(c, near)
+    draw(c)
+    await fix(c, { lat: 40.021, lon: 0 })
     const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--fuel')!
     expect(banner).not.toBeNull()
-    expect(banner.getAttribute('aria-live')).toBe('polite')
+    const nearby = spoken.filter((s) => s.text.includes(t('fuel.alert.title')))
+    expect(nearby).toHaveLength(1)
+    expect(nearby[0].politeness).toBe('polite')
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toMatch(
       /^.+ a (\d+ m|\d+,\d km)$/,
     )
@@ -211,6 +236,23 @@ describe('trip fuel name', () => {
     expect(label()).toBeUndefined()
     await fix(c, { lat: 40.015, lon: 0 })
     expect(label()).toBe(`Más barata en Gasolina 95 por delante: ${both.brand}`)
+    c.stop()
+  })
+})
+
+describe('trip layout', () => {
+  it('puts the alerts above the stop control while a trip runs', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, PRICEY])
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const view = draw(c).querySelector('.trip-view')!
+    expect(view.firstElementChild!.classList.contains('trip-view__alerts')).toBe(true)
+    expect(view.querySelector('.trip-view__alerts + .trip-view__controls')).not.toBeNull()
+    expect(view.querySelector('.trip-view__controls .trip-view__toggle')!.textContent).toBe(
+      t('trip.stop'),
+    )
     c.stop()
   })
 })
