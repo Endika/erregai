@@ -470,6 +470,92 @@ body {
   gap: 0.5rem;
 }
 
+/* Tinted, not filled: the filled accent stays the one primary action below. */
+.first-run__fuel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.first-run__fuel-legend {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  font-weight: 600;
+}
+
+.first-run__fuel-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.first-run__fuel-option {
+  position: relative;
+  display: flex;
+}
+
+.first-run__fuel-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.first-run__fuel-option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-fg);
+  text-align: center;
+  cursor: pointer;
+}
+
+.first-run__fuel-option input:checked + span {
+  border-color: var(--color-accent);
+  background: var(--color-selected);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.first-run__fuel-option input:focus-visible + span {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.first-run__fuel-other {
+  position: relative;
+  color: var(--color-muted);
+}
+
+.first-run__fuel-select {
+  appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.4rem 1.625rem 0.4rem 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg);
+  color: var(--color-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.first-run__fuel-select:not(:has(option[value='']:checked)) {
+  border-color: var(--color-accent);
+  background: var(--color-selected);
+  color: var(--color-fg);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
 /* --- Town search, offered when the location is refused or unavailable --- */
 .place-search {
   display: flex;

@@ -170,6 +170,8 @@ export const ca: Record<string, string> = {
   'firstRun.body':
     'La teva ubicació només es fa servir en aquest dispositiu, per trobar les benzineres properes.',
   'firstRun.pickTown': 'Tria un municipi',
+  'firstRun.fuel': 'Quin carburant fas servir?',
+  'firstRun.fuelOther': 'Un altre…',
   'radar.offline.offer': 'Veure radars (funcionen sense connexió)',
   'trip.needsLocation':
     "El viatge necessita la teva ubicació en temps real: permet l'accés a la ubicació a la configuració del navegador.",

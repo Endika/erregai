@@ -56,7 +56,7 @@ export function renderFuelControl(fuel: FuelControl): HTMLElement {
   select.value = fuel.current
   select.addEventListener('change', () => fuel.onChange(select.value as FuelId))
 
-  wrap.append(label, select, chevron())
+  wrap.append(label, select, selectChevron())
   return wrap
 }
 
@@ -72,7 +72,7 @@ function fuelGroup(name: string, ids: readonly FuelId[]): HTMLOptGroupElement {
   return group
 }
 
-function chevron(): SVGSVGElement {
+export function selectChevron(): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('class', 'sort-bar__fuel-chevron')
   svg.setAttribute('viewBox', '0 0 12 12')

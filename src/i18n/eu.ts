@@ -170,6 +170,8 @@ export const eu: Record<string, string> = {
   'firstRun.body':
     'Zure kokapena gailu honetan bakarrik erabiltzen da, inguruko gasolindegiak aurkitzeko.',
   'firstRun.pickTown': 'Aukeratu udalerria',
+  'firstRun.fuel': 'Zer erregai erabiltzen duzu?',
+  'firstRun.fuelOther': 'Beste bat…',
   'radar.offline.offer': 'Ikusi radarrak (konexiorik gabe ere badabiltza)',
   'trip.needsLocation':
     'Bidaiak zure kokapena behar du denbora errealean: eman kokapenerako baimena nabigatzailearen ezarpenetan.',

@@ -74,6 +74,20 @@ function button(root: HTMLElement, label: string): HTMLButtonElement {
   return el
 }
 
+const fuelOption = (root: HTMLElement, label: string): HTMLInputElement => {
+  const el = [...root.querySelectorAll<HTMLLabelElement>('.first-run__fuel label')].find(
+    (l) => l.textContent === label,
+  )
+  if (!el?.control) throw new Error(`no first-run fuel "${label}"`)
+  return el.control as HTMLInputElement
+}
+
+const otherFuel = (root: HTMLElement): HTMLSelectElement =>
+  root.querySelector<HTMLSelectElement>('.first-run__fuel select')!
+
+const savedFuel = (): string | undefined =>
+  (JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as { fuel?: string }).fuel
+
 beforeEach(() => {
   mocks.getOnce.mockReset()
   mocks.getOnce.mockResolvedValue(BILBAO)
@@ -153,5 +167,72 @@ describe('first run', () => {
     const root = await boot({ [SETTINGS_KEY]: JSON.stringify({ fuel: 'gasoleoA' }) })
     expect(intro(root)).toBeNull()
     expect(mocks.getOnce).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers the four usual fuels with Gasóleo A already chosen, the rest under Otro…', async () => {
+    const root = await boot()
+    const radios = [...root.querySelectorAll<HTMLInputElement>('.first-run__fuel input')]
+    expect(radios.map((r) => r.value)).toEqual([
+      'gasolina95',
+      'gasoleoA',
+      'gasolina98',
+      'gasoleoPremium',
+    ])
+    expect(fuelOption(root, 'Gasóleo A').checked).toBe(true)
+    expect(root.querySelector('.first-run__fuel legend')!.textContent).toBe(t('firstRun.fuel'))
+    const other = otherFuel(root)
+    expect([...other.options].map((o) => o.value)).toEqual(['', 'gasoleoB', 'glp', 'gnc', 'gnl'])
+    expect(other.value).toBe('')
+    expect(other.options[0].textContent).toBe(t('firstRun.fuelOther'))
+    expect(other.labels?.[0]?.textContent).toBe(t('firstRun.fuelOther'))
+  })
+
+  it('keeps Gasóleo A with a single tap on Usar mi ubicación', async () => {
+    const root = await boot()
+    button(root, 'Usar mi ubicación').click()
+    await flush()
+    expect(savedFuel()).toBe('gasoleoA')
+  })
+
+  it('saves the fuel tapped before locating', async () => {
+    const root = await boot()
+    fuelOption(root, 'Gasolina 95').click()
+    expect(localStorage.getItem(SETTINGS_KEY)).toBeNull()
+    button(root, 'Usar mi ubicación').click()
+    await flush()
+    expect(savedFuel()).toBe('gasolina95')
+  })
+
+  it('saves a fuel from Otro… when a town is picked instead', async () => {
+    const root = await boot()
+    const other = otherFuel(root)
+    other.value = 'glp'
+    other.dispatchEvent(new Event('change'))
+    expect(fuelOption(root, 'Gasóleo A').checked).toBe(false)
+    button(root, 'Elegir municipio').click()
+    expect(otherFuel(root).value).toBe('glp')
+    const input = root.querySelector<HTMLInputElement>('.first-run .place-search input')!
+    input.value = 'Donostia'
+    input.dispatchEvent(new Event('input'))
+    await vi.waitFor(() => {
+      if (!root.querySelector('.place-search__option')) throw new Error('town list not loaded')
+    })
+    root.querySelector<HTMLButtonElement>('.place-search__option')!.click()
+    await flush()
+    expect(savedFuel()).toBe('glp')
+  })
+
+  it('leaves the fuel untouched when the screen is skipped', async () => {
+    permission('granted')
+    const root = await boot()
+    expect(root.querySelector('.first-run__fuel')).toBeNull()
+    expect(localStorage.getItem(SETTINGS_KEY)).toBeNull()
+
+    const returning = await boot({
+      [FIRST_RUN_KEY]: '1',
+      [SETTINGS_KEY]: JSON.stringify({ fuel: 'gasolina98' }),
+    })
+    expect(returning.querySelector('.first-run__fuel')).toBeNull()
+    expect(savedFuel()).toBe('gasolina98')
   })
 })
