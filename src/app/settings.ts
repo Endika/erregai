@@ -54,11 +54,11 @@ export const DEFAULT_SETTINGS: Settings = {
   fuelAlertDistanceM: 2000,
   fuelSound: true,
 }
-const KEY = 'erregai.settings'
+export const SETTINGS_KEY = 'erregai.settings'
 
 export function loadSettings(store: Storage = localStorage): Settings {
   try {
-    const raw = store.getItem(KEY)
+    const raw = store.getItem(SETTINGS_KEY)
     if (!raw) return { ...DEFAULT_SETTINGS }
     return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<Settings>) }
   } catch {
@@ -67,5 +67,5 @@ export function loadSettings(store: Storage = localStorage): Settings {
 }
 
 export function saveSettings(s: Settings, store: Storage = localStorage): void {
-  store.setItem(KEY, JSON.stringify(s))
+  store.setItem(SETTINGS_KEY, JSON.stringify(s))
 }
