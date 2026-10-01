@@ -143,4 +143,16 @@ describe('MapView stacking', () => {
     // Above the radius ring and Leaflet's overlay pane, so it is never hidden there.
     expect(paneZ(radarPin)).toBeGreaterThan(400)
   })
+
+  it('lifts the radars above the stations while driving', () => {
+    view.raiseRadars(true)
+    view.render(BILBAO, [station], 'gasoleoA', () => {}, { radiusKm: 15 })
+    view.renderRadars([radar])
+    const pins = [...container.querySelectorAll('.leaflet-marker-icon')]
+    const stationPin = pins.find((el) => el.closest('.leaflet-marker-pane'))!
+    const radarPin = pins.find((el) => !el.closest('.leaflet-marker-pane'))!
+    expect(paneZ(radarPin)).toBeGreaterThan(paneZ(stationPin))
+    view.raiseRadars(false)
+    expect(paneZ(radarPin)).toBeLessThan(paneZ(stationPin))
+  })
 })

@@ -31,6 +31,7 @@ vi.mock('../src/ui/map', () => ({
     renderServiceAreas(): void {}
     clearServiceAreas(): void {}
     invalidateSize(): void {}
+    raiseRadars(): void {}
     fitRadius(pos: LatLon, radiusKm: number): void {
       mocks.calls.push('fit')
       mocks.fits.push({ pos, radiusKm })
