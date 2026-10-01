@@ -13,6 +13,7 @@ import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
 import {
+  freshnessStamp,
   freshnessText,
   joinNotice,
   locationProblem,
@@ -37,6 +38,8 @@ const TRIP_ZOOM = 15
 // icons and list rows so a dense urban area can't flood Leaflet or the DOM.
 const RADAR_MARKER_CAP = 60
 const RADAR_LIST_CAP = 10
+// The header's "updated 25 min ago" only changes by the minute.
+const FRESHNESS_TICK_MS = 60_000
 // Service areas are far sparser than radars, so a lower cap still covers any
 // realistic radius without crowding the map.
 const SERVICE_MARKER_CAP = 30
@@ -50,6 +53,8 @@ let activeTab: Tab = 'list'
 let selectedStation: Station | undefined
 let locationError: LocationProblem | undefined
 let locating = false
+let inlineError = false
+let freshnessTimer: number | undefined
 
 const root: HTMLElement =
   document.getElementById('app') ??
@@ -60,7 +65,7 @@ const root: HTMLElement =
 root.innerHTML = `
   <header class="app-header">
     <span class="app-header__title" data-title></span>
-    <span class="app-header__freshness" data-freshness></span>
+    <time class="app-header__freshness" data-freshness></time>
     <button type="button" class="app-header__refresh" data-refresh></button>
   </header>
   <div class="app-status" role="status" data-status>
@@ -239,6 +244,42 @@ function refreshStaticCopy(): void {
   }
 }
 
+// The header age and the cached-prices banner are both relative to now, so they
+// are redrawn together: on every render and on a timer while the page is visible.
+function renderAges(): void {
+  const state = store.state
+  const now = Date.now()
+  const busy = state.loading || locating
+  freshnessEl.textContent = freshnessText(state, busy, now)
+  const stamp = busy ? undefined : freshnessStamp(state)
+  if (stamp) {
+    freshnessEl.setAttribute('datetime', stamp.datetime)
+    freshnessEl.title = stamp.title
+  } else {
+    freshnessEl.removeAttribute('datetime')
+    freshnessEl.removeAttribute('title')
+  }
+
+  const banner = statusBanner(state, {
+    online: navigator.onLine,
+    now,
+    locationError,
+    inline: inlineError,
+  })
+  errorEl.textContent = banner?.text ?? ''
+  errorEl.classList.toggle('app-error--notice', banner?.tone === 'notice')
+  errorEl.hidden = !banner
+}
+
+function syncFreshnessTimer(): void {
+  window.clearInterval(freshnessTimer)
+  freshnessTimer = undefined
+  if (document.visibilityState === 'visible') {
+    renderAges()
+    freshnessTimer = window.setInterval(renderAges, FRESHNESS_TICK_MS)
+  }
+}
+
 function render(): void {
   const state = store.state
 
@@ -251,7 +292,6 @@ function render(): void {
   }
 
   const busy = state.loading || locating
-  freshnessEl.textContent = freshnessText(state, busy)
   refreshButton.classList.toggle('is-busy', busy)
   refreshButton.disabled = busy
 
@@ -381,15 +421,8 @@ function render(): void {
   }
 
   const inline = isInlineError(notice)
-  const banner = statusBanner(state, {
-    online: navigator.onLine,
-    now: Date.now(),
-    locationError,
-    inline,
-  })
-  errorEl.textContent = banner?.text ?? ''
-  errorEl.classList.toggle('app-error--notice', banner?.tone === 'notice')
-  errorEl.hidden = !banner
+  inlineError = inline
+  renderAges()
   // The inline error sits in the view, outside the live region; voice it once here.
   const announcement = inline && notice ? joinNotice(viewNoticeText(notice, !navigator.onLine)) : ''
   if (announceEl.textContent !== announcement) announceEl.textContent = announcement
@@ -399,4 +432,6 @@ function render(): void {
 
 store.subscribe(render)
 render()
+document.addEventListener('visibilitychange', syncFreshnessTimer)
+syncFreshnessTimer()
 locate()

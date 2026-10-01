@@ -8,6 +8,7 @@ import { serviceAreaStatus, type ServiceArea } from '../core/services'
 import { bandForThresholds, bandThresholds, priceOf, type PriceBand } from '../core/pricing'
 import { glyphSvg, serviceGlyph, type Glyph } from './map-icons'
 import { t } from '../i18n'
+import { formatPrice } from '../i18n/format'
 
 type MarkerKind = PriceBand | 'unknown' | 'user' | 'radar' | 'services'
 
@@ -150,7 +151,7 @@ export class MapView {
         zIndexOffset: selected ? 1000 : 0,
         keyboard: false,
       })
-      const priceLabel = price !== undefined ? price.toFixed(3) : '—'
+      const priceLabel = price !== undefined ? formatPrice(price) : '—'
       marker.bindTooltip(`${station.brand} · ${priceLabel}`)
       marker.on('click', () => onSelect(station))
       this.markers.addLayer(marker)

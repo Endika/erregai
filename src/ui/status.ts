@@ -1,5 +1,6 @@
 import type { AppState } from '../app/store'
-import { getLocale, t, type Locale } from '../i18n'
+import { getLocale, intlLocale, t, type Locale } from '../i18n'
+import { formatDateTime, formatNumber, hasRelativeTimeData } from '../i18n/format'
 
 export type LocationProblem = 'denied' | 'unavailable'
 
@@ -41,7 +42,7 @@ export function viewNoticeText(notice: ViewNotice, offline: boolean): NoticeText
     case 'loading':
       return { title: t('app.loading') }
     case 'empty':
-      return { title: t('list.empty').replace('{radius}', String(notice.radiusKm)) }
+      return { title: t('list.empty').replace('{radius}', formatNumber(notice.radiusKm)) }
     case 'loadFailed':
       return {
         title: t('error.load.title'),
@@ -58,20 +59,50 @@ export function joinNotice({ title, hint }: NoticeText): string {
   return hint ? `${title}. ${hint}` : title
 }
 
-export function freshnessText(state: AppState, busy: boolean): string {
+// Ages from dataStoredAt, the same clock the cached-prices banner reads, so the
+// header and the banner never disagree on how old the prices are.
+export function freshnessText(state: AppState, busy: boolean, now: number): string {
   if (busy) return t('app.refreshing')
-  return state.dataDate ? `${t('app.updated')} ${state.dataDate}` : ''
+  if (state.dataStoredAt === undefined) return ''
+  return t('app.updatedAgo').replace(
+    '{age}',
+    formatAge(now - state.dataStoredAt, getLocale(), 'short'),
+  )
+}
+
+export interface FreshnessStamp {
+  datetime: string
+  title: string
+}
+
+export function freshnessStamp(state: AppState): FreshnessStamp | undefined {
+  if (state.dataStoredAt === undefined) return undefined
+  return {
+    datetime: new Date(state.dataStoredAt).toISOString(),
+    title: `${t('app.updated')}: ${formatDateTime(state.dataStoredAt)}`,
+  }
 }
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
-export function formatAge(ms: number, locale: Locale = getLocale()): string {
-  const rtf = new Intl.RelativeTimeFormat(locale === 'va' ? 'ca' : locale, { numeric: 'always' })
-  if (ms < HOUR) return rtf.format(-Math.max(1, Math.floor(ms / MINUTE)), 'minute')
-  if (ms < 2 * DAY) return rtf.format(-Math.floor(ms / HOUR), 'hour')
-  return rtf.format(-Math.floor(ms / DAY), 'day')
+export function formatAge(
+  ms: number,
+  locale: Locale = getLocale(),
+  style: Intl.RelativeTimeFormatStyle = 'long',
+): string {
+  const [n, unit] = ageIn(ms)
+  // Abbreviated units need no plural, and days only start at 2.
+  if (!hasRelativeTimeData(locale)) return t(`age.${unit}`, locale).replace('{n}', String(n))
+  const rtf = new Intl.RelativeTimeFormat(intlLocale(locale), { numeric: 'always', style })
+  return rtf.format(-n, unit)
+}
+
+function ageIn(ms: number): [number, 'minute' | 'hour' | 'day'] {
+  if (ms < HOUR) return [Math.max(1, Math.floor(ms / MINUTE)), 'minute']
+  if (ms < 2 * DAY) return [Math.floor(ms / HOUR), 'hour']
+  return [Math.floor(ms / DAY), 'day']
 }
 
 // GeolocationPositionError.PERMISSION_DENIED is 1.

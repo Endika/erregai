@@ -4,6 +4,7 @@ import { haversineKm, type LatLon } from '../core/geo'
 import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
+import { formatKm, formatPrice } from '../i18n/format'
 
 // Deep-link that respects the device's default maps app: Apple Maps on iOS
 // (which does not handle geo:), the OS chooser via geo: elsewhere (Android
@@ -51,7 +52,7 @@ function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): 
     const unit = document.createElement('span')
     unit.className = 'station-detail__lead-unit'
     unit.textContent = '€/l'
-    priceEl.append(price.toFixed(3), ' ', unit)
+    priceEl.append(formatPrice(price), ' ', unit)
 
     const bandEl = document.createElement('span')
     bandEl.className = 'station-detail__band'
@@ -61,7 +62,7 @@ function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): 
   if (origin) {
     const distance = document.createElement('span')
     distance.className = 'station-detail__distance'
-    distance.textContent = `${haversineKm(origin, station.pos).toFixed(1)} km`
+    distance.textContent = formatKm(haversineKm(origin, station.pos))
     figures.appendChild(distance)
   }
 
@@ -82,7 +83,8 @@ function priceList(station: Station, fuels: readonly Fuel[]): HTMLElement {
 
     const value = document.createElement('span')
     value.className = 'station-detail__price-value'
-    value.textContent = station.prices[fuel.id]?.toFixed(3) ?? ''
+    const price = station.prices[fuel.id]
+    value.textContent = price !== undefined ? formatPrice(price) : ''
 
     item.append(label, value)
     list.appendChild(item)

@@ -17,6 +17,20 @@ let currentLocale: Locale = DEFAULT_LOCALE
 
 export function setLocale(l: Locale): void {
   currentLocale = l
+  applyDocumentLang()
+}
+
+// Valencian has no CLDR data of its own; Intl formats it as Catalan.
+export function intlLocale(l: Locale): string {
+  return l === 'va' ? 'ca' : l
+}
+
+export function langTag(l: Locale): string {
+  return l === 'va' ? 'ca-ES-valencia' : l
+}
+
+export function applyDocumentLang(): void {
+  if (typeof document !== 'undefined') document.documentElement.lang = langTag(currentLocale)
 }
 
 export function getLocale(): Locale {

@@ -10,6 +10,7 @@ export const ca: Record<string, string> = {
 
   'app.title': 'Erregai',
   'app.updated': 'Actualitzat',
+  'app.updatedAgo': 'Actualitzat {age}',
   'app.refresh': 'Actualitzar',
   'app.loading': 'Carregant…',
   'app.refreshing': 'Actualitzant…',
@@ -29,6 +30,7 @@ export const ca: Record<string, string> = {
   'band.cheap': 'Barata',
   'band.mid': 'Mitjana',
   'band.expensive': 'Cara',
+  'price.withBand': '{price} €/l, {band}',
 
   'trip.start': 'Iniciar viatge',
   'trip.stop': 'Aturar viatge',
@@ -85,7 +87,7 @@ export const ca: Record<string, string> = {
   'radar.settings.testSound': 'Provar el so',
   'radar.alert.title': 'Radar al davant',
   'radar.alert.body': 'Radar fix a {via}',
-  'radar.alert.banner': 'Radar a {m} m',
+  'radar.alert.banner': 'Radar a {distance}',
   'fuel.settings.mode': 'Avisos de benzinera',
   'fuel.settings.mode.cheap': 'Només barates a prop',
   'fuel.settings.mode.any': 'Qualsevol a prop',
@@ -95,7 +97,7 @@ export const ca: Record<string, string> = {
   'fuel.settings.testSound': 'Provar el so',
   'fuel.alert.title': 'Benzinera a prop',
   'fuel.alert.body': '{brand} a la teva ruta',
-  'fuel.alert.banner': '{brand} a {m} m',
+  'fuel.alert.banner': '{brand} a {distance}',
   'radar.list.title': 'Radars al davant',
   'radar.nearby.title': 'Radars propers',
   'radar.notice.fixedOnly': 'Només radars fixos oficials (sense mòbils ni de tram).',
@@ -115,6 +117,9 @@ export const ca: Record<string, string> = {
   'error.load.server': "El servei de preus no respon; torna-ho a provar d'aquí a uns minuts.",
   'status.cached.offline': 'Preus de {age} · sense connexió',
   'status.cached.failed': "Preus de {age} · no s'han pogut actualitzar",
+  'age.minute': 'fa {n} min',
+  'age.hour': 'fa {n} h',
+  'age.day': 'fa {n} dies',
   'error.refreshFailed': "No s'ha pogut actualitzar; es mostren les últimes dades desades",
   'error.storage':
     "L'emmagatzematge del dispositiu no està disponible; les dades no es desaran per a usar-les sense connexió",

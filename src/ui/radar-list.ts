@@ -1,5 +1,6 @@
 import type { RadarHit } from '../core/radars'
 import { t } from '../i18n'
+import { formatDistance } from '../i18n/format'
 
 // Shared radar list used by both the trip view and the map tab: a titled list of
 // radar hits (road name + distance), nearest first, capped to `limit`.
@@ -29,7 +30,7 @@ export function renderRadarList(
 
     const distance = document.createElement('span')
     distance.className = 'radar-list__distance'
-    distance.textContent = `${Math.round(hit.distanceKm * 1000)} m`
+    distance.textContent = formatDistance(hit.distanceKm)
 
     row.append(via, distance)
     list.appendChild(row)

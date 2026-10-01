@@ -39,9 +39,9 @@ describe('station detail card', () => {
     const lead = el.querySelector('.station-detail__lead')
     expect(lead?.getAttribute('data-band')).toBe('cheap')
     expect(lead?.querySelector('.station-detail__lead-fuel')?.textContent).toBe('Gasóleo A')
-    expect(lead?.querySelector('.station-detail__lead-price')?.textContent).toContain('1.400')
+    expect(lead?.querySelector('.station-detail__lead-price')?.textContent).toContain('1,400')
     expect(lead?.querySelector('.station-detail__band')?.textContent).toBe('Barata')
-    expect(lead?.querySelector('.station-detail__distance')?.textContent).toBe('1.0 km')
+    expect(lead?.querySelector('.station-detail__distance')?.textContent).toBe('1,0 km')
   })
 
   it('puts the directions action right after the lead price, keeping the maps link', () => {
