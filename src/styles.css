@@ -1852,13 +1852,14 @@ body {
   stroke-opacity: 0.85;
 }
 
-/* Map controls of our own: themed like the app's bars, not Leaflet's white, and
-   a full 44 px target where Leaflet's zoom buttons are 30. */
+/* Map controls of our own: skinned like Leaflet's zoom buttons through the
+   --map-chrome tokens, but a full 44 px target where those are 30. */
 .map-control {
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--map-chrome-edge);
   border-radius: 0.5rem;
-  background: var(--color-bg-raised);
-  color: var(--color-fg);
+  background: var(--map-chrome-bg);
+  background-clip: padding-box;
+  color: var(--map-chrome-fg);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   font-family: inherit;
 }
@@ -1878,7 +1879,7 @@ body {
 }
 
 .map-control__button:hover {
-  background: var(--color-selected);
+  background: var(--map-chrome-hover);
 }
 
 /* The key to the pins: closed to a 44 px icon by default, opening upwards from
@@ -1907,7 +1908,7 @@ body {
 }
 
 .map-legend__toggle:hover {
-  background: var(--color-selected);
+  background: var(--map-chrome-hover);
 }
 
 .map-legend__panel:not([hidden]) + .map-legend__toggle {
@@ -1924,7 +1925,7 @@ body {
 
 .map-legend__panel {
   padding: 0.75rem 0.875rem 0.25rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--map-chrome-divider);
 }
 
 .map-legend__panel[hidden] {
