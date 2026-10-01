@@ -8,7 +8,8 @@ import { haversineKm, type LatLon } from '../src/core/geo'
 import type { Station } from '../src/core/station'
 import { RADARS, RADARS_DATASET_DATE } from '../src/core/radars.data'
 import { setLocale, t } from '../src/i18n'
-import { formatDate, formatDistance, formatKm } from '../src/i18n/format'
+import { formatDate } from '../src/i18n/format'
+import { fuelKey, radarKey } from '../src/ui/alert-slot'
 import { bandFor } from '../src/core/pricing'
 
 const memKv = (): Kv => {
@@ -108,8 +109,7 @@ describe('trip radar banner', () => {
   const near: LatLon = { lat: RADAR.lat - 0.00326, lon: RADAR.lon }
   const nearer: LatLon = { lat: RADAR.lat - 0.00226, lon: RADAR.lon }
   const passed: LatLon = { lat: RADAR.lat + 0.00226, lon: RADAR.lon }
-  const metersTo = (p: LatLon) =>
-    t('radar.alert.banner').replace('{distance}', formatDistance(haversineKm(p, at)))
+  const metersTo = (p: LatLon) => radarKey(haversineKm(p, at))
   const radarBanner = (c: TripController) =>
     draw(c).querySelector<HTMLElement>('.trip-view__banner--radar')
 
@@ -162,38 +162,49 @@ describe('trip radar banner', () => {
 describe('trip fuel banners', () => {
   const behind: LatLon = { lat: 40.0, lon: 0 }
   const near: LatLon = { lat: 40.02, lon: 0 }
+  const keyOf = (el: Element | null) => el?.querySelector('.trip-view__banner-key')?.textContent
 
-  it('cheapest-ahead banner shows price and distance and is announced politely once', async () => {
+  beforeEach(() => setLocale('es'))
+
+  it('cheapest-ahead banner reads brand, price and distance and is announced politely once', async () => {
     const spoken: Spoken[] = []
     const c = makeController([CHEAP, PRICEY], spoken)
     await fix(c, behind) // first fix: no heading yet, so nothing alerts
     await fix(c, near) // heading north: CHEAP is the cheapest ahead
-    await fix(c, { lat: 40.025, lon: 0 }) // the distance follows the latest fix, not the one that alerted
-    const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--cheapest')!
-    expect(banner).not.toBeNull()
-    expect(banner.textContent).toContain(CHEAP.brand)
+    const latest = { lat: 40.025, lon: 0 } // the distance follows the latest fix, not the one that alerted
+    await fix(c, latest)
+    const el = draw(c)
+    const banner = el.querySelector<HTMLElement>('.trip-view__banner--cheapest')
+    expect(keyOf(banner)).toBe(fuelKey(CHEAP.brand, 1.0, haversineKm(latest, CHEAP.pos)))
+    expect(banner!.querySelector('.trip-view__banner-label')!.textContent).toBe(
+      'Más barata en Gasóleo A por delante',
+    )
+    // CHEAP is also the nearby station: one alert, not the same station twice.
+    expect(el.querySelectorAll('.trip-view__banner')).toHaveLength(1)
+    expect(el.querySelector('.trip-view__alerts-more')).toBeNull()
     const cheapest = spoken.filter((s) => s.text.includes(t('fuel.gasoleoA')))
     expect(cheapest).toHaveLength(1)
     expect(cheapest[0].politeness).toBe('polite')
-    const km = formatKm(haversineKm({ lat: 40.025, lon: 0 }, CHEAP.pos))
-    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(`1,000 · ${km}`)
   })
 
-  it('proximity fuel banner keeps its distance and is announced politely once', async () => {
+  it('collapses the nearby station into one line under the cheapest, announced politely once', async () => {
     const spoken: Spoken[] = []
     const c = makeController([CHEAP, PRICEY], spoken)
+    c['store'].setSettings({ fuelAlertMode: 'any' })
     await fix(c, behind)
     await fix(c, near)
     draw(c)
-    await fix(c, { lat: 40.021, lon: 0 })
-    const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--fuel')!
-    expect(banner).not.toBeNull()
+    const latest = { lat: 40.021, lon: 0 }
+    await fix(c, latest)
+    const el = draw(c)
+    expect(el.querySelectorAll('.trip-view__banner')).toHaveLength(1)
+    expect(el.querySelector('.trip-view__banner--cheapest')).not.toBeNull()
+    expect(el.querySelector('.trip-view__alerts-more')!.textContent).toBe(
+      `+ ${t('trip.slot.more.fuel')}: ${fuelKey(PRICEY.brand, 2.0, haversineKm(latest, PRICEY.pos))}`,
+    )
     const nearby = spoken.filter((s) => s.text.includes(t('fuel.alert.title')))
     expect(nearby).toHaveLength(1)
     expect(nearby[0].politeness).toBe('polite')
-    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toMatch(
-      /^.+ a (\d+ m|\d+,\d km)$/,
-    )
   })
 })
 
@@ -201,17 +212,18 @@ describe('trip fuel alerts expire', () => {
   const FAR = st('far', 40.06, 1.2)
   const bestRow = (el: HTMLElement) =>
     el.querySelector('.trip-view__row--best .trip-view__row-brand')?.textContent
-  const cheapestLabel = (el: HTMLElement) =>
-    el.querySelector('.trip-view__banner--cheapest .trip-view__banner-label')?.textContent
+  const cheapestKey = (el: HTMLElement) =>
+    el.querySelector('.trip-view__banner--cheapest .trip-view__banner-key')?.textContent
   const cheapestSpoken = (spoken: Spoken[]) =>
     spoken.filter((s) => s.text.includes(t('fuel.gasoleoA')))
+
+  beforeEach(() => setLocale('es'))
 
   it('drops the cheapest and nearby banners once the station is behind', async () => {
     const c = makeController([CHEAP, PRICEY])
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     expect(draw(c).querySelector('.trip-view__banner--cheapest')).not.toBeNull()
-    expect(draw(c).querySelector('.trip-view__banner--fuel')).not.toBeNull()
     await fix(c, { lat: 40.04, lon: 0 }) // both stations are behind now
     expect(draw(c).querySelector('.trip-view__banner')).toBeNull()
   })
@@ -224,14 +236,14 @@ describe('trip fuel alerts expire', () => {
     for (const lat of [40.0, 40.02, 40.03, 40.036, 40.045]) {
       await fix(c, { lat, lon: 0 })
       const el = draw(c)
-      const label = cheapestLabel(el)
-      if (label !== undefined) expect(label.endsWith(`: ${bestRow(el)}`)).toBe(true)
+      const key = cheapestKey(el)
+      if (key !== undefined) expect(key.startsWith(`${bestRow(el)} `)).toBe(true)
     }
     // Past CHEAP, FAR leads the list at 1,200: dearer than the 1,000 already
     // announced, so no banner for it and nothing new said.
     const el = draw(c)
     expect(bestRow(el)).toBe(FAR.brand)
-    expect(cheapestLabel(el)).toBeUndefined()
+    expect(cheapestKey(el)).toBeUndefined()
     expect(cheapestSpoken(spoken)).toHaveLength(1)
     c.stop()
   })
@@ -243,19 +255,33 @@ describe('trip fuel alerts expire', () => {
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     await fix(c, { lat: 40.07, lon: 0 })
-    expect(cheapestLabel(draw(c))!.endsWith(`: ${BETTER.brand}`)).toBe(true)
+    expect(cheapestKey(draw(c))!.startsWith(`${BETTER.brand} `)).toBe(true)
     expect(cheapestSpoken(spoken)).toHaveLength(2)
   })
 
-  it('does not announce a nearby station again when it comes back ahead', async () => {
+  it('shows a station that comes back ahead without announcing it again', async () => {
     const spoken: Spoken[] = []
     const c = makeController([CHEAP], spoken)
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     await fix(c, { lat: 40.036, lon: 0 }) // just past it
-    expect(draw(c).querySelector('.trip-view__banner--fuel')).toBeNull()
+    expect(cheapestKey(draw(c))).toBeUndefined()
     await fix(c, { lat: 40.0355, lon: 0 }) // turned back: it is ahead again
+    expect(cheapestKey(draw(c))!.startsWith(`${CHEAP.brand} `)).toBe(true)
+    expect(cheapestSpoken(spoken)).toHaveLength(1)
     expect(spoken.filter((s) => s.text.includes(t('fuel.alert.title')))).toHaveLength(1)
+  })
+
+  it('drops the nearby line once that station is behind', async () => {
+    const c = makeController([CHEAP, PRICEY])
+    c['store'].setSettings({ fuelAlertMode: 'any' })
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    expect(draw(c).querySelector('.trip-view__alerts-more')).not.toBeNull()
+    await fix(c, { lat: 40.031, lon: 0 }) // past PRICEY, CHEAP still ahead
+    const el = draw(c)
+    expect(el.querySelector('.trip-view__banner--cheapest')).not.toBeNull()
+    expect(el.querySelector('.trip-view__alerts-more')).toBeNull()
   })
 })
 
@@ -266,19 +292,16 @@ describe('trip fuel name', () => {
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     const label = draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')!
-    expect(label.textContent).toBe(`Más barata en Gasóleo A por delante: ${CHEAP.brand}`)
+    expect(label.textContent).toBe('Más barata en Gasóleo A por delante')
   })
 
-  it('switches fuel from the trip sort bar', async () => {
-    installGeolocation()
+  it('switches fuel from the trip sort bar before the trip starts', () => {
     const c = makeController([CHEAP, PRICEY])
-    await c.start()
     const select = draw(c).querySelector<HTMLSelectElement>('.sort-bar select')!
     expect(select.value).toBe('gasoleoA')
     select.value = 'gasolina95'
     select.dispatchEvent(new Event('change'))
     expect(c['store'].state.settings.fuel).toBe('gasolina95')
-    c.stop()
   })
 
   it('prices the cheapest-ahead banner afresh after a switch, even when the new fuel costs more', async () => {
@@ -289,15 +312,14 @@ describe('trip fuel name', () => {
     await c.start()
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.01, lon: 0 })
-    const label = () =>
-      draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')?.textContent
-    expect(label()).toBe(`Más barata en Gasóleo A por delante: ${both.brand}`)
-    const select = draw(c).querySelector<HTMLSelectElement>('.sort-bar select')!
-    select.value = 'gasolina95'
-    select.dispatchEvent(new Event('change'))
-    expect(label()).toBeUndefined()
+    const banner = () => draw(c).querySelector('.trip-view__banner--cheapest')
+    expect(banner()!.textContent).toContain('Gasóleo A')
+    // Mid-trip the fuel can still change from the List tab.
+    c['store'].setSettings({ fuel: 'gasolina95' })
+    expect(banner()).toBeNull()
     await fix(c, { lat: 40.015, lon: 0 })
-    expect(label()).toBe(`Más barata en Gasolina 95 por delante: ${both.brand}`)
+    expect(banner()!.textContent).toContain('Gasolina 95')
+    expect(banner()!.textContent).toContain('1,600')
     c.stop()
   })
 })
@@ -315,6 +337,21 @@ describe('trip layout', () => {
     expect(view.querySelector('.trip-view__controls .trip-view__toggle')!.textContent).toBe(
       t('trip.stop'),
     )
+    c.stop()
+  })
+
+  it('leaves sorting and the fuel picker out of an active trip', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, PRICEY])
+    expect(draw(c).querySelector('.sort-bar')).not.toBeNull()
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const el = draw(c)
+    expect(el.querySelector('.sort-bar')).toBeNull()
+    expect(el.querySelector('select')).toBeNull()
+    expect(el.querySelector('.trip-view__gps')).not.toBeNull()
+    expect(el.querySelectorAll('.trip-view__row').length).toBeGreaterThan(0)
     c.stop()
   })
 })
@@ -409,9 +446,8 @@ describe('trip idle and GPS status', () => {
   it('explains what starting a trip does before it starts, without a GPS line', () => {
     const el = draw(makeController())
     const intro = el.querySelector('.trip-view__intro')!
-    expect(intro).not.toBeNull()
-    expect(intro.textContent).toContain(t('trip.intro.notifications'))
-    expect(intro.textContent).toContain(t('trip.intro.screen'))
+    expect(intro.querySelectorAll('li').length).toBeLessThanOrEqual(3)
+    expect(intro.textContent).toContain(t('trip.foregroundOnly'))
     expect(el.querySelector('.trip-view__gps')).toBeNull()
   })
 

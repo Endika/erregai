@@ -45,8 +45,10 @@ export function formatKm(km: number, locale: Locale = getLocale()): string {
   return `${n.format(km)} km`
 }
 
+// Ten-metre steps: a distance redrawn on every GPS fix would otherwise flicker
+// through every metre.
 export function formatDistance(km: number, locale: Locale = getLocale()): string {
-  const m = Math.round(km * 1000)
+  const m = Math.round(km * 100) * 10
   if (m >= 1000) return formatKm(km, locale)
   return `${numberFormat(locale, 'm', { maximumFractionDigits: 0 }).format(m)} m`
 }
