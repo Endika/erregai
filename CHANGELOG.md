@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.26.0](https://github.com/Endika/erregai/compare/v1.25.0...v1.26.0) (2026-10-01)
+
+
+### Features
+
+* explain the price bands in an expandable legend and show each row's gap to the average ([0788812](https://github.com/Endika/erregai/commit/0788812c9304016c5bce1ba7417bd2c06a5d622d))
+
+
+### Bug Fixes
+
+* drop fuel and sort from Settings, group shared alert controls and name every control once ([6b53c5c](https://github.com/Endika/erregai/commit/6b53c5c97fcd8653adfa79899be7c3e2c16c830b))
+* drop the notice side stripe and follow the connection, refreshing once on reconnect ([21a247e](https://github.com/Endika/erregai/commit/21a247e5b81d06e3d6069a8a7b645572247960ce))
+
 ## [1.25.0](https://github.com/Endika/erregai/compare/v1.24.0...v1.25.0) (2026-10-01)
 
 
