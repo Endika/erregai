@@ -1759,8 +1759,8 @@ body {
   background: var(--color-selected);
 }
 
-/* The key to the pins: closed to a 44 px tab by default, opening upwards from
-   the bottom-left corner so it never sits over the user's own position. */
+/* The key to the pins: closed to a 44 px icon by default, opening upwards from
+   the bottom-left corner, clear of the zoom buttons in the other corner. */
 .map-legend {
   max-width: calc(100vw - 2rem);
   font-size: 0.875rem;
@@ -1768,11 +1768,13 @@ body {
 }
 
 .map-legend__toggle {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-width: 2.75rem;
   min-height: 2.75rem;
-  padding: 0 0.875rem;
+  padding: 0;
   border: none;
   border-radius: inherit;
   background: transparent;
@@ -1787,9 +1789,15 @@ body {
 }
 
 .map-legend__panel:not([hidden]) + .map-legend__toggle {
+  justify-content: start;
+  /* Centres the icon under the swatches above it. */
+  padding: 0 0.8125rem;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-  text-align: start;
+}
+
+.map-legend__icon {
+  flex: none;
 }
 
 .map-legend__panel {

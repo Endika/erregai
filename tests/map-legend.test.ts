@@ -22,6 +22,16 @@ describe('map legend', () => {
     expect(panelOf(legend).hidden).toBe(true)
   })
 
+  it('closes to a compact key icon whose name is still read out', () => {
+    const legend = renderMapLegend()
+    const toggle = toggleOf(legend)
+    const icon = toggle.querySelector('svg')
+    expect(icon?.getAttribute('aria-hidden')).toBe('true')
+    const name = toggle.querySelector<HTMLElement>('.visually-hidden')
+    expect(name?.textContent).toBe(t('map.legend.toggle'))
+    expect(toggle.textContent).toBe(name?.textContent)
+  })
+
   it('opens and closes from the toggle', () => {
     const legend = renderMapLegend()
     toggleOf(legend).click()
@@ -87,6 +97,21 @@ describe('map legend', () => {
     expect(container.querySelectorAll('.leaflet-bottom.leaflet-left .map-legend')).toHaveLength(1)
     view.render(pos, [], 'gasoleoA', () => {}, { recenter: true })
     expect(container.querySelectorAll('.leaflet-bottom.leaflet-left .map-legend')).toHaveLength(1)
+    view.destroy()
+    container.remove()
+  })
+
+  // Open, the key grows up the left edge; the zoom buttons live in the other
+  // bottom corner so it never covers them.
+  it('keeps the zoom buttons out of the legend’s corner', () => {
+    const container = document.createElement('div')
+    document.body.appendChild(container)
+    const view = new MapView(container)
+    view.render({ lat: 43.263, lon: -2.935 }, [], 'gasoleoA', () => {}, { radiusKm: 15 })
+    expect(container.querySelectorAll('.leaflet-control-zoom')).toHaveLength(1)
+    expect(
+      container.querySelector('.leaflet-bottom.leaflet-right .leaflet-control-zoom'),
+    ).not.toBeNull()
     view.destroy()
     container.remove()
   })
