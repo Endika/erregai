@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.27.2](https://github.com/Endika/erregai/compare/v1.27.1...v1.27.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* fit the trip alert label on one line at 390px ([62f360e](https://github.com/Endika/erregai/commit/62f360e2868ac81286716a44e22faf466d02eb65))
+* keep the map legend clear of the zoom buttons and the user's position ([c621f82](https://github.com/Endika/erregai/commit/c621f823097a4e8def2f034cbdc586e494d6caa2))
+* mirror the upper price band and never call a station at the average dear ([0a13ada](https://github.com/Endika/erregai/commit/0a13ada3f9b34dda0b1cf34786eb92f4b0ca99b8))
+* theme Leaflet popups, zoom buttons and attribution in dark mode ([2b5fff7](https://github.com/Endika/erregai/commit/2b5fff753a312d3cad991a3556c26f67dc7d2a41))
+
 ## [1.27.1](https://github.com/Endika/erregai/compare/v1.27.0...v1.27.1) (2026-10-01)
 
 
