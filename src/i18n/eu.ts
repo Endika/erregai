@@ -33,6 +33,13 @@ export const eu: Record<string, string> = {
   'band.mid': 'Ertaina',
   'band.expensive': 'Garestia',
   'price.withBand': '{price} €/l, {band}',
+  'price.withBandDelta': '{price} €/l, {band}, {delta}',
+  'list.vsAverage': '{delta} zent.',
+  'list.atAverage': 'batez bestekoan',
+  'price.below.one': '{n} zentimo batez bestekoaren azpitik',
+  'price.below.other': '{n} zentimo batez bestekoaren azpitik',
+  'price.above.one': '{n} zentimo batez bestekoaren gainetik',
+  'price.above.other': '{n} zentimo batez bestekoaren gainetik',
   'band.legend': 'Zure {radius} km-ko erradioan:',
   'band.legend.about':
     'Prezio bakoitza zure erradioko gasolindegiekin alderatzen da: merkea heren merkeenean dago, eta garestia garestienean.',

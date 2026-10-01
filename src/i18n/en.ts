@@ -33,6 +33,13 @@ export const en: Record<string, string> = {
   'band.mid': 'Mid',
   'band.expensive': 'Expensive',
   'price.withBand': '{price} €/l, {band}',
+  'price.withBandDelta': '{price} €/l, {band}, {delta}',
+  'list.vsAverage': '{delta} ct',
+  'list.atAverage': 'at the average',
+  'price.below.one': '{n} cent below the average',
+  'price.below.other': '{n} cents below the average',
+  'price.above.one': '{n} cent above the average',
+  'price.above.other': '{n} cents above the average',
   'band.legend': 'Within your {radius} km radius:',
   'band.legend.about':
     'Each price is compared with the stations within your radius: cheap is in the lowest third, expensive in the highest.',

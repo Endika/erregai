@@ -596,6 +596,16 @@ body {
   margin-left: 0.25rem;
 }
 
+/* Last on the line and pushed under the pill it qualifies; the town gives way
+   first, so the delta is never the part cut short. */
+.station-row__delta {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding-inline-start: 0.5rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .station-row__price {
   flex-shrink: 0;
   padding: 0.25rem 0.5rem;
@@ -1398,23 +1408,68 @@ body {
   margin-bottom: 0.75rem;
 }
 
-/* One line under the sort bar; the pills are the ones the rows wear. */
+/* One line under the sort bar; the pills are the ones the rows wear. Opening
+   it says what the three words mean. */
 .band-legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.375rem;
-  margin: 0;
-  padding-block: 0.5rem;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-muted);
   font-size: 0.8125rem;
   line-height: 1.25;
 }
 
+.band-legend__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.375rem;
+  min-height: 2.75rem;
+  padding-block: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.band-legend__summary::-webkit-details-marker {
+  display: none;
+}
+
+.band-legend__summary:focus-visible {
+  outline-offset: -2px;
+}
+
 .band-legend .legend__item {
   padding: 0.125rem 0.375rem;
   font-size: 0.75rem;
+}
+
+.band-legend__chevron {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-inline-start: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.band-legend[open] .band-legend__chevron {
+  transform: rotate(180deg);
+}
+
+.band-legend__about {
+  margin: 0 0 0.75rem;
+  max-width: 65ch;
+  color: var(--color-fg);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band-legend__chevron {
+    transition: none;
+  }
 }
 
 /* Drawn as the list's price pills, so the legend is the thing it explains. */

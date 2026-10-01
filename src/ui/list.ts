@@ -1,29 +1,70 @@
 import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import { haversineKm, type LatLon } from '../core/geo'
-import { priceOf, priceReference, stationBand, type PriceReference } from '../core/pricing'
+import {
+  centsFromAverage,
+  priceOf,
+  priceReference,
+  stationBand,
+  type PriceReference,
+} from '../core/pricing'
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
-import { formatKm, formatPrice, priceWithBand } from '../i18n/format'
+import {
+  formatKm,
+  formatPrice,
+  priceWithBand,
+  priceWithBandAndDelta,
+  rowAverageDelta,
+} from '../i18n/format'
 
 const BANDS = ['cheap', 'mid', 'expensive'] as const
+const SVG_NS = 'http://www.w3.org/2000/svg'
 
-// The same pills as the rows, so the legend is the thing it explains.
+// Every store update rebuilds the list; the legend stays as the reader left it.
+let legendOpen = false
+
+// The same pills as the rows, so the legend is the thing it explains; opening
+// it says what the three words mean.
 export function renderBandLegend(radiusKm: number): HTMLElement {
-  const legend = document.createElement('p')
+  const legend = document.createElement('details')
   legend.className = 'band-legend'
+  legend.open = legendOpen
+  legend.addEventListener('toggle', () => {
+    legendOpen = legend.open
+  })
+
+  const summary = document.createElement('summary')
+  summary.className = 'band-legend__summary'
   const scope = document.createElement('span')
   scope.className = 'band-legend__scope'
   scope.textContent = t('band.legend').replace('{radius}', String(radiusKm))
-  legend.appendChild(scope)
+  summary.appendChild(scope)
   for (const band of BANDS) {
     const item = document.createElement('span')
     item.className = 'legend__item'
     item.dataset.band = band
     item.textContent = t(`band.${band}`)
-    legend.append(' ', item)
+    summary.append(' ', item)
   }
+  summary.appendChild(chevron())
+
+  const about = document.createElement('p')
+  about.className = 'band-legend__about'
+  about.textContent = t('band.legend.about')
+  legend.append(summary, about)
   return legend
+}
+
+function chevron(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.setAttribute('class', 'band-legend__chevron')
+  svg.setAttribute('viewBox', '0 0 12 12')
+  svg.setAttribute('aria-hidden', 'true')
+  const path = document.createElementNS(SVG_NS, 'path')
+  path.setAttribute('d', 'M2.5 4.5 6 8l3.5-3.5')
+  svg.appendChild(path)
+  return svg
 }
 
 export interface ListOptions {
@@ -73,6 +114,7 @@ export function renderList(
     priceEl.appendChild(value)
 
     const band = stationBand(station, fuel, reference)
+    const cents = price !== undefined ? centsFromAverage(price, reference) : undefined
     if (price !== undefined) {
       // The aria-label already says "€/l", so the visible unit stays silent.
       const unit = document.createElement('span')
@@ -83,7 +125,12 @@ export function renderList(
       if (band) {
         row.dataset.band = band
         priceEl.title = t(`band.${band}`)
-        priceEl.setAttribute('aria-label', priceWithBand(price, band))
+        priceEl.setAttribute(
+          'aria-label',
+          cents !== undefined
+            ? priceWithBandAndDelta(price, band, cents)
+            : priceWithBand(price, band),
+        )
       }
     }
 
@@ -114,6 +161,15 @@ export function renderList(
       badge.dataset.schedule = status
       badge.textContent = t(status === 'closed' ? 'schedule.closed' : 'schedule.closingSoon')
       meta.appendChild(badge)
+    }
+    // A word next to the colour, so the band never rests on hue alone. The pill
+    // already voices it, so the visible copy stays silent.
+    if (cents !== undefined) {
+      const delta = document.createElement('span')
+      delta.className = 'station-row__delta'
+      delta.setAttribute('aria-hidden', 'true')
+      delta.textContent = rowAverageDelta(cents)
+      meta.appendChild(delta)
     }
 
     row.append(head, meta)

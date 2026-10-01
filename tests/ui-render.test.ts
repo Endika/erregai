@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderBandLegend, renderList } from '../src/ui/list'
 import { renderRadarList } from '../src/ui/radar-list'
-import { setLocale } from '../src/i18n'
+import { setLocale, t } from '../src/i18n'
 import type { RadarHit } from '../src/core/radars'
 import type { Station } from '../src/core/station'
 
@@ -90,16 +90,94 @@ describe('renderBandLegend', () => {
   it('names the reference the colours compare against, then the three bands', () => {
     setLocale('es')
     const el = renderBandLegend(15)
-    expect(el.querySelector('.band-legend__scope')?.textContent).toBe('En tu radio de 15 km:')
-    const items = [...el.querySelectorAll<HTMLElement>('.legend__item')]
+    const summary = el.querySelector('summary')!
+    expect(summary.querySelector('.band-legend__scope')?.textContent).toBe('En tu radio de 15 km:')
+    const items = [...summary.querySelectorAll<HTMLElement>('.legend__item')]
     expect(items.map((i) => i.dataset.band)).toEqual(['cheap', 'mid', 'expensive'])
-    expect(el.textContent).toBe('En tu radio de 15 km: Barata Media Cara')
+    expect(summary.textContent).toBe('En tu radio de 15 km: Barata Media Cara')
+  })
+
+  it('opens to the same explanation Settings gives, closed by default', () => {
+    setLocale('es')
+    const el = renderBandLegend(15)
+    expect(el.tagName).toBe('DETAILS')
+    expect((el as HTMLDetailsElement).open).toBe(false)
+    expect(el.querySelector('.band-legend__about')?.textContent).toBe(t('band.legend.about'))
+  })
+
+  it('stays open across re-renders once the reader opened it', () => {
+    const first = renderBandLegend(15) as HTMLDetailsElement
+    first.open = true
+    first.dispatchEvent(new Event('toggle'))
+    expect((renderBandLegend(15) as HTMLDetailsElement).open).toBe(true)
+    first.open = false
+    first.dispatchEvent(new Event('toggle'))
+    expect((renderBandLegend(15) as HTMLDetailsElement).open).toBe(false)
   })
 
   it('follows the locale and the radius', () => {
     setLocale('en')
-    expect(renderBandLegend(50).textContent).toBe('Within your 50 km radius: Cheap Mid Expensive')
+    expect(renderBandLegend(50).querySelector('summary')!.textContent).toBe(
+      'Within your 50 km radius: Cheap Mid Expensive',
+    )
     setLocale('es')
+  })
+})
+
+describe('row delta against the radius average', () => {
+  const ORIGIN = { lat: 40, lon: -3 }
+  const draw = (prices: number[]) => {
+    const el = document.createElement('div')
+    renderList(
+      el,
+      prices.map((p, i) => s(String(i), p)),
+      'gasoleoA',
+      ORIGIN,
+      () => {},
+    )
+    return [...el.querySelectorAll<HTMLElement>('.station-row')]
+  }
+
+  it('says in words how far each price sits from the average, last on the second line', () => {
+    setLocale('es')
+    const rows = draw([1.2, 1.4, 1.6])
+    const deltas = rows.map((r) => r.querySelector('.station-row__meta > :last-child')?.textContent)
+    expect(deltas).toEqual(['\u221220 cént.', 'en la media', '+20 cént.'])
+    for (const row of rows) {
+      expect(row.querySelector('.station-row__delta')!.getAttribute('aria-hidden')).toBe('true')
+    }
+  })
+
+  it('adds the delta to what the price pill voices', () => {
+    setLocale('es')
+    const rows = draw([1.2, 1.3, 1.4, 1.5, 1.5, 1.5])
+    const label = (r: HTMLElement) =>
+      r.querySelector('.station-row__price')!.getAttribute('aria-label')
+    expect([rows[0], rows[2], rows[5]].map(label)).toEqual([
+      '1,200 €/l, barata, 20 céntimos por debajo de la media',
+      '1,400 €/l, media, en la media',
+      '1,500 €/l, cara, 10 céntimos por encima de la media',
+    ])
+  })
+
+  it('uses the singular for one céntimo', () => {
+    setLocale('es')
+    const rows = draw([1.39, 1.4, 1.41])
+    expect(rows[0].querySelector('.station-row__price')!.getAttribute('aria-label')).toBe(
+      '1,390 €/l, barata, 1 céntimo por debajo de la media',
+    )
+    setLocale('en')
+    const en = draw([1.39, 1.4, 1.45])
+    expect(en[0].querySelector('.station-row__delta')!.textContent).toBe('\u22122 ct')
+    expect(en[0].querySelector('.station-row__price')!.getAttribute('aria-label')).toBe(
+      '1.390 €/l, cheap, 2 cents below the average',
+    )
+    setLocale('es')
+  })
+
+  it('stays out when too few prices make an average meaningless', () => {
+    const rows = draw([1.2, 1.6])
+    expect(rows.every((r) => r.querySelector('.station-row__delta') === null)).toBe(true)
   })
 })
 
