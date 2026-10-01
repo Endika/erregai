@@ -32,6 +32,32 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+// A token's value with every var() it leans on resolved, from the light root
+// overridden by one dark selector.
+function darkPalette(selector: string): (name: string) => string {
+  const merged = new Map([...tokens(':root'), ...tokens(selector)])
+  const resolve = (value: string): string =>
+    value.replace(/var\((--[\w-]+)\)/g, (_, name: string) => resolve(merged.get(name)!))
+  const mix = (value: string): string =>
+    value.replace(
+      /color-mix\(in srgb, (#[0-9a-f]{6}) (\d+)%, (#[0-9a-f]{6})\)/gi,
+      (_, a: string, pct: string, b: string) => over(a, Number(pct) / 100, b),
+    )
+  return (name) => mix(resolve(merged.get(name)!))
+}
+
+// Alpha-composites `top` at `alpha` over an opaque `under`, as #rrggbb.
+function over(top: string, alpha: number, under: string): string {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(i, i + 2), 16)
+  return (
+    '#' +
+    [1, 3, 5]
+      .map((i) => Math.round(ch(top, i) * alpha + ch(under, i) * (1 - alpha)))
+      .map((c) => c.toString(16).padStart(2, '0'))
+      .join('')
+  )
+}
+
 // OSM's land (#f2efe9) and residential (#e0dfdf) fills once through the dark
 // tile filter, measured from the CSS filter matrices: where the pins sit.
 const DARK_BASEMAP = ['#1b1914', '#262525']
@@ -62,5 +88,31 @@ describe('dark map', () => {
         expect(contrast(fill, '#ffffff'), `white on ${kind}`).toBeGreaterThanOrEqual(3)
       }
     }
+  })
+
+  it('skins Leaflet’s popups and controls from the app palette, legible on the dark map', () => {
+    for (const selector of DARK_SELECTORS) {
+      const dark = darkPalette(selector)
+      const bg = dark('--map-chrome-bg')
+      for (const ink of [dark('--map-chrome-fg'), dark('--color-muted'), dark('--map-chrome-link')])
+        expect(contrast(ink, bg), `${ink} on ${bg}`).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(dark('--map-chrome-fg'), dark('--map-chrome-hover'))).toBeGreaterThanOrEqual(
+        4.5,
+      )
+      for (const ground of DARK_BASEMAP) {
+        // The zoom buttons' outline is what sets them apart from the map.
+        expect(contrast(dark('--map-chrome-edge'), ground)).toBeGreaterThanOrEqual(3)
+        // The attribution strip lets 20% of the map through.
+        const strip = over(bg, 0.8, ground)
+        expect(contrast(dark('--map-chrome-fg'), strip)).toBeGreaterThanOrEqual(4.5)
+        expect(contrast(dark('--map-chrome-link'), strip)).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
+
+  it('keeps Leaflet’s own white chrome in the light theme', () => {
+    const light = tokens(':root')
+    expect(light.get('--map-chrome-bg')).toBe('#ffffff')
+    expect(light.get('--map-chrome-fg')).toBe('#333333')
   })
 })

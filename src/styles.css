@@ -36,6 +36,18 @@
   /* Teal, and square rather than round: it must not be mistaken for the blue
      user dot, the violet radar or any of the price bands. */
   --map-marker-services: #00838f;
+
+  /* Leaflet's popups, zoom buttons and attribution: its own white chrome here,
+     the app's surfaces in the dark theme. */
+  --map-chrome-bg: #ffffff;
+  --map-chrome-fg: #333333;
+  --map-chrome-hover: #f4f4f4;
+  --map-chrome-edge: rgba(0, 0, 0, 0.2);
+  --map-chrome-divider: #cccccc;
+  --map-chrome-disabled: #bbbbbb;
+  --map-chrome-close: #757575;
+  --map-chrome-link: #0078a8;
+  --map-chrome-ring: transparent;
 }
 
 /* Dark palette shared by system-dark (unless the user forced light) and by an
@@ -68,6 +80,16 @@
     --map-marker-expensive: #af5678;
     --map-marker-unknown: #747474;
     --map-marker-user: #3272d8;
+    --map-chrome-bg: var(--color-bg-raised);
+    --map-chrome-fg: var(--color-fg);
+    --map-chrome-hover: var(--color-selected);
+    /* Light enough to hold 3:1 against the darkened tiles. */
+    --map-chrome-edge: var(--color-muted);
+    --map-chrome-divider: var(--color-border);
+    --map-chrome-disabled: color-mix(in srgb, var(--color-muted) 45%, var(--color-bg-raised));
+    --map-chrome-close: var(--color-muted);
+    --map-chrome-link: var(--color-accent);
+    --map-chrome-ring: var(--color-border);
   }
 }
 
@@ -94,6 +116,16 @@
   --map-marker-expensive: #af5678;
   --map-marker-unknown: #747474;
   --map-marker-user: #3272d8;
+  --map-chrome-bg: var(--color-bg-raised);
+  --map-chrome-fg: var(--color-fg);
+  --map-chrome-hover: var(--color-selected);
+  /* Light enough to hold 3:1 against the darkened tiles. */
+  --map-chrome-edge: var(--color-muted);
+  --map-chrome-divider: var(--color-border);
+  --map-chrome-disabled: color-mix(in srgb, var(--color-muted) 45%, var(--color-bg-raised));
+  --map-chrome-close: var(--color-muted);
+  --map-chrome-link: var(--color-accent);
+  --map-chrome-ring: var(--color-border);
 }
 
 * {
@@ -226,6 +258,58 @@ body {
 
 .map-view.leaflet-container {
   background: var(--map-ground);
+}
+
+/* Leaflet's chrome, re-coloured through the --map-chrome tokens. Each selector
+   outranks Leaflet's own, whose stylesheet loads after this one. */
+.leaflet-container .leaflet-popup-content-wrapper,
+.leaflet-container .leaflet-popup-tip {
+  background: var(--map-chrome-bg);
+  color: var(--map-chrome-fg);
+}
+
+.leaflet-container .leaflet-popup-content-wrapper {
+  box-shadow:
+    0 0 0 1px var(--map-chrome-ring),
+    0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button {
+  color: var(--map-chrome-close);
+}
+
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:hover,
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button:focus {
+  color: var(--map-chrome-fg);
+}
+
+.leaflet-container.leaflet-touch .leaflet-bar {
+  border-color: var(--map-chrome-edge);
+}
+
+.leaflet-container .leaflet-bar a {
+  border-bottom-color: var(--map-chrome-divider);
+  background-color: var(--map-chrome-bg);
+  color: var(--map-chrome-fg);
+}
+
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus {
+  background-color: var(--map-chrome-hover);
+}
+
+.leaflet-container .leaflet-bar a.leaflet-disabled {
+  background-color: var(--map-chrome-hover);
+  color: var(--map-chrome-disabled);
+}
+
+.leaflet-container .leaflet-control-container .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--map-chrome-bg) 80%, transparent);
+  color: var(--map-chrome-fg);
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--map-chrome-link);
 }
 
 .trip-map {
