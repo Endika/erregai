@@ -408,6 +408,8 @@ function render(): void {
       locationError,
     })
   let notice: ViewNotice | undefined
+  // The card bands like the surface it was opened from.
+  let cardReference = reference
 
   if (activeTab === 'list') {
     const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
@@ -481,6 +483,11 @@ function render(): void {
     }
   } else if (activeTab === 'trip') {
     const tripPos = tripController.currentUpdate?.state.lastPos ?? state.pos
+    // Around the car, not the last List position: the radius moves with the trip.
+    const tripReference = tripPos
+      ? radiusReference(state.stations, state.settings.fuel, tripPos, state.settings.radiusKm)
+      : undefined
+    cardReference = tripReference
     if (tripPos) {
       const nearby = withinRadius(state.stations, tripPos, state.settings.radiusKm)
       const mapWrap = document.createElement('div')
@@ -496,7 +503,7 @@ function render(): void {
         tripController.stationsForMap(nearby),
         state.settings.fuel,
         selectStation,
-        { recenter: true, selectedId, aheadDeg },
+        { recenter: true, selectedId, aheadDeg, reference: tripReference },
       )
       // While a trip is active, onFix owns the radar layer (per GPS fix); when it
       // is not, keep the preview map's radar layer in sync with the toggle so
@@ -531,6 +538,7 @@ function render(): void {
     tripController.render(readout, tripController.currentUpdate, selectedId, {
       locationDenied: gpsDenied,
       pricesUnavailable: state.error !== undefined && state.stations.length === 0,
+      reference: tripReference,
     })
   } else if (activeTab === 'settings') {
     renderSettings(viewEl, state.settings, handleSettingsChange)
@@ -543,7 +551,7 @@ function render(): void {
   const announcement = inline && notice ? joinNotice(viewNoticeText(notice, !navigator.onLine)) : ''
   if (announceEl.textContent !== announcement) announceEl.textContent = announcement
 
-  renderCard(reference)
+  renderCard(cardReference)
 }
 
 store.subscribe(render)

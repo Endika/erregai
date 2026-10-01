@@ -1110,6 +1110,11 @@ body {
   font-weight: 600;
 }
 
+.trip-view__row-price-unit {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 .trip-view__row[data-band='cheap'] .trip-view__row-price {
   background: var(--band-cheap-bg);
   color: var(--band-cheap-fg);

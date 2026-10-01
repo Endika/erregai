@@ -25,7 +25,13 @@ import {
   stopBackgroundAudio,
 } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
-import { bandForThresholds, bandThresholds, priceOf, sortStations } from '../core/pricing'
+import {
+  priceOf,
+  radiusReference,
+  sortStations,
+  stationBand,
+  type PriceReference,
+} from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
 import { formatDate, formatKm, formatPrice, priceWithBand } from '../i18n/format'
@@ -47,6 +53,9 @@ export interface TripRenderOptions {
   locationDenied?: boolean
   // No prices and none cached: only the bundled radars are left to warn about.
   pricesUnavailable?: boolean
+  // The radius set the trip map bands against; without it the rows work out
+  // the same one from the store, so a station keeps its List band either way.
+  reference?: PriceReference
 }
 
 type GpsStatus = 'waiting' | 'active' | 'lost'
@@ -295,7 +304,7 @@ export class TripController {
     container: HTMLElement,
     update: TripUpdate | undefined,
     selectedId?: string,
-    { locationDenied = false, pricesUnavailable = false }: TripRenderOptions = {},
+    { locationDenied = false, pricesUnavailable = false, reference }: TripRenderOptions = {},
   ): void {
     const wrapper = document.createElement('div')
     wrapper.className = 'trip-view'
@@ -347,7 +356,7 @@ export class TripController {
       controls.className = 'trip-view__controls'
       controls.append(this.renderGpsStatus(), toggle)
       wrapper.appendChild(controls)
-      wrapper.appendChild(this.renderAhead(update, selectedId))
+      wrapper.appendChild(this.renderAhead(update, selectedId, reference))
       if (this.store.state.settings.radarAlertsEnabled) {
         if (this.radarHits.length > 0)
           wrapper.appendChild(renderRadarList(this.radarHits, 'radar.list.title', NEARBY_RADARS))
@@ -399,8 +408,12 @@ export class TripController {
     }
   }
 
-  private renderAhead(update: TripUpdate | undefined, selectedId?: string): HTMLElement {
-    const fuel = this.store.state.settings.fuel
+  private renderAhead(
+    update: TripUpdate | undefined,
+    selectedId?: string,
+    radiusRef?: PriceReference,
+  ): HTMLElement {
+    const { fuel, radiusKm } = this.store.state.settings
     // update.ahead is price-sorted by the selector, so its head is the cheapest
     // regardless of the display order the user picks below.
     const ahead = update?.ahead ?? []
@@ -417,9 +430,11 @@ export class TripController {
       return list
     }
 
-    const thresholds = bandThresholds(
-      ahead.map((s) => priceOf(s, fuel)).filter((p): p is number => p !== undefined),
-    )
+    // Banded against the whole radius like the List, not the few stations
+    // ahead, or the same price would be cheap here and dear there.
+    const reference =
+      radiusRef ??
+      (origin ? radiusReference(this.store.state.stations, fuel, origin, radiusKm) : undefined)
     const display = origin
       ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort)
       : ahead
@@ -429,6 +444,7 @@ export class TripController {
       const row = document.createElement('button')
       row.type = 'button'
       row.className = 'trip-view__row'
+      row.dataset.station = station.id
       if (station.id === cheapestId) row.classList.add('trip-view__row--best')
       if (station.id === selectedId) row.classList.add('is-selected')
 
@@ -442,12 +458,23 @@ export class TripController {
 
       const priceEl = document.createElement('span')
       priceEl.className = 'trip-view__row-price'
-      priceEl.textContent = price !== undefined ? formatPrice(price) : '—'
+      const value = document.createElement('span')
+      value.className = 'trip-view__row-price-value'
+      value.textContent = price !== undefined ? formatPrice(price) : '—'
+      priceEl.appendChild(value)
       if (price !== undefined) {
-        const band = bandForThresholds(price, thresholds)
-        row.dataset.band = band
-        priceEl.title = t(`band.${band}`)
-        priceEl.setAttribute('aria-label', priceWithBand(price, band))
+        // The aria-label already says "€/l", so the visible unit stays silent.
+        const unit = document.createElement('span')
+        unit.className = 'trip-view__row-price-unit'
+        unit.setAttribute('aria-hidden', 'true')
+        unit.textContent = '€/l'
+        priceEl.append(' ', unit)
+        const band = stationBand(station, fuel, reference)
+        if (band) {
+          row.dataset.band = band
+          priceEl.title = t(`band.${band}`)
+          priceEl.setAttribute('aria-label', priceWithBand(price, band))
+        }
       }
 
       row.append(brand, distance, priceEl)

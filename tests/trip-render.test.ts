@@ -10,7 +10,8 @@ import { RADARS, RADARS_DATASET_DATE } from '../src/core/radars.data'
 import { setLocale, t } from '../src/i18n'
 import { formatDate } from '../src/i18n/format'
 import { fuelKey, radarKey } from '../src/ui/alert-slot'
-import { bandFor } from '../src/core/pricing'
+import { bandFor, radiusReference } from '../src/core/pricing'
+import { renderList } from '../src/ui/list'
 
 const memKv = (): Kv => {
   const m = new Map<string, CacheEntry>()
@@ -387,8 +388,50 @@ describe('trip rows', () => {
       (r) => r.dataset.band === 'cheap',
     )!
     const price = cheap.querySelector('.trip-view__row-price')!
-    expect(price.textContent).toBe('1,000')
+    expect(price.querySelector('.trip-view__row-price-value')!.textContent).toBe('1,000')
     expect(price.getAttribute('aria-label')).toBe('1,000 €/l, barata')
+    c.stop()
+  })
+})
+
+describe('trip rows against the radius', () => {
+  // Cheaper stations just behind the car: banding only what lies ahead would
+  // call 1,000 cheap here, while the list, which sees the whole radius, does not.
+  const BEHIND = [st('b1', 39.99, 0.5), st('b2', 39.985, 0.6), st('b3', 39.98, 0.7)]
+  const ALL = [CHEAP, MID, PRICEY, ...BEHIND]
+
+  it('give each station the band the list gives it', async () => {
+    installGeolocation()
+    const c = makeController(ALL)
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    const here = { lat: 40.02, lon: 0 }
+    await fix(c, here)
+
+    const reference = radiusReference(ALL, 'gasoleoA', here, 15)
+    const list = document.createElement('div')
+    renderList(list, ALL, 'gasoleoA', here, () => {}, { reference })
+    const listBand = (id: string) =>
+      list.querySelector<HTMLElement>(`[data-station="${id}"]`)!.dataset.band
+
+    const rows = [...draw(c).querySelectorAll<HTMLElement>('.trip-view__row')]
+    expect(rows.map((r) => r.dataset.station)).toEqual(
+      expect.arrayContaining(['cheap', 'mid', 'pricey']),
+    )
+    for (const row of rows) expect(row.dataset.band).toBe(listBand(row.dataset.station!))
+    expect(rows.find((r) => r.dataset.station === 'cheap')!.dataset.band).toBe('expensive')
+    c.stop()
+  })
+
+  it('wear the list pill, unit included', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, MID, PRICEY])
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const unit = draw(c).querySelector('.trip-view__row-price .trip-view__row-price-unit')!
+    expect(unit.textContent).toBe('€/l')
+    expect(unit.getAttribute('aria-hidden')).toBe('true')
     c.stop()
   })
 })
