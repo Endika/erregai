@@ -1,6 +1,7 @@
 import type { RadarHit } from '../core/radars'
 import { t } from '../i18n'
 import { formatDistance } from '../i18n/format'
+import { glyphSvg } from './map-icons'
 
 // Shared radar list used by both the trip view and the map tab: a titled list of
 // radar hits (road name + distance), nearest first, capped to `limit`.
@@ -24,6 +25,11 @@ export function renderRadarList(
     const row = document.createElement('div')
     row.className = 'radar-list__row'
 
+    const icon = document.createElement('span')
+    icon.className = 'radar-list__icon'
+    icon.setAttribute('aria-hidden', 'true')
+    icon.innerHTML = glyphSvg('camera', 14)
+
     const via = document.createElement('span')
     via.className = 'radar-list__via'
     via.textContent = hit.radar.via
@@ -32,7 +38,7 @@ export function renderRadarList(
     distance.className = 'radar-list__distance'
     distance.textContent = formatDistance(hit.distanceKm)
 
-    row.append(via, distance)
+    row.append(icon, via, distance)
     list.appendChild(row)
   }
 

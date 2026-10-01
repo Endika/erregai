@@ -16,8 +16,10 @@ export default defineConfig({
       manifest: {
         name: 'Erregai',
         short_name: 'Erregai',
-        theme_color: '#0b7285',
-        background_color: '#0b7285',
+        // The splash and status bar match the light shell (--color-bg and the
+        // raised header) so launching doesn't flash teal before the app paints.
+        theme_color: '#f7f7f8',
+        background_color: '#ffffff',
         display: 'standalone',
         start_url: '/erregai/',
         icons: [
