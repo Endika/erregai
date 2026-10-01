@@ -3,6 +3,8 @@ import * as L from 'leaflet'
 import { MapView } from '../src/ui/map'
 import { radiusBounds } from '../src/ui/map-frame'
 import { setLocale, t } from '../src/i18n'
+import type { Station } from '../src/core/station'
+import type { Radar } from '../src/core/radars'
 
 const BILBAO = { lat: 43.263, lon: -2.935 }
 
@@ -106,5 +108,39 @@ describe('MapView fit control', () => {
     setLocale('en')
     view.render(BILBAO, [], 'gasoleoA', () => {}, { radiusKm: 15 })
     expect(fitButton()!.getAttribute('aria-label')).toBe(t('map.fit', 'en'))
+  })
+})
+
+describe('MapView stacking', () => {
+  // leaflet.css stacks its own marker pane at 600; jsdom never loads the sheet.
+  const LEAFLET_MARKER_PANE_Z = 600
+  const paneZ = (el: Element): number => {
+    const pane = el.closest<HTMLElement>('.leaflet-pane')!
+    return pane.classList.contains('leaflet-marker-pane')
+      ? LEAFLET_MARKER_PANE_Z
+      : Number(pane.style.zIndex)
+  }
+  const station: Station = {
+    id: 's1',
+    brand: 'REPSOL',
+    name: 'REPSOL',
+    pos: BILBAO,
+    address: '',
+    town: 'Bilbao',
+    schedule: '',
+    prices: { gasoleoA: 1.5 },
+  }
+  const radar: Radar = { id: 'r1', ...BILBAO, via: 'A-8', source: 'euskadi' }
+
+  it('keeps every station pin above the radars', () => {
+    view.render(BILBAO, [station], 'gasoleoA', () => {}, { radiusKm: 15 })
+    view.renderRadars([radar])
+    const pins = [...container.querySelectorAll('.leaflet-marker-icon')]
+    const stationPin = pins.find((el) => el.closest('.leaflet-marker-pane'))!
+    const radarPin = pins.find((el) => !el.closest('.leaflet-marker-pane'))!
+    expect(radarPin).toBeDefined()
+    expect(paneZ(radarPin)).toBeLessThan(paneZ(stationPin))
+    // Above the radius ring and Leaflet's overlay pane, so it is never hidden there.
+    expect(paneZ(radarPin)).toBeGreaterThan(400)
   })
 })
