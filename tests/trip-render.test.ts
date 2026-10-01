@@ -197,6 +197,68 @@ describe('trip fuel banners', () => {
   })
 })
 
+describe('trip fuel alerts expire', () => {
+  const FAR = st('far', 40.06, 1.2)
+  const bestRow = (el: HTMLElement) =>
+    el.querySelector('.trip-view__row--best .trip-view__row-brand')?.textContent
+  const cheapestLabel = (el: HTMLElement) =>
+    el.querySelector('.trip-view__banner--cheapest .trip-view__banner-label')?.textContent
+  const cheapestSpoken = (spoken: Spoken[]) =>
+    spoken.filter((s) => s.text.includes(t('fuel.gasoleoA')))
+
+  it('drops the cheapest and nearby banners once the station is behind', async () => {
+    const c = makeController([CHEAP, PRICEY])
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    expect(draw(c).querySelector('.trip-view__banner--cheapest')).not.toBeNull()
+    expect(draw(c).querySelector('.trip-view__banner--fuel')).not.toBeNull()
+    await fix(c, { lat: 40.04, lon: 0 }) // both stations are behind now
+    expect(draw(c).querySelector('.trip-view__banner')).toBeNull()
+  })
+
+  it('never names a station other than the best row of the list below', async () => {
+    const spoken: Spoken[] = []
+    installGeolocation()
+    const c = makeController([CHEAP, MID, PRICEY, FAR], spoken)
+    await c.start()
+    for (const lat of [40.0, 40.02, 40.03, 40.036, 40.045]) {
+      await fix(c, { lat, lon: 0 })
+      const el = draw(c)
+      const label = cheapestLabel(el)
+      if (label !== undefined) expect(label.endsWith(`: ${bestRow(el)}`)).toBe(true)
+    }
+    // Past CHEAP, FAR leads the list at 1,200: dearer than the 1,000 already
+    // announced, so no banner for it and nothing new said.
+    const el = draw(c)
+    expect(bestRow(el)).toBe(FAR.brand)
+    expect(cheapestLabel(el)).toBeUndefined()
+    expect(cheapestSpoken(spoken)).toHaveLength(1)
+    c.stop()
+  })
+
+  it('alerts again when a cheaper station than the one passed comes into range', async () => {
+    const spoken: Spoken[] = []
+    const BETTER = st('better', 40.2, 0.9) // beyond the 15 km radius at the start
+    const c = makeController([CHEAP, BETTER], spoken)
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    await fix(c, { lat: 40.07, lon: 0 })
+    expect(cheapestLabel(draw(c))!.endsWith(`: ${BETTER.brand}`)).toBe(true)
+    expect(cheapestSpoken(spoken)).toHaveLength(2)
+  })
+
+  it('does not announce a nearby station again when it comes back ahead', async () => {
+    const spoken: Spoken[] = []
+    const c = makeController([CHEAP], spoken)
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    await fix(c, { lat: 40.036, lon: 0 }) // just past it
+    expect(draw(c).querySelector('.trip-view__banner--fuel')).toBeNull()
+    await fix(c, { lat: 40.0355, lon: 0 }) // turned back: it is ahead again
+    expect(spoken.filter((s) => s.text.includes(t('fuel.alert.title')))).toHaveLength(1)
+  })
+})
+
 describe('trip fuel name', () => {
   it('names the fuel in the cheapest-ahead banner', async () => {
     setLocale('es')
