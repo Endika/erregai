@@ -2,6 +2,7 @@
 import { vi } from 'vitest'
 import type { LatLon } from '../src/core/geo'
 import { t as translate, type Locale } from '../src/i18n'
+import { formatAge } from '../src/ui/status'
 
 const mocks = vi.hoisted(() => ({
   getOnce: vi.fn<() => Promise<LatLon>>(),
@@ -208,6 +209,26 @@ describe('connectivity', () => {
     window.dispatchEvent(new Event('offline'))
     window.dispatchEvent(new Event('online'))
     await vi.advanceTimersByTimeAsync(10_000)
+    expect(mocks.fetchProvince).toHaveBeenCalledTimes(1)
+  })
+
+  it('says it is offline over fresh prices, and stops saying so on reconnect', async () => {
+    mocks.getOnce.mockResolvedValue(BILBAO)
+    const root = await boot()
+    const banner = root.querySelector<HTMLElement>('[data-error]')!
+    expect(banner.hidden).toBe(true)
+
+    online = false
+    window.dispatchEvent(new Event('offline'))
+    expect(banner.hidden).toBe(false)
+    const age = formatAge(60_000, document.documentElement.lang as Locale)
+    expect(banner.textContent).toBe(t('status.cached.offline').replace('{age}', age))
+    expect(banner.classList.contains('app-error--notice')).toBe(true)
+    expect(root.querySelector('.notice')).toBeNull()
+
+    online = true
+    window.dispatchEvent(new Event('online'))
+    expect(banner.hidden).toBe(true)
     expect(mocks.fetchProvince).toHaveBeenCalledTimes(1)
   })
 })
