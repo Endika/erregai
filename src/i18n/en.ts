@@ -152,6 +152,9 @@ export const en: Record<string, string> = {
   'place.search.none': 'No town with a fuel station matches “{query}”',
   'place.manual': 'Location: {place} (picked by hand)',
   'place.useGps': 'Use my location',
+  'firstRun.title': 'Fuel stations near you',
+  'firstRun.body': 'Your location is only used on this device, to find the stations nearby.',
+  'firstRun.pickTown': 'Choose a town',
   'radar.offline.offer': 'See radars (they work offline)',
   'trip.needsLocation':
     'A trip needs your live location: allow location access in your browser settings.',

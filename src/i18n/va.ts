@@ -155,6 +155,10 @@ export const va: Record<string, string> = {
   'place.search.none': 'Cap municipi amb gasolinera coincideix amb «{query}»',
   'place.manual': 'Ubicació: {place} (triada a mà)',
   'place.useGps': 'Usa la meua ubicació',
+  'firstRun.title': 'Gasolineres prop de tu',
+  'firstRun.body':
+    "La teua ubicació només s'usa en este dispositiu, per a trobar les gasolineres pròximes.",
+  'firstRun.pickTown': 'Tria un municipi',
   'radar.offline.offer': 'Vore radars (funcionen sense connexió)',
   'trip.needsLocation':
     "El viatge necessita la teua ubicació en temps real: permet l'accés a la ubicació en la configuració del navegador.",

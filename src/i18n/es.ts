@@ -154,6 +154,10 @@ export const es: Record<string, string> = {
   'place.search.none': 'Ningún municipio con gasolinera coincide con «{query}»',
   'place.manual': 'Ubicación: {place} (elegida a mano)',
   'place.useGps': 'Usar mi ubicación',
+  'firstRun.title': 'Gasolineras cerca de ti',
+  'firstRun.body':
+    'Tu ubicación se usa solo en este dispositivo, para encontrar las gasolineras cercanas.',
+  'firstRun.pickTown': 'Elegir municipio',
   'radar.offline.offer': 'Ver radares (funcionan sin conexión)',
   'trip.needsLocation':
     'El viaje necesita tu ubicación en tiempo real: permite el acceso a la ubicación en los ajustes del navegador.',

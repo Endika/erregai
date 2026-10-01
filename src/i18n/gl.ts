@@ -155,6 +155,10 @@ export const gl: Record<string, string> = {
   'place.search.none': 'Ningún concello con gasolineira coincide con «{query}»',
   'place.manual': 'Localización: {place} (escollida a man)',
   'place.useGps': 'Usar a miña localización',
+  'firstRun.title': 'Gasolineiras preto de ti',
+  'firstRun.body':
+    'A túa localización úsase só neste dispositivo, para atopar as gasolineiras próximas.',
+  'firstRun.pickTown': 'Escoller concello',
   'radar.offline.offer': 'Ver radares (funcionan sen conexión)',
   'trip.needsLocation':
     'A viaxe necesita a túa localización en tempo real: permite o acceso á localización na configuración do navegador.',

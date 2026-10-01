@@ -45,6 +45,8 @@ const flush = (): Promise<void> => new Promise((resolve) => globalThis.setTimeou
 async function boot(): Promise<HTMLElement> {
   vi.resetModules()
   localStorage.clear()
+  // A returning user: the first-run screen would hold the location back.
+  localStorage.setItem('erregai.firstRunDone', '1')
   document.body.innerHTML = '<div id="app"></div>'
   await import('../src/main')
   await flush()

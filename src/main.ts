@@ -15,6 +15,8 @@ import { statusBanner } from './ui/banner'
 import { createAnnouncer } from './ui/announcer'
 import { watchConnectivity } from './app/connectivity'
 import { renderPlaceSearch, renderPlaceStrip } from './ui/place-search'
+import { renderFirstRun } from './ui/first-run'
+import { geolocationPermission, isFirstRun, markFirstRunDone } from './app/first-run'
 import { placesFromRows, type Place } from './core/places'
 import {
   freshnessStamp,
@@ -69,6 +71,8 @@ let inlineError = false
 // Only a refusal blocks a trip: an unavailable fix may come back once moving.
 let gpsDenied = false
 let placeQuery = ''
+// Before the browser's own prompt, a first visit says what the location is for.
+let firstRun: 'checking' | 'intro' | 'search' | undefined
 let places: Promise<readonly Place[]> | undefined
 let freshnessTimer: number | undefined
 // What the Map tab last framed: entering the tab or a new position reframes the
@@ -207,7 +211,14 @@ function renderCard(reference: PriceReference | undefined): void {
   }
 }
 
+function endFirstRun(): void {
+  if (!firstRun) return
+  firstRun = undefined
+  markFirstRunDone()
+}
+
 function locate(): void {
+  endFirstRun()
   locating = true
   render()
   getOnce()
@@ -239,6 +250,7 @@ function loadPlaces(): Promise<readonly Place[]> {
 }
 
 function usePlace(place: Place): void {
+  endFirstRun()
   locationError = undefined
   placeQuery = ''
   const { name, province, pos } = place
@@ -319,6 +331,32 @@ function renderNotice(notice: ViewNotice): void {
   }
   box.appendChild(actions)
   viewEl.appendChild(box)
+}
+
+function pickTownFirst(): void {
+  firstRun = 'search'
+  render()
+  viewEl.querySelector<HTMLInputElement>('.first-run .place-search input')?.focus()
+}
+
+function renderFirstRunIn(container: HTMLElement): void {
+  container.appendChild(
+    renderFirstRun({
+      onLocate: locate,
+      onPickTown: pickTownFirst,
+      search:
+        firstRun === 'search'
+          ? {
+              load: loadPlaces,
+              onPick: usePlace,
+              query: placeQuery,
+              onQuery: (q) => {
+                placeQuery = q
+              },
+            }
+          : undefined,
+    }),
+  )
 }
 
 function isInlineError(notice: ViewNotice | undefined): boolean {
@@ -438,14 +476,17 @@ function render(): void {
       locationError,
     })
   let notice: ViewNotice | undefined
+  const introducing = !state.pos && (firstRun === 'intro' || firstRun === 'search')
   // The card bands like the surface it was opened from.
   let cardReference = reference
 
   if (activeTab === 'list') {
     const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
-    notice = noticeFor(nearby.length)
+    notice = introducing ? undefined : noticeFor(nearby.length)
     renderPlaceStripIn(viewEl)
-    if (notice) {
+    if (introducing) {
+      renderFirstRunIn(viewEl)
+    } else if (notice) {
       renderNotice(notice)
     } else if (state.pos) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
@@ -513,6 +554,8 @@ function render(): void {
         if (radarHits.length > 0)
           listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
       }
+    } else if (introducing) {
+      renderFirstRunIn(viewEl)
     } else {
       notice = noticeFor(0)
       renderNotice(notice ?? { kind: 'loading' })
@@ -633,6 +676,19 @@ if (manualPlace) {
       render()
     })
     .catch(() => {})
+} else if (isFirstRun()) {
+  firstRun = 'checking'
+  render()
+  // Granted needs no explaining, and denied would only reach the refusal later.
+  void geolocationPermission().then((permission) => {
+    if (firstRun !== 'checking') return
+    if (permission === 'granted' || permission === 'denied') {
+      locate()
+    } else {
+      firstRun = 'intro'
+      render()
+    }
+  })
 } else {
   locate()
 }

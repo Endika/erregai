@@ -155,6 +155,10 @@ export const eu: Record<string, string> = {
   'place.search.none': 'Ez dago «{query}» bilaketarekin bat datorren gasolindegidun udalerririk',
   'place.manual': 'Kokapena: {place} (eskuz aukeratua)',
   'place.useGps': 'Erabili nire kokapena',
+  'firstRun.title': 'Gasolindegiak zure inguruan',
+  'firstRun.body':
+    'Zure kokapena gailu honetan bakarrik erabiltzen da, inguruko gasolindegiak aurkitzeko.',
+  'firstRun.pickTown': 'Aukeratu udalerria',
   'radar.offline.offer': 'Ikusi radarrak (konexiorik gabe ere badabiltza)',
   'trip.needsLocation':
     'Bidaiak zure kokapena behar du denbora errealean: eman kokapenerako baimena nabigatzailearen ezarpenetan.',

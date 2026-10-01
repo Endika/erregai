@@ -45,6 +45,8 @@ describe('trip without prices', () => {
     mocks.getOnce.mockResolvedValue({ lat: 43.263, lon: -2.935 })
     mocks.fetchProvince.mockRejectedValue(new Error('down'))
     localStorage.clear()
+    // A returning user: the first-run screen would hold the location back.
+    localStorage.setItem('erregai.firstRunDone', '1')
     document.body.innerHTML = '<div id="app"></div>'
     await import('../src/main')
     await flush()
