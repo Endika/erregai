@@ -935,18 +935,6 @@ body {
   cursor: pointer;
 }
 
-.detail-back {
-  display: inline-block;
-  margin: 0.75rem 1rem 0;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  background: transparent;
-  color: var(--color-accent);
-  font: inherit;
-  cursor: pointer;
-}
-
 /* Its content shares the list's 36rem column, so on a wide screen the card
    opens under the rows it came from rather than at the far left. */
 .station-detail {
