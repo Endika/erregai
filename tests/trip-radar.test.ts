@@ -146,6 +146,34 @@ describe('TripController radar alerting', () => {
     expect(patterns).toHaveLength(0)
   })
 
+  it('does not alert for a radar in range before the direction is known', async () => {
+    const c = makeController()
+    await fix(c, near)
+    await fix(c, { lat: near.lat + 0.0001, lon: near.lon }) // ~11 m: too little to trust a direction
+    expect(FakeNotification.instances).toHaveLength(0)
+  })
+
+  it('draws only the radars ahead on the map layer', async () => {
+    const map = fakeMap()
+    const c = makeController(map)
+    await fix(c, near)
+    expect(map.rendered).toHaveLength(0) // no direction yet
+    await fix(c, { lat: RADAR.lat + 0.004, lon: RADAR.lon }) // drove past it, heading north
+    expect(map.rendered.map((r) => r.id)).not.toContain(RADAR.id)
+  })
+
+  it('keeps the banner through jitter while stopped short of the radar', async () => {
+    const c = makeController()
+    await fix(c, behind)
+    await fix(c, near) // alert
+    // ~10 m back and to the side: a raw bearing would point the car away from the radar.
+    await fix(c, { lat: near.lat - 0.00009, lon: near.lon + 0.00008 })
+    await fix(c, { lat: near.lat + 0.00005, lon: near.lon - 0.0001 })
+    const hits = (c as unknown as { radarHits: { radar: { id: string } }[] }).radarHits
+    expect(hits.map((h) => h.radar.id)).toContain(RADAR.id)
+    expect(FakeNotification.instances.filter((n) => n.body?.includes(RADAR.via))).toHaveLength(1)
+  })
+
   it('renders nearby radars onto the map layer when the radar layer is enabled', async () => {
     const map = fakeMap()
     const c = makeController(map)

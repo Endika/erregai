@@ -42,6 +42,7 @@ export const en: Record<string, string> = {
   'trip.foregroundOnly': 'Only works with the app open in the foreground.',
   'trip.gps.waiting': 'Waiting for GPS…',
   'trip.gps.active': 'GPS active',
+  'trip.gps.heading': 'Waiting for direction of travel…',
   'trip.gps.lost': 'No GPS signal',
   'trip.mediaSession.title': 'Trip mode',
   'trip.cheapestAhead': 'Cheapest ahead',

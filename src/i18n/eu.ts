@@ -43,6 +43,7 @@ export const eu: Record<string, string> = {
   'trip.foregroundOnly': 'Aplikazioa lehen planoan irekita dagoenean bakarrik dabil.',
   'trip.gps.waiting': 'GPS seinalearen zain…',
   'trip.gps.active': 'GPSa aktibo',
+  'trip.gps.heading': 'Norabidearen zain…',
   'trip.gps.lost': 'Ez dago GPS seinalerik',
   'trip.mediaSession.title': 'Bidaia modua',
   'trip.cheapestAhead': 'Merkeena aurrean',

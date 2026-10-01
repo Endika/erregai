@@ -43,6 +43,7 @@ export const ca: Record<string, string> = {
   'trip.foregroundOnly': "Només funciona amb l'app oberta en primer pla.",
   'trip.gps.waiting': 'Esperant senyal GPS…',
   'trip.gps.active': 'GPS actiu',
+  'trip.gps.heading': 'Esperant direcció…',
   'trip.gps.lost': 'Sense senyal GPS',
   'trip.mediaSession.title': 'Mode viatge',
   'trip.cheapestAhead': 'La més barata al davant',

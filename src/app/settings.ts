@@ -31,7 +31,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   fuel: DEFAULT_FUEL,
   sort: 'price',
-  tripSort: 'distance',
+  tripSort: 'price',
   radiusKm: 15,
   theme: 'system',
   alertVolume: 1,
