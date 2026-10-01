@@ -32,7 +32,16 @@ export const es: Record<string, string> = {
 
   'trip.start': 'Iniciar viaje',
   'trip.stop': 'Detener viaje',
-  'trip.foregroundOnly': 'Solo en primer plano',
+  'trip.intro.follow':
+    'Sigue tu posición por GPS y te muestra las gasolineras que tienes por delante.',
+  'trip.intro.alerts':
+    'Te avisa de los radares fijos y de las gasolineras baratas en tu camino, según tus ajustes.',
+  'trip.intro.notifications': 'Puede pedirte permiso para mostrar notificaciones.',
+  'trip.intro.screen': 'Mantiene la pantalla encendida si el navegador lo permite.',
+  'trip.foregroundOnly': 'Solo funciona con la app abierta en primer plano.',
+  'trip.gps.waiting': 'Esperando señal GPS…',
+  'trip.gps.active': 'GPS activo',
+  'trip.gps.lost': 'Sin señal GPS',
   'trip.mediaSession.title': 'Modo viaje',
   'trip.cheapestAhead': 'Más barata por delante',
   'trip.noneAhead': 'Aún no hay gasolineras por delante',

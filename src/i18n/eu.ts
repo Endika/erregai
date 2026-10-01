@@ -32,7 +32,16 @@ export const eu: Record<string, string> = {
 
   'trip.start': 'Hasi bidaia',
   'trip.stop': 'Gelditu bidaia',
-  'trip.foregroundOnly': 'Lehen planoan soilik',
+  'trip.intro.follow':
+    'GPS bidez zure kokapenari jarraitzen dio eta aurrean dituzun gasolindegiak erakusten dizkizu.',
+  'trip.intro.alerts':
+    'Bidean dituzun radar finkoez eta gasolindegi merkeez ohartarazten zaitu, zure ezarpenen arabera.',
+  'trip.intro.notifications': 'Jakinarazpenak erakusteko baimena eska diezazuke.',
+  'trip.intro.screen': 'Pantaila piztuta mantentzen du, nabigatzaileak uzten badu.',
+  'trip.foregroundOnly': 'Aplikazioa lehen planoan irekita dagoenean bakarrik dabil.',
+  'trip.gps.waiting': 'GPS seinalearen zain…',
+  'trip.gps.active': 'GPSa aktibo',
+  'trip.gps.lost': 'Ez dago GPS seinalerik',
   'trip.mediaSession.title': 'Bidaia modua',
   'trip.cheapestAhead': 'Merkeena aurrean',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
