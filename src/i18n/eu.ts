@@ -56,7 +56,7 @@ export const eu: Record<string, string> = {
   'trip.gps.heading': 'Hasi mugitzen, nora zoazen jakiteko',
   'trip.gps.lost': 'Ez dago GPS seinalerik',
   'trip.mediaSession.title': 'Bidaia modua',
-  'trip.cheapestAhead': '{fuel} merkeena aurrean',
+  'trip.cheapestAhead': 'Merkeena · {fuel}',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
   'trip.ahead.showAll': 'Ikusi guztiak ({n})',
   'trip.ahead.showFewer': 'Ikusi gutxiago',

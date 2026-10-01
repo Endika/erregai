@@ -1172,6 +1172,15 @@ body {
   color: var(--map-marker-radar-fg);
 }
 
+/* A radar's road can run to "N-637 RAMAL R-02"; its one-line key leaves room
+   for the label to take a second line rather than cut the road's name. */
+.trip-view__banner--radar .trip-view__banner-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+}
+
 .trip-view__banner--cheapest {
   background: var(--band-cheap-bg);
   color: var(--band-cheap-fg);

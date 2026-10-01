@@ -56,7 +56,7 @@ export const va: Record<string, string> = {
   'trip.gps.heading': "Comença a moure't per a saber cap a on vas",
   'trip.gps.lost': 'Sense senyal GPS',
   'trip.mediaSession.title': 'Mode viatge',
-  'trip.cheapestAhead': 'La més barata en {fuel} per davant',
+  'trip.cheapestAhead': 'Més barata · {fuel}',
   'trip.noneAhead': 'Encara no hi ha gasolineres per davant',
   'trip.ahead.showAll': 'Vore-les totes ({n})',
   'trip.ahead.showFewer': "Vore'n menys",

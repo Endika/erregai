@@ -186,7 +186,7 @@ describe('trip fuel banners', () => {
     const banner = el.querySelector<HTMLElement>('.trip-view__banner--cheapest')
     expect(keyOf(banner)).toBe(fuelKey(CHEAP.brand, 1.0, haversineKm(latest, CHEAP.pos)))
     expect(banner!.querySelector('.trip-view__banner-label')!.textContent).toBe(
-      'Más barata en Gasóleo A por delante',
+      'Más barata · Gasóleo A',
     )
     // CHEAP is also the nearby station: one alert, not the same station twice.
     expect(el.querySelectorAll('.trip-view__banner')).toHaveLength(1)
@@ -301,7 +301,7 @@ describe('trip fuel name', () => {
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     const label = draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')!
-    expect(label.textContent).toBe('Más barata en Gasóleo A por delante')
+    expect(label.textContent).toBe('Más barata · Gasóleo A')
   })
 
   it('switches fuel from the trip view before the trip starts', () => {

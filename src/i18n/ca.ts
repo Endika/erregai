@@ -56,7 +56,7 @@ export const ca: Record<string, string> = {
   'trip.gps.heading': "Comença a moure't per saber cap on vas",
   'trip.gps.lost': 'Sense senyal GPS',
   'trip.mediaSession.title': 'Mode viatge',
-  'trip.cheapestAhead': 'La més barata en {fuel} al davant',
+  'trip.cheapestAhead': 'Més barata · {fuel}',
   'trip.noneAhead': 'Encara no hi ha benzineres al davant',
   'trip.ahead.showAll': 'Veure-les totes ({n})',
   'trip.ahead.showFewer': "Veure'n menys",
