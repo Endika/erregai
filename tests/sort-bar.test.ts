@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { renderSortBar } from '../src/ui/sortBar'
 import { COMMON_FUELS, FUELS, type FuelId } from '../src/core/fuels'
 import { setLocale, t } from '../src/i18n'
@@ -43,5 +45,23 @@ describe('sort bar fuel control', () => {
     })
     el.querySelectorAll<HTMLButtonElement>('.sort-bar__btn')[1].click()
     expect(sorted).toEqual(['distance'])
+  })
+})
+
+// jsdom has no layout; read the declared floor rather than trust the fuel select
+// beside them to stretch the buttons to a full touch target.
+describe('sort bar buttons', () => {
+  const css = readFileSync(resolve(import.meta.dirname, '../src/styles.css'), 'utf8')
+
+  it('are rendered with the class that carries the touch target', () => {
+    const buttons = bar('gasoleoA').querySelectorAll('button')
+    expect(buttons).toHaveLength(2)
+    for (const button of buttons) expect(button.classList.contains('sort-bar__btn')).toBe(true)
+  })
+
+  it('declare at least a 44px touch target of their own', () => {
+    const rule = /\.sort-bar__btn\s*\{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const rem = Number(/min-height:\s*([\d.]+)rem/.exec(rule)?.[1])
+    expect(rem * 16).toBeGreaterThanOrEqual(44)
   })
 })
