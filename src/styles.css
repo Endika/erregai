@@ -203,16 +203,26 @@ body {
   text-wrap: balance;
 }
 
+/* A secondary control on every tab: an icon, not a second primary button. */
 .app-header__refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  min-height: 2.75rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--color-accent);
-  border-radius: 0.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-inline-end: -0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
   background: transparent;
-  color: var(--color-accent);
-  font: inherit;
+  color: var(--color-muted);
   cursor: pointer;
+}
+
+.app-header__refresh:hover:not(:disabled) {
+  background: var(--color-selected);
+  color: var(--color-fg);
 }
 
 .app-error {
@@ -1655,21 +1665,11 @@ body {
 }
 
 .app-header__refresh.is-busy {
-  position: relative;
-  color: transparent;
+  color: var(--color-accent);
 }
 
-.app-header__refresh.is-busy::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin: auto;
-  border: 2px solid var(--color-accent);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: erregai-spin 0.7s linear infinite;
+.app-header__refresh.is-busy svg {
+  animation: erregai-spin 0.8s linear infinite;
 }
 
 @keyframes erregai-spin {

@@ -107,6 +107,16 @@ describe('app shell', () => {
     expect(mocks.fetchProvince).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps the header refresh a quiet icon button named for readers', async () => {
+    mocks.getOnce.mockResolvedValue(BILBAO)
+    const root = await boot()
+    const button = root.querySelector<HTMLButtonElement>('[data-refresh]')!
+    const locale = document.documentElement.lang as Locale
+    expect(button.getAttribute('aria-label')).toBe(translate('app.refresh', locale))
+    expect(button.textContent?.trim()).toBe('')
+    expect(button.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+  })
+
   it('only refreshes the data from the header once the position is known', async () => {
     mocks.getOnce.mockResolvedValue(BILBAO)
     const root = await boot()
