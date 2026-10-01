@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.24.0](https://github.com/Endika/erregai/compare/v1.23.1...v1.24.0) (2026-10-01)
+
+
+### Features
+
+* lead the trip map towards the direction of travel ([5a2434b](https://github.com/Endika/erregai/commit/5a2434b3006dc7d3f915689fb0a89ad698fd79d1))
+* show trip alerts in one glanceable slot and strip the active trip to what a glance needs ([da4e993](https://github.com/Endika/erregai/commit/da4e993a2edb5ea89a44d0e39cc30ad53a609a41))
+
+
+### Bug Fixes
+
+* drop trip fuel alerts once their station is no longer ahead ([4888ca5](https://github.com/Endika/erregai/commit/4888ca56b65e69c4781ad57f64b00a72b24da2f6))
+
 ## [1.23.1](https://github.com/Endika/erregai/compare/v1.23.0...v1.23.1) (2026-10-01)
 
 
