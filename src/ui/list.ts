@@ -1,10 +1,37 @@
 import type { Station } from '../core/station'
 import type { FuelId } from '../core/fuels'
 import { haversineKm, type LatLon } from '../core/geo'
-import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
+import { priceOf, priceReference, stationBand, type PriceReference } from '../core/pricing'
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
 import { formatKm, formatPrice, priceWithBand } from '../i18n/format'
+
+const BANDS = ['cheap', 'mid', 'expensive'] as const
+
+// The same pills as the rows, so the legend is the thing it explains.
+export function renderBandLegend(radiusKm: number): HTMLElement {
+  const legend = document.createElement('p')
+  legend.className = 'band-legend'
+  const scope = document.createElement('span')
+  scope.className = 'band-legend__scope'
+  scope.textContent = t('band.legend').replace('{radius}', String(radiusKm))
+  legend.appendChild(scope)
+  for (const band of BANDS) {
+    const item = document.createElement('span')
+    item.className = 'legend__item'
+    item.dataset.band = band
+    item.textContent = t(`band.${band}`)
+    legend.append(' ', item)
+  }
+  return legend
+}
+
+export interface ListOptions {
+  selectedId?: string
+  now?: Date
+  // Defaults to the listed stations themselves.
+  reference?: PriceReference
+}
 
 // Only the states worth interrupting for get a badge: more than half the feed
 // is 24 h, so marking those "open" would put a label on most rows and mean
@@ -16,14 +43,8 @@ export function renderList(
   fuel: FuelId,
   origin: LatLon,
   onSelect: (s: Station) => void,
-  selectedId?: string,
-  now: Date = new Date(),
+  { selectedId, now = new Date(), reference = priceReference(stations, fuel) }: ListOptions = {},
 ): void {
-  const knownPrices = stations
-    .map((s) => priceOf(s, fuel))
-    .filter((p): p is number => p !== undefined)
-  const thresholds = bandThresholds(knownPrices)
-
   const list = document.createElement('div')
   list.className = 'station-list'
   let selectedRow: HTMLElement | undefined
@@ -56,8 +77,8 @@ export function renderList(
     priceEl.className = 'station-row__price'
     priceEl.textContent = price !== undefined ? formatPrice(price) : '—'
 
-    if (price !== undefined) {
-      const band = bandForThresholds(price, thresholds)
+    const band = stationBand(station, fuel, reference)
+    if (price !== undefined && band) {
       row.dataset.band = band
       priceEl.title = t(`band.${band}`)
       priceEl.setAttribute('aria-label', priceWithBand(price, band))

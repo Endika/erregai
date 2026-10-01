@@ -1,10 +1,10 @@
 import type { Station } from '../core/station'
 import { FUELS, type Fuel, type FuelId } from '../core/fuels'
 import { haversineKm, type LatLon } from '../core/geo'
-import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
+import { centsFromAverage, priceOf, stationBand, type PriceReference } from '../core/pricing'
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
-import { formatKm, formatPrice } from '../i18n/format'
+import { averageDelta, formatKm, formatPrice } from '../i18n/format'
 
 // Deep-link that respects the device's default maps app: Apple Maps on iOS
 // (which does not handle geo:), the OS chooser via geo: elsewhere (Android
@@ -18,15 +18,15 @@ function mapsUrl(station: Station): string {
     : `geo:${lat},${lon}?q=${lat},${lon}(${label})`
 }
 
-// `nearby` must be the same set the list bands against, so the card and the
-// row it came from never disagree on cheap/mid/expensive.
+// `reference` must be the one the list and the map band against, so the card
+// and the row it came from never disagree on cheap/mid/expensive.
 export interface DetailContext {
   fuel: FuelId
   origin?: LatLon
-  nearby: Station[]
+  reference?: PriceReference
 }
 
-function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): HTMLElement {
+function renderLead(station: Station, { fuel, origin, reference }: DetailContext): HTMLElement {
   const lead = document.createElement('div')
   lead.className = 'station-detail__lead'
 
@@ -37,16 +37,13 @@ function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): 
   const figures = document.createElement('p')
   figures.className = 'station-detail__lead-figures'
   const price = priceOf(station, fuel)
+  let delta: HTMLElement | undefined
   if (price === undefined) {
     const missing = document.createElement('span')
     missing.className = 'station-detail__lead-missing'
     missing.textContent = t('detail.noPrice')
     figures.appendChild(missing)
   } else {
-    const known = nearby.map((s) => priceOf(s, fuel)).filter((p): p is number => p !== undefined)
-    const band = bandForThresholds(price, bandThresholds(known.length > 0 ? known : [price]))
-    lead.dataset.band = band
-
     const priceEl = document.createElement('span')
     priceEl.className = 'station-detail__lead-price'
     const unit = document.createElement('span')
@@ -54,10 +51,23 @@ function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): 
     unit.textContent = '€/l'
     priceEl.append(formatPrice(price), ' ', unit)
 
-    const bandEl = document.createElement('span')
-    bandEl.className = 'station-detail__band'
-    bandEl.textContent = t(`band.${band}`)
-    figures.append(priceEl, bandEl)
+    figures.appendChild(priceEl)
+
+    const band = stationBand(station, fuel, reference)
+    if (band) {
+      lead.dataset.band = band
+      const bandEl = document.createElement('span')
+      bandEl.className = 'station-detail__band'
+      bandEl.textContent = t(`band.${band}`)
+      figures.appendChild(bandEl)
+    }
+
+    const cents = centsFromAverage(price, reference)
+    if (cents !== undefined) {
+      delta = document.createElement('p')
+      delta.className = 'station-detail__delta'
+      delta.textContent = averageDelta(cents)
+    }
   }
   if (origin) {
     const distance = document.createElement('span')
@@ -67,6 +77,7 @@ function renderLead(station: Station, { fuel, origin, nearby }: DetailContext): 
   }
 
   lead.append(fuelLabel, figures)
+  if (delta) lead.appendChild(delta)
   return lead
 }
 

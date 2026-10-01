@@ -1,4 +1,5 @@
 import {
+  averageDelta,
   formatDate,
   formatDateTime,
   formatDistance,
@@ -122,5 +123,18 @@ describe('locales the browser has no Intl data for', () => {
     withoutBasque()
     expect(formatDate('2026-10-01', 'eu')).toBe('1/10/2026')
     expect(formatDateTime(new Date(2026, 9, 1, 16, 56).getTime(), 'eu')).toBe('1/10/2026, 16:56')
+  })
+})
+
+describe('averageDelta', () => {
+  it('signs the difference with a true minus and a plus', () => {
+    expect(averageDelta(-8, 'es')).toBe('\u22128 cént. frente a la media')
+    expect(averageDelta(5, 'es')).toBe('+5 cént. frente a la media')
+    expect(averageDelta(-12, 'en')).toBe('\u221212 ct vs. the average')
+  })
+
+  it('says it sits on the average rather than showing a signed zero', () => {
+    expect(averageDelta(0, 'es')).toBe('En la media')
+    expect(averageDelta(0, 'eu')).toBe('Batez bestekoan')
   })
 })

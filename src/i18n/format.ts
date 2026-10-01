@@ -89,3 +89,13 @@ export function priceWithBand(
     .replace('{price}', formatPrice(price, locale))
     .replace('{band}', t(`band.${band}`, locale).toLocaleLowerCase(intlLocale(locale)))
 }
+
+// A true minus, not a hyphen, and no signed zero: "on the average" instead.
+export function averageDelta(cents: number, locale: Locale = getLocale()): string {
+  if (cents === 0) return t('detail.atAverage', locale)
+  const sign = cents < 0 ? '\u2212' : '+'
+  return t('detail.vsAverage', locale).replace(
+    '{delta}',
+    `${sign}${formatNumber(Math.abs(cents), locale)}`,
+  )
+}

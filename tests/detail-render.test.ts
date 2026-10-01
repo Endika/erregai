@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { renderDetail } from '../src/ui/detail'
 import { setLocale } from '../src/i18n'
+import { priceReference } from '../src/core/pricing'
 import type { Station } from '../src/core/station'
 
 const station = (id: string, prices: Station['prices'], lat = 43.263): Station => ({
@@ -33,9 +34,10 @@ describe('station detail card', () => {
     station('c', { gasoleoA: 1.6 }),
     station('d', { gasoleoA: 1.7 }),
   ]
+  const reference = priceReference(nearby, 'gasoleoA')
 
   it('leads with the selected fuel price, its band and the distance', () => {
-    const el = render(target, { fuel: 'gasoleoA', origin, nearby })
+    const el = render(target, { fuel: 'gasoleoA', origin, reference })
     const lead = el.querySelector('.station-detail__lead')
     expect(lead?.getAttribute('data-band')).toBe('cheap')
     expect(lead?.querySelector('.station-detail__lead-fuel')?.textContent).toBe('Gasóleo A')
@@ -44,8 +46,34 @@ describe('station detail card', () => {
     expect(lead?.querySelector('.station-detail__distance')?.textContent).toBe('1,0 km')
   })
 
+  it('says how far the price sits from the reference average, in céntimos', () => {
+    // Mean of 1,40 1,50 1,60 1,70 is 1,55: 15 céntimos below.
+    const el = render(target, { fuel: 'gasoleoA', origin, reference })
+    expect(el.querySelector('.station-detail__delta')?.textContent).toBe(
+      '\u221215 cént. frente a la media',
+    )
+    const dear = render(station('d', { gasoleoA: 1.7 }), { fuel: 'gasoleoA', origin, reference })
+    expect(dear.querySelector('.station-detail__delta')?.textContent).toBe(
+      '+15 cént. frente a la media',
+    )
+  })
+
+  it('hides the comparison when fewer than three prices make the average', () => {
+    const thin = priceReference(nearby.slice(0, 2), 'gasoleoA')
+    const el = render(target, { fuel: 'gasoleoA', origin, reference: thin })
+    expect(el.querySelector('.station-detail__band')?.textContent).toBe('Barata')
+    expect(el.querySelector('.station-detail__delta')).toBeNull()
+  })
+
+  it('claims no band when there is nothing to compare against', () => {
+    const el = render(target, { fuel: 'gasoleoA', origin })
+    expect(el.querySelector('.station-detail__lead')?.hasAttribute('data-band')).toBe(false)
+    expect(el.querySelector('.station-detail__band')).toBeNull()
+    expect(el.querySelector('.station-detail__delta')).toBeNull()
+  })
+
   it('puts the directions action right after the lead price, keeping the maps link', () => {
-    const el = render(target, { fuel: 'gasoleoA', origin, nearby })
+    const el = render(target, { fuel: 'gasoleoA', origin, reference })
     const lead = el.querySelector('.station-detail__lead')
     const action = el.querySelector<HTMLAnchorElement>('a.station-detail__directions')
     expect(action?.textContent).toBe('Cómo llegar')
@@ -54,7 +82,7 @@ describe('station detail card', () => {
   })
 
   it('folds only the other priced fuels behind a closed disclosure', () => {
-    const el = render(target, { fuel: 'gasoleoA', origin, nearby })
+    const el = render(target, { fuel: 'gasoleoA', origin, reference })
     const others = el.querySelector('details.station-detail__others')
     expect(others?.hasAttribute('open')).toBe(false)
     expect(others?.querySelector('summary')?.textContent).toBe('Otros combustibles (2)')
@@ -66,16 +94,17 @@ describe('station detail card', () => {
   })
 
   it('omits the disclosure when the selected fuel is the only one priced', () => {
-    const el = render(station('b', { gasoleoA: 1.5 }), { fuel: 'gasoleoA', origin, nearby })
+    const el = render(station('b', { gasoleoA: 1.5 }), { fuel: 'gasoleoA', origin, reference })
     expect(el.querySelector('.station-detail__others')).toBeNull()
   })
 
   it('says so when the station does not sell the selected fuel', () => {
-    const el = render(station('e', { gasolina95: 1.6 }), { fuel: 'gasoleoA', origin, nearby })
+    const el = render(station('e', { gasolina95: 1.6 }), { fuel: 'gasoleoA', origin, reference })
     const lead = el.querySelector('.station-detail__lead')
     expect(lead?.hasAttribute('data-band')).toBe(false)
     expect(lead?.textContent).toContain('Sin precio')
     expect(el.querySelector('.station-detail__band')).toBeNull()
+    expect(el.querySelector('.station-detail__delta')).toBeNull()
   })
 
   it('lists every priced fuel openly when no fuel is selected', () => {

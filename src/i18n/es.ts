@@ -33,6 +33,9 @@ export const es: Record<string, string> = {
   'band.mid': 'Media',
   'band.expensive': 'Cara',
   'price.withBand': '{price} €/l, {band}',
+  'band.legend': 'En tu radio de {radius} km:',
+  'band.legend.about':
+    'Cada precio se compara con las gasolineras de tu radio: barata está en el tercio más barato y cara, en el más caro.',
 
   'trip.start': 'Iniciar viaje',
   'trip.stop': 'Detener viaje',
@@ -54,6 +57,8 @@ export const es: Record<string, string> = {
   'detail.directions': 'Cómo llegar',
   'detail.otherFuels': 'Otros combustibles ({n})',
   'detail.noPrice': 'Sin precio de este combustible',
+  'detail.vsAverage': '{delta} cént. frente a la media',
+  'detail.atAverage': 'En la media',
   'detail.schedule': 'Horario',
   'schedule.open': 'Abierto ahora',
   'schedule.closed': 'Cerrado ahora',

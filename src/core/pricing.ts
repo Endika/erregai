@@ -35,6 +35,67 @@ export function bandFor(price: number, all: number[]): PriceBand {
   return bandForThresholds(price, bandThresholds(all))
 }
 
+// The one set every surface bands against: the selected fuel's prices within
+// the radius. A station keeps its band on the list, the map and the card,
+// even where a surface draws more (or fewer) stations than that set.
+export interface PriceReference {
+  thresholds: BandThresholds
+  mean: number
+  count: number
+}
+
+// Below this, an average of two prices says nothing worth printing.
+export const MIN_PRICES_FOR_AVERAGE = 3
+
+export function withinRadius(
+  stations: readonly Station[],
+  origin: LatLon,
+  radiusKm: number,
+): Station[] {
+  return stations.filter((s) => haversineKm(origin, s.pos) <= radiusKm)
+}
+
+export function priceReference(
+  stations: readonly Station[],
+  fuel: FuelId,
+): PriceReference | undefined {
+  const prices = stations.map((s) => priceOf(s, fuel)).filter((p): p is number => p !== undefined)
+  if (prices.length === 0) return undefined
+  const mean = prices.reduce((sum, p) => sum + p, 0) / prices.length
+  return { thresholds: bandThresholds(prices), mean, count: prices.length }
+}
+
+export function radiusReference(
+  stations: readonly Station[],
+  fuel: FuelId,
+  origin: LatLon,
+  radiusKm: number,
+): PriceReference | undefined {
+  return priceReference(withinRadius(stations, origin, radiusKm), fuel)
+}
+
+export function stationBand(
+  station: Station,
+  fuel: FuelId,
+  reference: PriceReference | undefined,
+): PriceBand | undefined {
+  const price = priceOf(station, fuel)
+  if (price === undefined || !reference) return undefined
+  return bandForThresholds(price, reference.thresholds)
+}
+
+// Whole céntimos, half away from zero on both sides; toFixed first so float
+// noise such as 0.4999999 does not decide the rounding.
+export function centsFromAverage(
+  price: number,
+  reference: PriceReference | undefined,
+): number | undefined {
+  if (!reference || reference.count < MIN_PRICES_FOR_AVERAGE) return undefined
+  const cents = Number(((price - reference.mean) * 100).toFixed(6))
+  const rounded = Math.round(Math.abs(cents))
+  return rounded === 0 ? 0 : Math.sign(cents) * rounded
+}
+
 export function sortStations(
   stations: Station[],
   fuel: FuelId,
