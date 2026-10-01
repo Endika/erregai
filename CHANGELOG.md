@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.22.4](https://github.com/Endika/erregai/compare/v1.22.3...v1.22.4) (2026-10-01)
+
+
+### Bug Fixes
+
+* offer the radius as fixed choices, add the mid band to the legend and make toggles switches ([6d7edfd](https://github.com/Endika/erregai/commit/6d7edfd09687eb2857d4e209335ee2f4647fec33))
+* reset scroll on tab change, retry location from refresh and mark the tab bar as navigation ([fa3fc04](https://github.com/Endika/erregai/commit/fa3fc04c195587f9a6ecdaf76c7705235ef59140))
+
 ## [1.22.3](https://github.com/Endika/erregai/compare/v1.22.2...v1.22.3) (2026-10-01)
 
 
