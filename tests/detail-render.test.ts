@@ -36,6 +36,24 @@ describe('station detail card', () => {
   ]
   const reference = priceReference(nearby, 'gasoleoA')
 
+  // The visible line drops the "Dirección:" prefix the pin already says; a
+  // screen reader still hears it, and the Ministerio's capitals become readable.
+  it('shows the address in readable case under a pin, labelled for readers', () => {
+    const el = render({ ...target, address: 'POLIGONO GRANADA, S/N', town: 'Ortuella' })
+    const line = el.querySelector('.station-detail__address')!
+    expect(line.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    expect(line.querySelector('.visually-hidden')?.textContent).toBe('Dirección: ')
+    expect(line.textContent).toBe('Dirección: Poligono Granada, S/N, Ortuella')
+  })
+
+  it('shows the published schedule readably, labelled for readers', () => {
+    const el = render(target)
+    const line = el.querySelector('.station-detail__schedule')!
+    expect(line.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    expect(line.querySelector('.visually-hidden')?.textContent).toBe('Horario: ')
+    expect(line.textContent).toBe('Horario: L-D: 24 h Abierto ahora')
+  })
+
   it('leads with the selected fuel price, its band and the distance', () => {
     const el = render(target, { fuel: 'gasoleoA', origin, reference })
     const lead = el.querySelector('.station-detail__lead')
