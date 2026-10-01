@@ -80,6 +80,8 @@ export class TripController {
   private radarHits: RadarHit[] = []
   private fuelBanner: Alert | undefined
   private alertedFuelIds = new Set<string>()
+  // Voiced once per trip: a station that comes back ahead is not repeated.
+  private announcedFuelIds = new Set<string>()
   private releaseWakeLock: (() => void) | undefined
   private gps: GpsStatus = 'waiting'
 
@@ -119,6 +121,7 @@ export class TripController {
     this.radarHits = []
     this.fuelBanner = undefined
     this.alertedFuelIds = new Set<string>()
+    this.announcedFuelIds = new Set<string>()
     this.gps = 'waiting'
     this.map.clearRadars()
     this.releaseWakeLock = keepScreenAwake()
@@ -155,6 +158,7 @@ export class TripController {
     this.radarHits = []
     this.fuelBanner = undefined
     this.alertedFuelIds = new Set<string>()
+    this.announcedFuelIds = new Set<string>()
     this.map.clearRadars()
     this.onChange()
   }
@@ -274,8 +278,10 @@ export class TripController {
         alertDistanceKm,
       )
       this.alertedFuelIds = alertedIds
-      if (newlyAlerted.length > 0) {
-        const nearest = hits.find((h) => h.station.id === newlyAlerted[0].id)!
+      const nearest =
+        newlyAlerted.length > 0 ? hits.find((h) => h.station.id === newlyAlerted[0].id)! : undefined
+      if (nearest && !this.announcedFuelIds.has(nearest.station.id)) {
+        this.announcedFuelIds.add(nearest.station.id)
         this.fuelBanner = makeAlert(
           nearest.station.id,
           nearest.station.pos,
@@ -292,6 +298,11 @@ export class TripController {
         if (settings.alertVibrate) vibrateFuel()
       }
     }
+    // Like a passed radar: a station that is no longer ahead must not stay on
+    // screen, and the cheapest banner must name the list's best row or nothing.
+    if (this.banner && update.ahead[0]?.id !== this.banner.id) this.banner = undefined
+    const fuelId = this.fuelBanner?.id
+    if (fuelId && !update.ahead.some((s) => s.id === fuelId)) this.fuelBanner = undefined
 
     this.onChange()
   }
