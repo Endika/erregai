@@ -24,6 +24,19 @@ export interface DetailContext {
   fuel: FuelId
   origin?: LatLon
   reference?: PriceReference
+  // The maps app takes the page to the background, where trip alerts stop.
+  tripActive?: boolean
+}
+
+let noteCounter = 0
+
+function directionsNote(directions: HTMLAnchorElement): HTMLElement {
+  const note = document.createElement('p')
+  note.id = `directions-note-${++noteCounter}`
+  note.className = 'station-detail__directions-note'
+  note.textContent = t('detail.directions.tripNote')
+  directions.setAttribute('aria-describedby', note.id)
+  return note
 }
 
 function renderLead(station: Station, { fuel, origin, reference }: DetailContext): HTMLElement {
@@ -158,7 +171,9 @@ export function renderDetail(
     return
   }
 
-  wrapper.append(renderLead(station, context), directions, address, schedule)
+  wrapper.append(renderLead(station, context), directions)
+  if (context.tripActive) wrapper.appendChild(directionsNote(directions))
+  wrapper.append(address, schedule)
 
   const others = pricedFuels.filter((f) => f.id !== context.fuel)
   if (others.length > 0) {

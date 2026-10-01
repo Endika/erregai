@@ -50,6 +50,7 @@ export const en: Record<string, string> = {
   'trip.intro.alerts': 'Warns you about fixed radars and cheap stations, as set in Settings.',
   'trip.foregroundOnly':
     'Works with the app in the foreground and keeps the screen on if the browser allows it.',
+  'trip.resumed': "You're back: Erregai is warning you about radars and stations again.",
   'trip.gps.waiting': 'Waiting for GPS…',
   'trip.gps.active': 'GPS active',
   'trip.gps.heading': "Start moving so it can tell which way you're going",
@@ -65,6 +66,8 @@ export const en: Record<string, string> = {
   'trip.slot.empty': 'No alerts right now',
 
   'detail.directions': 'Directions',
+  'detail.directions.tripNote':
+    'Once you open navigation, Erregai stops warning you about radars and stations until you come back.',
   'detail.otherFuels': 'Other fuels ({n})',
   'detail.noPrice': 'No price for this fuel',
   'detail.vsAverage': '{delta} ct vs. the average',
