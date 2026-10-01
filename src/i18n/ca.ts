@@ -51,6 +51,7 @@ export const ca: Record<string, string> = {
     "T'avisa dels radars fixos i de les benzineres barates, segons els teus ajustos.",
   'trip.foregroundOnly':
     "Funciona amb l'app en primer pla i manté la pantalla encesa si el navegador ho permet.",
+  'trip.resumed': 'Has tornat: Erregai torna a avisar-te de radars i benzineres.',
   'trip.gps.waiting': 'Esperant senyal GPS…',
   'trip.gps.active': 'GPS actiu',
   'trip.gps.heading': "Comença a moure't per saber cap on vas",
@@ -66,6 +67,8 @@ export const ca: Record<string, string> = {
   'trip.slot.empty': 'Cap avís ara mateix',
 
   'detail.directions': 'Com arribar-hi',
+  'detail.directions.tripNote':
+    "En obrir la navegació, Erregai deixa d'avisar-te de radars i benzineres fins que tornis.",
   'detail.otherFuels': 'Altres combustibles ({n})',
   'detail.noPrice': "Sense preu d'aquest combustible",
   'detail.vsAverage': '{delta} cènt. respecte a la mitjana',

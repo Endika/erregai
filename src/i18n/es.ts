@@ -50,6 +50,7 @@ export const es: Record<string, string> = {
   'trip.intro.alerts': 'Te avisa de radares fijos y gasolineras baratas, según tus ajustes.',
   'trip.foregroundOnly':
     'Funciona con la app en primer plano y mantiene la pantalla encendida si el navegador lo permite.',
+  'trip.resumed': 'Has vuelto: Erregai vuelve a avisarte de radares y gasolineras.',
   'trip.gps.waiting': 'Esperando señal GPS…',
   'trip.gps.active': 'GPS activo',
   'trip.gps.heading': 'Empieza a moverte para saber hacia dónde vas',
@@ -65,6 +66,8 @@ export const es: Record<string, string> = {
   'trip.slot.empty': 'Sin avisos ahora',
 
   'detail.directions': 'Cómo llegar',
+  'detail.directions.tripNote':
+    'Al abrir la navegación, Erregai deja de avisar de radares y gasolineras hasta que vuelvas.',
   'detail.otherFuels': 'Otros combustibles ({n})',
   'detail.noPrice': 'Sin precio de este combustible',
   'detail.vsAverage': '{delta} cént. frente a la media',

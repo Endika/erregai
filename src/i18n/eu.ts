@@ -51,6 +51,7 @@ export const eu: Record<string, string> = {
     'Radar finkoez eta gasolindegi merkeez ohartarazten zaitu, zure ezarpenen arabera.',
   'trip.foregroundOnly':
     'Aplikazioa lehen planoan dagoen bitartean dabil, eta pantaila piztuta mantentzen du nabigatzaileak uzten badu.',
+  'trip.resumed': 'Itzuli zara: Erregaik berriro ohartarazten zaitu radarrez eta gasolindegiez.',
   'trip.gps.waiting': 'GPS seinalearen zain…',
   'trip.gps.active': 'GPSa aktibo',
   'trip.gps.heading': 'Hasi mugitzen, nora zoazen jakiteko',
@@ -66,6 +67,8 @@ export const eu: Record<string, string> = {
   'trip.slot.empty': 'Ez dago abisurik orain',
 
   'detail.directions': 'Nola iritsi',
+  'detail.directions.tripNote':
+    'Nabigazioa irekitzen duzunean, Erregaik ez zaitu radarrez eta gasolindegiez ohartaraziko itzultzen zaren arte.',
   'detail.otherFuels': 'Beste erregaiak ({n})',
   'detail.noPrice': 'Erregai honen preziorik ez',
   'detail.vsAverage': '{delta} zent. batez bestekoarekiko',

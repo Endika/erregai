@@ -930,6 +930,16 @@ body {
   font-weight: 600;
 }
 
+.station-detail__directions:has(+ .station-detail__directions-note) {
+  margin-bottom: 0.25rem;
+}
+
+.station-detail__directions-note {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
 .station-detail__address,
 .station-detail__schedule {
   margin: 0;

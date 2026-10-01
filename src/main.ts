@@ -116,6 +116,7 @@ const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
 const mapView = new MapView(mapContainer)
+const announce = createAnnouncer(document.body)
 const tripController = new TripController(
   store,
   mapView,
@@ -123,7 +124,7 @@ const tripController = new TripController(
     if (activeTab === 'trip') render()
   },
   selectStation,
-  createAnnouncer(document.body),
+  announce,
 )
 
 root.addEventListener('click', (e) => {
@@ -190,6 +191,7 @@ function renderCard(reference: PriceReference | undefined): void {
     fuel: settings.fuel,
     origin: pos,
     reference,
+    tripActive: tripController.isActive,
   })
   cardEl.replaceChildren(close, detailContainer)
   cardEl.hidden = false
@@ -594,9 +596,23 @@ function render(): void {
   renderCard(cardReference)
 }
 
+// The position watch outlives a hidden page but gets no fixes there, so the
+// trip alerts pause until the page is back, and then say so.
+let tripHidden = false
+function onVisibilityChange(): void {
+  syncFreshnessTimer()
+  const visible = document.visibilityState === 'visible'
+  if (!tripController.isActive) tripHidden = false
+  else if (!visible) tripHidden = true
+  else if (tripHidden) {
+    tripHidden = false
+    announce(t('trip.resumed'), 'polite')
+  }
+}
+
 store.subscribe(render)
 render()
-document.addEventListener('visibilitychange', syncFreshnessTimer)
+document.addEventListener('visibilitychange', onVisibilityChange)
 syncFreshnessTimer()
 watchConnectivity(window, {
   delayMs: RECONNECT_SETTLE_MS,
