@@ -60,6 +60,7 @@ export const es: Record<string, string> = {
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Más barata',
   'trip.slot.more.fuel': 'Cerca',
+  'trip.slot.empty': 'Sin avisos ahora',
 
   'detail.directions': 'Cómo llegar',
   'detail.otherFuels': 'Otros combustibles ({n})',

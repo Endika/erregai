@@ -60,6 +60,7 @@ export const en: Record<string, string> = {
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Cheapest',
   'trip.slot.more.fuel': 'Nearby',
+  'trip.slot.empty': 'No alerts right now',
 
   'detail.directions': 'Directions',
   'detail.otherFuels': 'Other fuels ({n})',

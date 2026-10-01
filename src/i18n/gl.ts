@@ -61,6 +61,7 @@ export const gl: Record<string, string> = {
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Máis barata',
   'trip.slot.more.fuel': 'Preto',
+  'trip.slot.empty': 'Sen avisos agora',
 
   'detail.directions': 'Como chegar',
   'detail.otherFuels': 'Outros combustibles ({n})',

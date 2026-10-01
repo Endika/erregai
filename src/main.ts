@@ -568,6 +568,7 @@ function render(): void {
       mapView.invalidateSize()
     }
     const readout = document.createElement('div')
+    readout.className = 'trip-readout'
     viewEl.appendChild(readout)
     tripController.render(readout, tripController.currentUpdate, selectedId, {
       locationDenied: gpsDenied,

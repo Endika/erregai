@@ -36,7 +36,7 @@ import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
 import { formatDate, formatKm, formatPrice, priceWithBand } from '../i18n/format'
 import { renderSortBar } from './sortBar'
-import { composeSlot, fuelKey, radarKey, renderSlot, type SlotAlert } from './alert-slot'
+import { composeSlot, fuelKey, radarKey, renderSlotArea, type SlotAlert } from './alert-slot'
 import { renderRadarList } from './radar-list'
 import type { MapView } from './map'
 import type { Store } from '../app/store'
@@ -318,11 +318,6 @@ export class TripController {
       void (this.active ? this.stop() : this.start())
     })
 
-    // The alert slot sits right under the map so a glance finds it without
-    // scrolling; stopping is rare and can wait one row lower.
-    const slot = composeSlot(this.liveAlerts())
-    if (slot) wrapper.appendChild(renderSlot(slot))
-
     if (!this.active && locationDenied) {
       // A disabled control alone says nothing; the reason sits right under it.
       const reason = document.createElement('p')
@@ -352,16 +347,22 @@ export class TripController {
         toggle,
       )
     } else {
-      const controls = document.createElement('div')
-      controls.className = 'trip-view__controls'
-      controls.append(this.renderGpsStatus(), toggle)
-      wrapper.appendChild(controls)
+      wrapper.classList.add('trip-view--active')
+      // The slot is reserved right under the map so a glance finds it without
+      // scrolling, and keeps its height so the rows under it stay put.
+      wrapper.appendChild(renderSlotArea(composeSlot(this.liveAlerts())))
       wrapper.appendChild(this.renderAhead(update, selectedId, reference))
       if (this.store.state.settings.radarAlertsEnabled) {
         if (this.radarHits.length > 0)
           wrapper.appendChild(renderRadarList(this.radarHits, 'radar.list.title', NEARBY_RADARS))
         wrapper.appendChild(this.renderRadarNotice())
       }
+      // Stop is docked at the foot of the screen, last in reading order: one tap
+      // ends the trip, so it must never slide under the thumb as alerts change.
+      const dock = document.createElement('div')
+      dock.className = 'trip-view__dock'
+      dock.append(this.renderGpsStatus(), toggle)
+      wrapper.appendChild(dock)
     }
 
     container.replaceChildren(wrapper)

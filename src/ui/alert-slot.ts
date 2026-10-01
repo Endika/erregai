@@ -31,6 +31,22 @@ export function fuelKey(brand: string, price: number, km: number): string {
   return `${brand} ${formatPrice(price)} · ${formatDistance(km)}`
 }
 
+// The slot keeps its height with or without an alert, so nothing below it moves
+// when one comes or goes.
+export function renderSlotArea(slot: AlertSlot | undefined): HTMLElement {
+  const area = document.createElement('div')
+  area.className = 'trip-view__slot'
+  if (slot) {
+    area.appendChild(renderSlot(slot))
+  } else {
+    const empty = document.createElement('p')
+    empty.className = 'trip-view__slot-empty'
+    empty.textContent = t('trip.slot.empty')
+    area.appendChild(empty)
+  }
+  return area
+}
+
 export function renderSlot(slot: AlertSlot): HTMLElement {
   const wrap = document.createElement('div')
   wrap.className = 'trip-view__alerts'

@@ -61,6 +61,7 @@ export const ca: Record<string, string> = {
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Més barata',
   'trip.slot.more.fuel': 'A prop',
+  'trip.slot.empty': 'Cap avís ara mateix',
 
   'detail.directions': 'Com arribar-hi',
   'detail.otherFuels': 'Altres combustibles ({n})',
