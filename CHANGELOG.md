@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.28.0](https://github.com/Endika/erregai/compare/v1.27.4...v1.28.0) (2026-10-01)
+
+
+### Features
+
+* ask the fuel on the first-run screen ([dd6de04](https://github.com/Endika/erregai/commit/dd6de0412a89f617cc677e4a0fe8c32ecb994167))
+
+
+### Bug Fixes
+
+* draw the radars under the station pins on the map ([e9495f3](https://github.com/Endika/erregai/commit/e9495f3f7c3b84dc86cfd102a39530fd262bf63b))
+* keep the radars above the stations on the trip map ([660ca7d](https://github.com/Endika/erregai/commit/660ca7d2f21a13198908761eee858e7676648add))
+* say the app is offline even when the cached prices are fresh ([21a65c9](https://github.com/Endika/erregai/commit/21a65c96ecbec8d9a11a8dd39693cdc29afd7abb))
+
 ## [1.27.4](https://github.com/Endika/erregai/compare/v1.27.3...v1.27.4) (2026-10-01)
 
 
