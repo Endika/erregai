@@ -7,6 +7,10 @@ export interface SlotAlert {
   kind: AlertKind
   key: string
   label: string
+  // The radar or station behind the alert; the key changes on every fix, this does not.
+  id?: string
+  // Where the key opens with a station's name, the part that may be cut short.
+  brand?: string
 }
 
 export interface AlertSlot {
@@ -31,11 +35,20 @@ export function fuelKey(brand: string, price: number, km: number): string {
   return `${brand} ${formatPrice(price)} · ${formatDistance(km)}`
 }
 
+// Which alert leads the slot: the same radar drawing nearer is not a new alert.
+export function slotId(slot: AlertSlot | undefined): string {
+  return slot ? `${slot.primary.kind}:${slot.primary.id ?? slot.primary.key}` : ''
+}
+
 // The slot keeps its height with or without an alert, so nothing below it moves
-// when one comes or goes.
-export function renderSlotArea(slot: AlertSlot | undefined): HTMLElement {
+// when one comes or goes; a new alert fades in where the last one was.
+export function renderSlotArea(
+  slot: AlertSlot | undefined,
+  { entering = false }: { entering?: boolean } = {},
+): HTMLElement {
   const area = document.createElement('div')
   area.className = 'trip-view__slot'
+  area.classList.toggle('trip-view__slot--enter', entering)
   if (slot) {
     area.appendChild(renderSlot(slot))
   } else {
@@ -55,7 +68,7 @@ export function renderSlot(slot: AlertSlot): HTMLElement {
   banner.className = `trip-view__banner trip-view__banner--${slot.primary.kind}`
   const key = document.createElement('span')
   key.className = 'trip-view__banner-key'
-  key.textContent = slot.primary.key
+  appendKey(key, slot.primary, 'trip-view__banner-brand')
   const label = document.createElement('span')
   label.className = 'trip-view__banner-label'
   label.textContent = slot.primary.label
@@ -72,10 +85,27 @@ export function renderSlot(slot: AlertSlot): HTMLElement {
       const tag = document.createElement('span')
       tag.className = 'trip-view__more-tag'
       tag.textContent = `+ ${t(`trip.slot.more.${alert.kind}`)}:`
-      item.append(tag, ` ${alert.key}`)
+      item.append(tag, ' ')
+      appendKey(item, alert, 'trip-view__more-brand')
       more.appendChild(item)
     }
     wrap.appendChild(more)
   }
   return wrap
+}
+
+// A long station name is cut on its own, so price and distance always show.
+function appendKey(parent: HTMLElement, alert: SlotAlert, brandClass: string): void {
+  const { key, brand } = alert
+  if (!brand || !key.startsWith(`${brand} `)) {
+    parent.append(key)
+    return
+  }
+  const name = document.createElement('span')
+  name.className = brandClass
+  name.textContent = brand
+  const rest = document.createElement('span')
+  rest.className = 'trip-view__key-rest'
+  rest.textContent = key.slice(brand.length + 1)
+  parent.append(name, ' ', rest)
 }
