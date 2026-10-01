@@ -89,7 +89,9 @@ root.innerHTML = `
   <header class="app-header">
     <span class="app-header__title" data-title></span>
     <time class="app-header__freshness" data-freshness></time>
-    <button type="button" class="app-header__refresh" data-refresh></button>
+    <button type="button" class="app-header__refresh" data-refresh>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.5M20 3.5v5h-5"/></svg>
+    </button>
   </header>
   <div class="app-status" role="status" data-status>
     <p class="app-error" data-error hidden></p>
@@ -398,7 +400,8 @@ function handleSettingsChange(partial: Partial<Settings>): void {
 function refreshStaticCopy(): void {
   document.title = t('app.title')
   titleEl.textContent = t('app.title')
-  refreshButton.textContent = t('app.refresh')
+  refreshButton.setAttribute('aria-label', t('app.refresh'))
+  refreshButton.title = t('app.refresh')
   for (const button of tabButtons) {
     const tab = button.dataset.tab as Tab
     button.textContent = t(`nav.${tab}`)
