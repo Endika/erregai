@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.27.1](https://github.com/Endika/erregai/compare/v1.27.0...v1.27.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* dock Stop at the foot of the trip screen and reserve the alert slot ([d67b3a2](https://github.com/Endika/erregai/commit/d67b3a27d026cd0cdda8d7f209497b1b1bbbe641))
+* make the trip alert glanceable and the radar notice legible ([deaef05](https://github.com/Endika/erregai/commit/deaef05891437a0f98020c051159dc3c5650219d))
+* show less on the trip screen while driving and order it by price ([795b8af](https://github.com/Endika/erregai/commit/795b8af28ff3c159537ced95346cab8942681eb9))
+
 ## [1.27.0](https://github.com/Endika/erregai/compare/v1.26.0...v1.27.0) (2026-10-01)
 
 
