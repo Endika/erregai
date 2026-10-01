@@ -5,16 +5,39 @@ import { LOCALE_ORDER, setLocale, t } from '../src/i18n'
 import { formatPercent } from '../src/i18n/format'
 
 describe('renderSettings', () => {
-  it('renders the general, services, radar and fuel section headings in order', () => {
+  it('renders the general, services, shared alert, radar and fuel section headings in order', () => {
     const el = document.createElement('div')
     renderSettings(el, DEFAULT_SETTINGS, () => {})
     const titles = [...el.querySelectorAll('.settings-section__title')].map((h) => h.textContent)
     expect(titles).toEqual([
       t('settings.section.general'),
       t('settings.section.services'),
+      t('settings.section.alerts'),
       t('settings.section.radar'),
       t('settings.section.fuel'),
     ])
+  })
+
+  it('leaves fuel and sort to the sort bar instead of a second copy here', () => {
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    expect(el.querySelector('[data-field="fuel"]')).toBeNull()
+    expect(el.querySelector('[data-field="sort"]')).toBeNull()
+    const labels = [...el.querySelectorAll('.settings-form__label')].map((l) => l.textContent)
+    expect(labels).not.toContain(t('settings.fuel'))
+  })
+
+  it('groups the volume and the vibration that every alert shares under their own heading', () => {
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    const shared = [...el.querySelectorAll('.settings-section')].find(
+      (s) =>
+        s.querySelector('.settings-section__title')!.textContent === t('settings.section.alerts'),
+    )!
+    const fields = [...shared.querySelectorAll<HTMLElement>('[data-field]')].map(
+      (n) => n.dataset.field,
+    )
+    expect(fields).toEqual(['alertVolume', 'alertVibrate'])
   })
 
   it('keeps every control field and fires the matching onChange payload', () => {
@@ -25,14 +48,12 @@ describe('renderSettings', () => {
       (n) => (n as HTMLElement).dataset.field,
     )
     expect(fields).toEqual([
-      'fuel',
-      'sort',
       'radiusKm',
       'locale',
       'theme',
+      'servicesLayerEnabled',
       'alertVolume',
       'alertVibrate',
-      'servicesLayerEnabled',
       'radarLayerEnabled',
       'radarAlertsEnabled',
       'radarAlertDistanceM',
@@ -162,6 +183,21 @@ describe('settings labels', () => {
       )
       expect(labels).not.toContain(title)
     }
+    setLocale('es')
+  })
+
+  // A screen reader jumping from control to control hears the label alone, so
+  // "Alert sound" twice would not say which alert it is.
+  it.each(LOCALE_ORDER)('name every control once across the whole page (%s)', (locale) => {
+    setLocale(locale)
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    const names = [
+      ...[...el.querySelectorAll('.settings-form__label')].map((l) => l.textContent),
+      ...[...el.querySelectorAll('.settings-form__button')].map((b) => b.textContent),
+    ]
+    const repeated = names.filter((n, i) => names.indexOf(n) !== i)
+    expect(repeated).toEqual([])
     setLocale('es')
   })
 })
