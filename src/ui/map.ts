@@ -15,6 +15,7 @@ import {
 import { glyphSvg, serviceGlyph, type Glyph } from './map-icons'
 import { aheadOffset } from './map-ahead'
 import { radiusBounds } from './map-frame'
+import { relabelMapLegend, renderMapLegend } from './map-legend'
 import { t } from '../i18n'
 import { formatPrice } from '../i18n/format'
 
@@ -125,6 +126,7 @@ export class MapView {
   private radiusCircle?: L.Circle
   private fitControl?: L.Control
   private fitButton?: HTMLButtonElement
+  private legend?: HTMLElement
   // The radius the Map tab last drew, so the fit control frames the current one.
   private frame?: { pos: LatLon; radiusKm: number }
   // Heading the view leads towards; set by the latest render, so a later
@@ -160,6 +162,7 @@ export class MapView {
     this.userMarker?.setLatLng([pos.lat, pos.lon]).setStyle({ fillColor: colors.user })
     if (opts.radiusKm !== undefined) this.showRadius(this.map, pos, opts.radiusKm)
     else this.hideRadius()
+    if (this.legend) relabelMapLegend(this.legend)
     this.markers.clearLayers()
 
     const reference = opts.reference ?? priceReference(stations, fuel)
@@ -340,6 +343,7 @@ export class MapView {
     this.fitControl = undefined
     this.fitButton = undefined
     this.frame = undefined
+    this.legend = undefined
   }
 
   private init(pos: LatLon): void {
@@ -351,6 +355,15 @@ export class MapView {
     this.markers = L.layerGroup().addTo(map)
     this.radarMarkers = L.layerGroup().addTo(map)
     this.serviceMarkers = L.layerGroup().addTo(map)
+    const legend = new L.Control({ position: 'bottomleft' })
+    legend.onAdd = () => {
+      const el = renderMapLegend()
+      L.DomEvent.disableClickPropagation(el)
+      L.DomEvent.disableScrollPropagation(el)
+      this.legend = el
+      return el
+    }
+    legend.addTo(map)
     const colors = readMarkerColors()
     this.userMarker = L.circleMarker([pos.lat, pos.lon], {
       pane: PANE_USER,

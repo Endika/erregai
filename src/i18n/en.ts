@@ -119,6 +119,11 @@ export const en: Record<string, string> = {
   'about.data': 'Prices: Spanish Ecological Transition Ministry',
   'about.map': 'Map: OpenStreetMap',
   'map.fit': 'Show your whole radius',
+  'map.legend.toggle': 'Legend',
+  'map.legend.prices': 'Price within your radius',
+  'map.legend.noPrice': 'No price',
+  'map.legend.radar': 'Fixed radar',
+  'map.legend.services': 'Service area',
 
   'error.location.denied': "Erregai isn't allowed to use your location",
   'error.location.deniedHint':

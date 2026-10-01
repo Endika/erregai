@@ -119,6 +119,11 @@ export const es: Record<string, string> = {
   'about.data': 'Precios: Ministerio de Transición Ecológica',
   'about.map': 'Mapa: OpenStreetMap',
   'map.fit': 'Ver todo tu radio',
+  'map.legend.toggle': 'Leyenda',
+  'map.legend.prices': 'Precio en tu radio',
+  'map.legend.noPrice': 'Sin precio',
+  'map.legend.radar': 'Radar fijo',
+  'map.legend.services': 'Área de servicio',
 
   'error.location.denied': 'Erregai no tiene permiso para usar tu ubicación',
   'error.location.deniedHint':
