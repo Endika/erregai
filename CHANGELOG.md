@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.27.3](https://github.com/Endika/erregai/compare/v1.27.2...v1.27.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* explain the location use before the first location prompt ([1d62291](https://github.com/Endika/erregai/commit/1d62291b9208f0af874fa79c4c294db5d4e36a97))
+* outline the map's own controls so they hold 3:1 in dark mode ([634d679](https://github.com/Endika/erregai/commit/634d679ce4898f4752803496aa1fb8cb87630785))
+* warn that opening directions pauses the trip alerts ([7b23db1](https://github.com/Endika/erregai/commit/7b23db1e9614482651817cb8758174cee150b85d))
+
 ## [1.27.2](https://github.com/Endika/erregai/compare/v1.27.1...v1.27.2) (2026-10-01)
 
 
