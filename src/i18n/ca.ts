@@ -130,4 +130,15 @@ export const ca: Record<string, string> = {
   'error.refreshFailed': "No s'ha pogut actualitzar; es mostren les últimes dades desades",
   'error.storage':
     "L'emmagatzematge del dispositiu no està disponible; les dades no es desaran per a usar-les sense connexió",
+
+  'place.search.label': 'Cerca un municipi',
+  'place.search.hint': 'Municipis amb almenys una benzinera.',
+  'place.search.none': 'Cap municipi amb benzinera coincideix amb «{query}»',
+  'place.manual': 'Ubicació: {place} (triada a mà)',
+  'place.useGps': 'Fes servir la meva ubicació',
+  'radar.offline.offer': 'Veure radars (funcionen sense connexió)',
+  'trip.needsLocation':
+    "El viatge necessita la teva ubicació en temps real: permet l'accés a la ubicació a la configuració del navegador.",
+  'trip.radarsOnly':
+    "Sense preus ara mateix: el viatge t'avisarà dels radars fixos, que funcionen sense connexió.",
 }

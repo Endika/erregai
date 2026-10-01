@@ -15,15 +15,16 @@ export interface BannerContext {
   inline?: boolean
 }
 
-// Errors mean there is nothing to show; notices report a failure while the
-// cached stations stay on screen.
+// Errors mean prices could not load; notices report a failure the user can
+// work around: cached stations still on screen, or a refused location that a
+// town picked by hand replaces.
 export function statusBanner(state: AppState, ctx: BannerContext): Banner | undefined {
   if (!ctx.inline) {
     if (ctx.locationError) {
       const text = joinNotice(
         viewNoticeText({ kind: 'location', reason: ctx.locationError }, !ctx.online),
       )
-      return { text, tone: 'error' }
+      return { text, tone: 'notice' }
     }
     if (state.error) {
       return {

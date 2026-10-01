@@ -476,3 +476,36 @@ describe('trip idle and GPS status', () => {
     c.stop()
   })
 })
+
+describe('trip start without a usable location or prices', () => {
+  const drawWith = (c: TripController, opts: Parameters<TripController['render']>[3]) => {
+    const el = document.createElement('div')
+    c.render(el, c.currentUpdate, undefined, opts)
+    return el
+  }
+
+  it('disables Start while the location is refused, with the reason tied to it', () => {
+    const el = drawWith(makeController(), { locationDenied: true })
+    const start = el.querySelector<HTMLButtonElement>('.trip-view__toggle')!
+    expect(start.disabled).toBe(true)
+    const reason = el.querySelector(`#${start.getAttribute('aria-describedby')}`)!
+    expect(reason.textContent).toBe(t('trip.needsLocation'))
+  })
+
+  it('offers Start as usual when the location is not refused', () => {
+    const start = drawWith(makeController(), {}).querySelector<HTMLButtonElement>(
+      '.trip-view__toggle',
+    )!
+    expect(start.disabled).toBe(false)
+    expect(start.hasAttribute('aria-describedby')).toBe(false)
+  })
+
+  it('puts Start first and drops the intro and pickers when no prices could load', () => {
+    const el = drawWith(makeController(), { pricesUnavailable: true })
+    const view = el.querySelector('.trip-view')!
+    expect(view.firstElementChild!.classList.contains('trip-view__toggle')).toBe(true)
+    expect(el.querySelector('.trip-view__intro')).toBeNull()
+    expect(el.querySelector('.sort-bar')).toBeNull()
+    expect(el.querySelector('.trip-view__note')!.textContent).toBe(t('trip.radarsOnly'))
+  })
+})

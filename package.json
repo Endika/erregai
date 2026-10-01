@@ -15,6 +15,7 @@
     "test:run": "vitest run --passWithNoTests",
     "data:radars": "node scripts/build-radars.mjs",
     "data:services": "node scripts/build-services.mjs",
+    "data:places": "node scripts/build-places.mjs",
     "prepare": "husky"
   },
   "keywords": [],

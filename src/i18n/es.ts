@@ -129,4 +129,15 @@ export const es: Record<string, string> = {
   'error.refreshFailed': 'No se pudo actualizar; se muestran los últimos datos guardados',
   'error.storage':
     'El almacenamiento del dispositivo no está disponible; los datos no se guardarán para usarlos sin conexión',
+
+  'place.search.label': 'Buscar municipio',
+  'place.search.hint': 'Municipios con al menos una gasolinera.',
+  'place.search.none': 'Ningún municipio con gasolinera coincide con «{query}»',
+  'place.manual': 'Ubicación: {place} (elegida a mano)',
+  'place.useGps': 'Usar mi ubicación',
+  'radar.offline.offer': 'Ver radares (funcionan sin conexión)',
+  'trip.needsLocation':
+    'El viaje necesita tu ubicación en tiempo real: permite el acceso a la ubicación en los ajustes del navegador.',
+  'trip.radarsOnly':
+    'Sin precios ahora mismo: el viaje te avisará de los radares fijos, que funcionan sin conexión.',
 }

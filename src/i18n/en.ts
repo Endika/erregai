@@ -127,4 +127,15 @@ export const en: Record<string, string> = {
   'age.day': '{n} days ago',
   'error.refreshFailed': 'Could not refresh; showing the last saved data',
   'error.storage': "This device's storage is unavailable; data will not be kept for offline use",
+
+  'place.search.label': 'Search for a town',
+  'place.search.hint': 'Towns with at least one fuel station.',
+  'place.search.none': 'No town with a fuel station matches “{query}”',
+  'place.manual': 'Location: {place} (picked by hand)',
+  'place.useGps': 'Use my location',
+  'radar.offline.offer': 'See radars (they work offline)',
+  'trip.needsLocation':
+    'A trip needs your live location: allow location access in your browser settings.',
+  'trip.radarsOnly':
+    'No prices right now: the trip will warn you about fixed radars, which work offline.',
 }

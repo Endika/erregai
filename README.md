@@ -40,6 +40,7 @@ the road ahead during a drive and nudge you toward a cheaper station before you 
 | --- | --- | --- | --- |
 | Stations & prices | [Ministerio para la Transición Ecológica](https://www.mites.gob.es/) REST API | Public sector | Live per province, cached 6 h |
 | Fixed radars | [DGT](https://nap.dgt.es/), [Servei Català de Trànsit](https://transit.gencat.cat/), [Trafikoa](https://apps.trafikoa.euskadi.eus/) | Open data | Bundled; cron on the 1st and 15th |
+| Towns to pick by hand | Same Ministerio API (municipalities with a station, centred on them) | Public sector | Bundled; `npm run data:places` by hand |
 | Service areas | [OpenStreetMap](https://www.openstreetmap.org/) via [Overpass](https://overpass-api.de/) | **ODbL** | Bundled; cron monthly |
 | Map tiles | [OpenStreetMap](https://www.openstreetmap.org/copyright) | ODbL | Live |
 
@@ -70,6 +71,7 @@ geometry, so twin areas across a motorway can swap a restaurant. Rest areas
 ```bash
 npm run data:radars    # DGT + Catalunya + Euskadi
 npm run data:services  # OpenStreetMap via Overpass
+npm run data:places    # towns for the manual location, from the Ministerio station list
 ```
 
 Both fetch server-side and, for development, fall back to local raw files in `data/raw/`,

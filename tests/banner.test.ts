@@ -38,10 +38,10 @@ describe('statusBanner', () => {
     })
     expect(banner?.text).not.toContain('Failed to fetch')
   })
-  it('a location error wins over everything', () => {
+  it('a location error wins over everything, as a warning with a way around it', () => {
     expect(statusBanner(state({ error: 'boom' }), { ...ctx, locationError: 'denied' })).toEqual({
       text: `${t('error.location.denied')}. ${t('error.location.deniedHint')}`,
-      tone: 'error',
+      tone: 'notice',
     })
   })
   it('errors the view already shows inline are not repeated in the banner', () => {

@@ -42,6 +42,13 @@ const NEARBY_RADARS = 3
 // Max radars drawn as icons on the trip map (bounds DOM/Leaflet in dense areas).
 const RADAR_LAYER_CAP = 60
 
+export interface TripRenderOptions {
+  // The browser refused the location: a trip cannot run, so Start says why.
+  locationDenied?: boolean
+  // No prices and none cached: only the bundled radars are left to warn about.
+  pricesUnavailable?: boolean
+}
+
 type GpsStatus = 'waiting' | 'active' | 'lost'
 // 'heading': fixes are arriving but the car has not moved far enough to tell where it is going.
 type GpsLine = GpsStatus | 'heading'
@@ -284,7 +291,12 @@ export class TripController {
     this.onChange()
   }
 
-  render(container: HTMLElement, update: TripUpdate | undefined, selectedId?: string): void {
+  render(
+    container: HTMLElement,
+    update: TripUpdate | undefined,
+    selectedId?: string,
+    { locationDenied = false, pricesUnavailable = false }: TripRenderOptions = {},
+  ): void {
     const wrapper = document.createElement('div')
     wrapper.className = 'trip-view'
 
@@ -302,7 +314,23 @@ export class TripController {
     const slot = composeSlot(this.liveAlerts())
     if (slot) wrapper.appendChild(renderSlot(slot))
 
-    if (!this.active) {
+    if (!this.active && locationDenied) {
+      // A disabled control alone says nothing; the reason sits right under it.
+      const reason = document.createElement('p')
+      reason.id = 'trip-start-reason'
+      reason.className = 'trip-view__blocked'
+      reason.textContent = t('trip.needsLocation')
+      toggle.disabled = true
+      toggle.setAttribute('aria-describedby', reason.id)
+      wrapper.append(toggle, reason)
+    } else if (!this.active && pricesUnavailable) {
+      // Without prices the fuel and order pickers have nothing to act on, and
+      // Start must stay above the fold: one line says what the trip still does.
+      const note = document.createElement('p')
+      note.className = 'trip-view__note'
+      note.textContent = t('trip.radarsOnly')
+      wrapper.append(toggle, note)
+    } else if (!this.active) {
       // Fuel and order are chosen before setting off; mid-trip they would only
       // compete with the alerts, and the List tab still changes the fuel.
       const { tripSort, fuel } = this.store.state.settings
