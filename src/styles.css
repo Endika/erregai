@@ -953,9 +953,18 @@ body {
 }
 
 .station-detail__distance {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
   margin-left: auto;
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.station-detail__distance-note {
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 .station-detail__directions {

@@ -43,6 +43,7 @@ export const gl: Record<string, string> = {
   'band.legend': 'No teu radio de {radius} km:',
   'band.legend.about':
     'Cada prezo compárase coas gasolineiras do teu radio: barata está no terzo máis barato e cara, no máis caro.',
+  'band.legend.straightLine': 'O radio e as distancias mídense en liña recta, non por estrada.',
 
   'trip.start': 'Iniciar viaxe',
   'trip.stop': 'Deter viaxe',
@@ -66,6 +67,7 @@ export const gl: Record<string, string> = {
   'trip.slot.more.fuel': 'Preto',
   'trip.slot.empty': 'Sen avisos agora',
 
+  'detail.distance.straightLine': 'en liña recta',
   'detail.directions': 'Como chegar',
   'detail.directions.tripNote':
     'Ao abrir a navegación, Erregai deixa de avisarte de radares e gasolineiras ata que volvas.',

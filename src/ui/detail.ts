@@ -87,7 +87,11 @@ function renderLead(station: Station, { fuel, origin, reference }: DetailContext
   if (origin) {
     const distance = document.createElement('span')
     distance.className = 'station-detail__distance'
-    distance.textContent = formatKm(haversineKm(origin, station.pos))
+    // Said quietly under the figure: the distance is haversine, not by road.
+    const note = document.createElement('span')
+    note.className = 'station-detail__distance-note'
+    note.textContent = t('detail.distance.straightLine')
+    distance.append(formatKm(haversineKm(origin, station.pos)), ' ', note)
     figures.appendChild(distance)
   }
 
