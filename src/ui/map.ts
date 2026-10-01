@@ -347,7 +347,11 @@ export class MapView {
   }
 
   private init(pos: LatLon): void {
-    const map = L.map(this.container).setView([pos.lat, pos.lon], INITIAL_ZOOM)
+    const map = L.map(this.container, { zoomControl: false }).setView(
+      [pos.lat, pos.lon],
+      INITIAL_ZOOM,
+    )
+    L.control.zoom({ position: 'bottomright' }).addTo(map)
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map)
     map.createPane(PANE_SERVICES).style.zIndex = '610'
     map.createPane(PANE_RADARS).style.zIndex = '620'

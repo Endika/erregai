@@ -33,6 +33,18 @@ const ROWS: readonly { key: string; swatch: string }[] = [
   },
 ]
 
+// A key in miniature: the three band colours, each against a line of text.
+const TOGGLE_ICON =
+  '<svg class="map-legend__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">' +
+  ['cheap', 'mid', 'expensive']
+    .map(
+      (kind, i) =>
+        `<circle cx="5" cy="${6 + i * 6}" r="2.75" style="fill:var(--map-marker-${kind})"/>` +
+        `<path d="M10.5 ${6 + i * 6}H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+    )
+    .join('') +
+  '</svg>'
+
 let legendCount = 0
 
 export function renderMapLegend(): HTMLElement {
@@ -68,7 +80,11 @@ export function renderMapLegend(): HTMLElement {
   const toggle = document.createElement('button')
   toggle.type = 'button'
   toggle.className = 'map-legend__toggle'
-  toggle.dataset.label = 'map.legend.toggle'
+  toggle.innerHTML = TOGGLE_ICON
+  const name = document.createElement('span')
+  name.className = 'visually-hidden'
+  name.dataset.label = 'map.legend.toggle'
+  toggle.appendChild(name)
   toggle.setAttribute('aria-controls', panel.id)
   toggle.setAttribute('aria-expanded', 'false')
 
