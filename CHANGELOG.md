@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.3](https://github.com/Endika/erregai/compare/v1.22.2...v1.22.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* hold trip heading through GPS jitter and show only what lies ahead ([758f82b](https://github.com/Endika/erregai/commit/758f82b30ef9d07b7ef46355f16d0b3f004669ad))
+
 ## [1.22.2](https://github.com/Endika/erregai/compare/v1.22.1...v1.22.2) (2026-10-01)
 
 
