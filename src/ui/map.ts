@@ -43,12 +43,15 @@ const PIN_SERVICE_SIZE = 24
 // Room for the edge pins' discs, so a station right on the radius is not cut.
 const FIT_PADDING_PX = 16
 // Every layer is an L.Marker, and markers in one pane stack by latitude, so
-// each layer gets a pane of its own. Radars sit under the stations (600): along
-// the A-8 a run of cameras otherwise buried the very prices the map is for, and
-// a camera under a pin still shows round its edge. Service areas are sparse and
-// stay above, below the tooltips (650) and popups (700).
+// each layer gets a pane of its own. On the Map tab radars sit under the
+// stations (600): along the A-8 a run of cameras otherwise buried the very
+// prices the map is for. While driving the radar is the hazard, so it goes on
+// top. Service areas are sparse and stay above, below the tooltips (650) and
+// popups (700).
 const PANE_SERVICES = 'erregai-services'
 const PANE_RADARS = 'erregai-radars'
+const RADARS_UNDER_Z = '590'
+const RADARS_ON_TOP_Z = '620'
 // "You are here" outranks everything: it used to win by being the last vector
 // layer added, which the station pins no longer are.
 const PANE_USER = 'erregai-user'
@@ -120,6 +123,7 @@ function servicePopup(area: ServiceArea, now: Date): HTMLElement {
 
 export class MapView {
   private map?: L.Map
+  private radarsOnTop = false
   private markers?: L.LayerGroup
   private radarMarkers?: L.LayerGroup
   private serviceMarkers?: L.LayerGroup
@@ -255,6 +259,12 @@ export class MapView {
     this.map?.invalidateSize()
   }
 
+  raiseRadars(on: boolean): void {
+    this.radarsOnTop = on
+    const pane = this.map?.getPane(PANE_RADARS)
+    if (pane) pane.style.zIndex = on ? RADARS_ON_TOP_Z : RADARS_UNDER_Z
+  }
+
   fitRadius(pos: LatLon, radiusKm: number): void {
     const { south, west, north, east } = radiusBounds(pos, radiusKm)
     this.map?.fitBounds(
@@ -355,7 +365,7 @@ export class MapView {
     L.control.zoom({ position: 'bottomright' }).addTo(map)
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map)
     map.createPane(PANE_SERVICES).style.zIndex = '610'
-    map.createPane(PANE_RADARS).style.zIndex = '590'
+    map.createPane(PANE_RADARS).style.zIndex = this.radarsOnTop ? RADARS_ON_TOP_Z : RADARS_UNDER_Z
     map.createPane(PANE_USER).style.zIndex = '630'
     this.markers = L.layerGroup().addTo(map)
     this.radarMarkers = L.layerGroup().addTo(map)

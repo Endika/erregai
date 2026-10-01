@@ -155,6 +155,7 @@ function showTab(tab: Tab): void {
   render()
   if (activeTab !== previousTab) viewEl.scrollTop = 0
   if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
+  mapView.raiseRadars(activeTab === 'trip')
   if (activeTab === 'trip') {
     const tp = tripController.currentUpdate?.state.lastPos ?? store.state.pos
     if (tp) mapView.focus(tp, TRIP_ZOOM)
