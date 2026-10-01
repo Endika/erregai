@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.22.2](https://github.com/Endika/erregai/compare/v1.22.1...v1.22.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* format prices, distances and dates for the active locale and show data age in the header ([33153b9](https://github.com/Endika/erregai/commit/33153b96a51969f419c69fc7b8c803e0d1371941))
+
 ## [1.22.1](https://github.com/Endika/erregai/compare/v1.22.0...v1.22.1) (2026-10-01)
 
 
