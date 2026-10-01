@@ -120,6 +120,11 @@ export const eu: Record<string, string> = {
   'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',
   'about.map': 'Mapa: OpenStreetMap',
   'map.fit': 'Ikusi zure erradio osoa',
+  'map.legend.toggle': 'Legenda',
+  'map.legend.prices': 'Prezioa zure erradioan',
+  'map.legend.noPrice': 'Preziorik gabe',
+  'map.legend.radar': 'Radar finkoa',
+  'map.legend.services': 'Zerbitzugunea',
 
   'error.location.denied': 'Erregaik ez du zure kokapena erabiltzeko baimenik',
   'error.location.deniedHint':
