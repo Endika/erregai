@@ -22,6 +22,12 @@ describe('settings', () => {
     expect(loadSettings(s).fuel).toBe('gasolina95')
     expect(loadSettings(s).radiusKm).toBe(25)
   })
+  it('sorts the trip list by price by default, but keeps a stored trip sort', () => {
+    expect(DEFAULT_SETTINGS.tripSort).toBe('price')
+    const s = memStore()
+    s.setItem('erregai.settings', JSON.stringify({ tripSort: 'distance' }))
+    expect(loadSettings(s).tripSort).toBe('distance')
+  })
   it('ignores corrupt json and returns defaults', () => {
     const s = memStore()
     s.setItem('erregai.settings', '{bad')

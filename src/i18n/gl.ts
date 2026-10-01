@@ -42,6 +42,7 @@ export const gl: Record<string, string> = {
   'trip.foregroundOnly': 'Só funciona coa app aberta en primeiro plano.',
   'trip.gps.waiting': 'Agardando sinal GPS…',
   'trip.gps.active': 'GPS activo',
+  'trip.gps.heading': 'Agardando dirección…',
   'trip.gps.lost': 'Sen sinal GPS',
   'trip.mediaSession.title': 'Modo viaxe',
   'trip.cheapestAhead': 'A máis barata diante',

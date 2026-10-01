@@ -1,8 +1,16 @@
 import type { LatLon } from '../core/geo'
+import type { FixInfo } from '../core/heading'
 
-export function watchPosition(cb: (p: LatLon) => void, onErr: (e: unknown) => void): () => void {
+export function watchPosition(
+  cb: (p: LatLon, fix: FixInfo) => void,
+  onErr: (e: unknown) => void,
+): () => void {
   const id = navigator.geolocation.watchPosition(
-    (p) => cb({ lat: p.coords.latitude, lon: p.coords.longitude }),
+    (p) =>
+      cb(
+        { lat: p.coords.latitude, lon: p.coords.longitude },
+        { heading: p.coords.heading, speed: p.coords.speed, accuracy: p.coords.accuracy },
+      ),
     (e) => onErr(e),
     { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
   )

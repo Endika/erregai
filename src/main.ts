@@ -381,10 +381,13 @@ function render(): void {
       mapWrap.className = 'trip-map'
       mapWrap.appendChild(mapContainer)
       viewEl.appendChild(mapWrap)
-      mapView.render(tripPos, nearby, state.settings.fuel, selectStation, {
-        recenter: true,
-        selectedId,
-      })
+      mapView.render(
+        tripPos,
+        tripController.stationsForMap(nearby),
+        state.settings.fuel,
+        selectStation,
+        { recenter: true, selectedId },
+      )
       // While a trip is active, onFix owns the radar layer (per GPS fix); when it
       // is not, keep the preview map's radar layer in sync with the toggle so
       // markers drawn on the map tab don't linger here after it's turned off.

@@ -148,14 +148,15 @@ describe('trip fuel banners', () => {
 
   it('cheapest-ahead banner shows price and distance and is a polite live region', async () => {
     const c = makeController([CHEAP, PRICEY])
-    await fix(c, behind) // first fix: no heading yet, so CHEAP is the cheapest ahead
-    await fix(c, near) // the distance follows the latest fix, not the one that alerted
+    await fix(c, behind) // first fix: no heading yet, so nothing alerts
+    await fix(c, near) // heading north: CHEAP is the cheapest ahead
+    await fix(c, { lat: 40.025, lon: 0 }) // the distance follows the latest fix, not the one that alerted
     const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--cheapest')!
     expect(banner).not.toBeNull()
     expect(banner.getAttribute('aria-live')).toBe('polite')
     expect(banner.textContent).toContain(t('trip.cheapestAhead'))
     expect(banner.textContent).toContain(CHEAP.brand)
-    const km = formatKm(haversineKm(near, CHEAP.pos))
+    const km = formatKm(haversineKm({ lat: 40.025, lon: 0 }, CHEAP.pos))
     expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(`1,000 · ${km}`)
   })
 
@@ -209,6 +210,42 @@ describe('trip rows', () => {
   })
 })
 
+describe('trip before the direction is known', () => {
+  it('lists no stations and shows the nothing-ahead state', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, MID, PRICEY, st('south', 39.97, 0.9)])
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    const el = draw(c)
+    expect(el.querySelectorAll('.trip-view__row')).toHaveLength(0)
+    expect(el.querySelector('.trip-view__empty')!.textContent).toBe(t('trip.noneAhead'))
+    expect(el.querySelector('.trip-view__banner')).toBeNull()
+    c.stop()
+  })
+})
+
+describe('trip map stations', () => {
+  const SOUTH = st('south', 39.97, 0.9)
+  const ALL = [CHEAP, MID, PRICEY, SOUTH]
+
+  it('shows every nearby station when no trip is running', () => {
+    expect(makeController(ALL).stationsForMap(ALL)).toEqual(ALL)
+  })
+
+  it('shows only the stations ahead while a trip runs', async () => {
+    installGeolocation()
+    const c = makeController(ALL)
+    await c.start()
+    expect(c.stationsForMap(ALL)).toEqual([])
+    await fix(c, { lat: 40.0, lon: 0 })
+    expect(c.stationsForMap(ALL)).toEqual([])
+    await fix(c, { lat: 40.01, lon: 0 })
+    expect(c.stationsForMap(ALL).map((s) => s.id)).toEqual(['cheap', 'mid', 'pricey'])
+    c.stop()
+    expect(c.stationsForMap(ALL)).toEqual(ALL)
+  })
+})
+
 describe('trip radar dataset notice', () => {
   it("dates the radar dataset in the reader's locale, not ISO", async () => {
     installGeolocation()
@@ -232,7 +269,7 @@ describe('trip idle and GPS status', () => {
     expect(el.querySelector('.trip-view__gps')).toBeNull()
   })
 
-  it('reports waiting, active and lost GPS while a trip runs', async () => {
+  it('reports waiting, direction pending, active and lost GPS while a trip runs', async () => {
     const geo = installGeolocation()
     const c = makeController()
     await c.start()
@@ -242,6 +279,11 @@ describe('trip idle and GPS status', () => {
     expect(draw(c).querySelector('.trip-view__intro')).toBeNull()
 
     geo.success!({ coords: { latitude: 40.0, longitude: 0 } })
+    expect(gps().dataset.gps).toBe('heading')
+    expect(gps().textContent).toBe(t('trip.gps.heading'))
+
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.01, lon: 0 })
     expect(gps().dataset.gps).toBe('active')
     expect(gps().textContent).toBe(t('trip.gps.active'))
 

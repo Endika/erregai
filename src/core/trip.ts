@@ -1,6 +1,7 @@
 import type { Station } from './station'
 import type { FuelId } from './fuels'
-import { bearingDeg, haversineKm, isAhead, type LatLon } from './geo'
+import { haversineKm, isAhead, type LatLon } from './geo'
+import { nextHeading, type FixInfo } from './heading'
 import { priceOf } from './pricing'
 
 export interface TripConfig {
@@ -10,6 +11,7 @@ export interface TripConfig {
 }
 export interface TripState {
   headingDeg: number | undefined
+  headingAnchor: LatLon | undefined
   lastPos: LatLon | undefined
   bestSeenPrice: number | undefined
 }
@@ -20,7 +22,12 @@ export interface TripUpdate {
 }
 
 export function newTripState(): TripState {
-  return { headingDeg: undefined, lastPos: undefined, bestSeenPrice: undefined }
+  return {
+    headingDeg: undefined,
+    headingAnchor: undefined,
+    lastPos: undefined,
+    bestSeenPrice: undefined,
+  }
 }
 
 export function updateTrip(
@@ -28,16 +35,22 @@ export function updateTrip(
   pos: LatLon,
   stations: Station[],
   cfg: TripConfig,
+  fix?: FixInfo,
 ): TripUpdate {
-  let heading = state.headingDeg
-  if (state.lastPos && (state.lastPos.lat !== pos.lat || state.lastPos.lon !== pos.lon)) {
-    heading = bearingDeg(state.lastPos, pos)
-  }
-  const ahead = stations
-    .filter((s) => priceOf(s, cfg.fuel) !== undefined)
-    .filter((s) => haversineKm(pos, s.pos) <= cfg.radiusKm)
-    .filter((s) => (heading === undefined ? true : isAhead(pos, heading, s.pos, cfg.corridorDeg)))
-    .sort((a, b) => priceOf(a, cfg.fuel)! - priceOf(b, cfg.fuel)!)
+  const { headingDeg: heading, anchor } = nextHeading(
+    { headingDeg: state.headingDeg, anchor: state.headingAnchor },
+    pos,
+    fix,
+  )
+  // Until the direction of travel is known, "ahead" would include what lies behind.
+  const ahead =
+    heading === undefined
+      ? []
+      : stations
+          .filter((s) => priceOf(s, cfg.fuel) !== undefined)
+          .filter((s) => haversineKm(pos, s.pos) <= cfg.radiusKm)
+          .filter((s) => isAhead(pos, heading, s.pos, cfg.corridorDeg))
+          .sort((a, b) => priceOf(a, cfg.fuel)! - priceOf(b, cfg.fuel)!)
 
   let alert: Station | undefined
   let bestSeenPrice = state.bestSeenPrice
@@ -49,5 +62,9 @@ export function updateTrip(
       bestSeenPrice = p
     }
   }
-  return { state: { headingDeg: heading, lastPos: pos, bestSeenPrice }, ahead, alert }
+  return {
+    state: { headingDeg: heading, headingAnchor: anchor, lastPos: pos, bestSeenPrice },
+    ahead,
+    alert,
+  }
 }

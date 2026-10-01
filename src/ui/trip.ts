@@ -8,7 +8,8 @@ import {
   type TripState,
   type TripUpdate,
 } from '../core/trip'
-import { radarsAhead, nearbyRadars, nextRadarAlerts, type RadarHit } from '../core/radars'
+import type { FixInfo } from '../core/heading'
+import { radarsAhead, nextRadarAlerts, type RadarHit } from '../core/radars'
 import { nextProximityAlerts } from '../core/proximity'
 import { cheapAhead } from '../core/fuel-alert'
 import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
@@ -39,6 +40,8 @@ const NEARBY_RADARS = 3
 const RADAR_LAYER_CAP = 60
 
 type GpsStatus = 'waiting' | 'active' | 'lost'
+// 'heading': fixes are arriving but the car has not moved far enough to tell where it is going.
+type GpsLine = GpsStatus | 'heading'
 
 // The banner shows the distance from the latest fix, but screen readers get
 // the text as it was when the alert fired: every fix re-renders the view, and
@@ -121,9 +124,9 @@ export class TripController {
     await ensureNotifyPermission()
 
     this.stopFn = watchPosition(
-      (pos) => {
+      (pos, fix) => {
         this.gps = 'active'
-        void this.onFix(pos)
+        void this.onFix(pos, fix)
       },
       () => {
         if (this.gps === 'lost') return
@@ -154,7 +157,12 @@ export class TripController {
     this.onChange()
   }
 
-  private async onFix(pos: LatLon): Promise<void> {
+  // While a trip runs the map shows only what is ahead, like the list below it.
+  stationsForMap(nearby: Station[]): Station[] {
+    return this.active ? (this.lastUpdate?.ahead ?? []) : nearby
+  }
+
+  private async onFix(pos: LatLon, fix?: FixInfo): Promise<void> {
     const provinceId = provinceFor(pos).id
     if (provinceId !== this.lastProvinceId) {
       this.lastProvinceId = provinceId
@@ -167,9 +175,10 @@ export class TripController {
       radiusKm: settings.radiusKm,
       corridorDeg: DEFAULT_CORRIDOR_DEG,
     }
-    const update = updateTrip(this.tripState, pos, this.store.state.stations, cfg)
+    const update = updateTrip(this.tripState, pos, this.store.state.stations, cfg, fix)
     this.tripState = update.state
     this.lastUpdate = update
+    const heading = update.state.headingDeg
 
     if (update.alert) {
       const price = priceOf(update.alert, cfg.fuel)
@@ -187,10 +196,15 @@ export class TripController {
 
     if (settings.radarAlertsEnabled) {
       const alertDistanceKm = settings.radarAlertDistanceM / 1000
-      const hits = radarsAhead(pos, this.tripState.headingDeg, RADARS, {
-        radiusKm: alertDistanceKm,
-        corridorDeg: DEFAULT_CORRIDOR_DEG,
-      })
+      // radarsAhead treats an undefined heading as "everything around"; on a
+      // trip, an unknown direction means nothing is ahead yet.
+      const hits =
+        heading === undefined
+          ? []
+          : radarsAhead(pos, heading, RADARS, {
+              radiusKm: alertDistanceKm,
+              corridorDeg: DEFAULT_CORRIDOR_DEG,
+            })
       this.radarHits = hits
       const { alertedIds, newlyAlerted } = nextRadarAlerts(
         this.alertedRadarIds,
@@ -223,9 +237,15 @@ export class TripController {
     }
 
     // Map visibility has its own toggle, independent of the audio/notification
-    // alert: show nearby radars as icons even before an alert would fire.
+    // alert: show radars ahead as icons even before an alert would fire.
     if (settings.radarLayerEnabled) {
-      const displayRadars = nearbyRadars(pos, RADARS, settings.radiusKm, RADAR_LAYER_CAP)
+      const displayRadars =
+        heading === undefined
+          ? []
+          : radarsAhead(pos, heading, RADARS, {
+              radiusKm: settings.radiusKm,
+              corridorDeg: DEFAULT_CORRIDOR_DEG,
+            }).slice(0, RADAR_LAYER_CAP)
       this.map.renderRadars(displayRadars.map((h) => h.radar))
     } else {
       this.map.clearRadars()
@@ -233,13 +253,16 @@ export class TripController {
 
     if (settings.fuelAlertMode !== 'off') {
       const alertDistanceKm = settings.fuelAlertDistanceM / 1000
-      const hits = cheapAhead(pos, this.tripState.headingDeg, this.store.state.stations, {
-        fuel: settings.fuel,
-        radiusKm: settings.radiusKm,
-        corridorDeg: DEFAULT_CORRIDOR_DEG,
-        alertDistanceKm,
-        mode: settings.fuelAlertMode,
-      })
+      const hits =
+        heading === undefined
+          ? []
+          : cheapAhead(pos, heading, this.store.state.stations, {
+              fuel: settings.fuel,
+              radiusKm: settings.radiusKm,
+              corridorDeg: DEFAULT_CORRIDOR_DEG,
+              alertDistanceKm,
+              mode: settings.fuelAlertMode,
+            })
       const { alertedIds, newlyAlerted } = nextProximityAlerts(
         this.alertedFuelIds,
         hits.map((h) => ({ id: h.station.id, distanceKm: h.distanceKm })),
@@ -385,8 +408,10 @@ export class TripController {
   private renderGpsStatus(): HTMLElement {
     const status = document.createElement('p')
     status.className = 'trip-view__gps'
-    status.dataset.gps = this.gps
-    status.textContent = t(`trip.gps.${this.gps}`)
+    const line: GpsLine =
+      this.gps === 'active' && this.tripState.headingDeg === undefined ? 'heading' : this.gps
+    status.dataset.gps = line
+    status.textContent = t(`trip.gps.${line}`)
     return status
   }
 
