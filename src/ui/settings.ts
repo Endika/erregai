@@ -1,12 +1,9 @@
-import { FUELS } from '../core/fuels'
 import type { FuelAlertMode, Settings, Theme } from '../app/settings'
-import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
 import { formatDistance, formatNumber, formatPercent } from '../i18n/format'
 import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 
-const SORT_KEYS: readonly SortKey[] = ['price', 'distance']
 const THEMES: readonly Theme[] = ['light', 'system', 'dark']
 const RADAR_DISTANCES_M: readonly number[] = [300, 500, 800, 1000, 1500]
 const FUEL_ALERT_MODES: readonly FuelAlertMode[] = ['cheap', 'any', 'off']
@@ -164,21 +161,9 @@ export function renderSettings(
 
   const activeLocale = settings.locale ?? getLocale()
 
+  // Fuel and sort live in the sort bar over the list and the map, where their
+  // effect is in view; a second pair here only drifted out of step with it.
   const general = section(t('settings.section.general'), [
-    selectField(
-      t('settings.fuel'),
-      'fuel',
-      settings.fuel,
-      FUELS.map((f) => ({ value: f.id, label: t(f.i18nKey) })),
-      (value) => onChange({ fuel: value as Settings['fuel'] }),
-    ),
-    selectField(
-      t('settings.sort'),
-      'sort',
-      settings.sort,
-      SORT_KEYS.map((key) => ({ value: key, label: t(`sort.${key}`) })),
-      (value) => onChange({ sort: value as SortKey }),
-    ),
     selectField(
       t('settings.radius'),
       'radiusKm',
@@ -200,6 +185,20 @@ export function renderSettings(
       THEMES.map((theme) => ({ value: theme, label: t(`theme.${theme}`) })),
       (value) => onChange({ theme: value as Theme }),
     ),
+  ])
+
+  const services = section(t('settings.section.services'), [
+    toggleField(
+      t('services.settings.showOnMap'),
+      'servicesLayerEnabled',
+      settings.servicesLayerEnabled,
+      (checked) => onChange({ servicesLayerEnabled: checked }),
+    ),
+  ])
+
+  // Volume and vibration apply to both kinds of alert, so they head the two
+  // alert sections instead of hiding under General or belonging to one of them.
+  const alerts = section(t('settings.section.alerts'), [
     // Previews the new level on release: a volume slider you cannot hear while
     // setting it is guesswork, and the release is still a user gesture, so the
     // audio context unlocks here too.
@@ -212,15 +211,6 @@ export function renderSettings(
       onChange({ alertVibrate: checked })
       if (checked) vibrateRadar()
     }),
-  ])
-
-  const services = section(t('settings.section.services'), [
-    toggleField(
-      t('services.settings.showOnMap'),
-      'servicesLayerEnabled',
-      settings.servicesLayerEnabled,
-      (checked) => onChange({ servicesLayerEnabled: checked }),
-    ),
   ])
 
   const radar = section(t('settings.section.radar'), [
@@ -309,6 +299,6 @@ export function renderSettings(
   version.textContent = `v${__APP_VERSION__}`
   about.append(aboutTitle, legend, legendNote, dataCredit, mapCredit, version)
 
-  form.append(general, services, radar, fuel, about)
+  form.append(general, services, alerts, radar, fuel, about)
   container.replaceChildren(form)
 }
