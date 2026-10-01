@@ -37,7 +37,9 @@ export const en: Record<string, string> = {
   'trip.cheapestAhead': 'Cheapest ahead',
   'trip.noneAhead': 'No stations ahead yet',
 
-  'detail.openInMaps': 'Open in Maps',
+  'detail.directions': 'Directions',
+  'detail.otherFuels': 'Other fuels ({n})',
+  'detail.noPrice': 'No price for this fuel',
   'detail.schedule': 'Schedule',
   'schedule.open': 'Open now',
   'schedule.closed': 'Closed now',

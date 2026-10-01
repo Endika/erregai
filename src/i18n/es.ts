@@ -37,7 +37,9 @@ export const es: Record<string, string> = {
   'trip.cheapestAhead': 'Más barata por delante',
   'trip.noneAhead': 'Aún no hay gasolineras por delante',
 
-  'detail.openInMaps': 'Abrir en Maps',
+  'detail.directions': 'Cómo llegar',
+  'detail.otherFuels': 'Otros combustibles ({n})',
+  'detail.noPrice': 'Sin precio de este combustible',
   'detail.schedule': 'Horario',
   'schedule.open': 'Abierto ahora',
   'schedule.closed': 'Cerrado ahora',

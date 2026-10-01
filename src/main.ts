@@ -142,7 +142,12 @@ function renderCard(): void {
   close.textContent = '×'
   close.addEventListener('click', closeCard)
   const detailContainer = document.createElement('div')
-  renderDetail(detailContainer, selectedStation)
+  const { settings, pos, stations } = store.state
+  renderDetail(detailContainer, selectedStation, undefined, {
+    fuel: settings.fuel,
+    origin: pos,
+    nearby: pos ? withinRadius(stations, pos, settings.radiusKm) : stations,
+  })
   cardEl.replaceChildren(close, detailContainer)
   cardEl.hidden = false
 }
