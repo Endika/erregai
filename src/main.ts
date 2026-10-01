@@ -4,7 +4,7 @@ import { fetchProvince } from './adapters/api'
 import { openIdbKv } from './adapters/cache'
 import { getOnce } from './adapters/geolocation'
 import { detectLocale, setLocale, t } from './i18n'
-import { renderList } from './ui/list'
+import { renderBandLegend, renderList } from './ui/list'
 import { renderDetail } from './ui/detail'
 import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
@@ -27,8 +27,14 @@ import { nearbyRadars } from './core/radars'
 import { RADARS } from './core/radars.data'
 import { nearbyServiceAreas } from './core/services'
 import { SERVICE_AREAS } from './core/services.data'
-import { sortStations, type SortKey } from './core/pricing'
-import { haversineKm, type LatLon } from './core/geo'
+import {
+  radiusReference,
+  sortStations,
+  withinRadius,
+  type PriceReference,
+  type SortKey,
+} from './core/pricing'
+import type { LatLon } from './core/geo'
 import type { Station } from './core/station'
 import type { Settings } from './app/settings'
 
@@ -140,7 +146,7 @@ function closeCard(): void {
   render()
 }
 
-function renderCard(): void {
+function renderCard(reference: PriceReference | undefined): void {
   if (!selectedStation) {
     cardEl.hidden = true
     cardEl.replaceChildren()
@@ -153,11 +159,11 @@ function renderCard(): void {
   close.textContent = '×'
   close.addEventListener('click', closeCard)
   const detailContainer = document.createElement('div')
-  const { settings, pos, stations } = store.state
+  const { settings, pos } = store.state
   renderDetail(detailContainer, selectedStation, undefined, {
     fuel: settings.fuel,
     origin: pos,
-    nearby: pos ? withinRadius(stations, pos, settings.radiusKm) : stations,
+    reference,
   })
   cardEl.replaceChildren(close, detailContainer)
   cardEl.hidden = false
@@ -211,16 +217,13 @@ function isInlineError(notice: ViewNotice | undefined): boolean {
   return notice?.kind === 'location' || notice?.kind === 'loadFailed'
 }
 
-function withinRadius(stations: Station[], origin: LatLon, radiusKm: number): Station[] {
-  return stations.filter((s) => haversineKm(origin, s.pos) <= radiusKm)
-}
-
 function renderStationList(
   container: HTMLElement,
   sorted: Station[],
   fuel: Settings['fuel'],
   origin: LatLon,
   sort: SortKey,
+  reference: PriceReference | undefined,
   selectedId?: string,
 ): void {
   container.appendChild(
@@ -229,9 +232,10 @@ function renderStationList(
       onChange: (next) => store.setSettings({ fuel: next }),
     }),
   )
+  if (reference) container.appendChild(renderBandLegend(store.state.settings.radiusKm))
   const listContainer = document.createElement('div')
   container.appendChild(listContainer)
-  renderList(listContainer, sorted, fuel, origin, selectStation, selectedId)
+  renderList(listContainer, sorted, fuel, origin, selectStation, { selectedId, reference })
 }
 
 function applyTheme(theme: Settings['theme']): void {
@@ -311,6 +315,10 @@ function render(): void {
   viewEl.replaceChildren()
 
   const selectedId = selectedStation?.id
+  // One reference per render, shared by the list, the map and the card.
+  const reference = state.pos
+    ? radiusReference(state.stations, state.settings.fuel, state.pos, state.settings.radiusKm)
+    : undefined
   const noticeFor = (nearby: number): ViewNotice | undefined =>
     viewNotice({
       hasPos: state.pos !== undefined,
@@ -336,6 +344,7 @@ function render(): void {
         state.settings.fuel,
         state.pos,
         state.settings.sort,
+        reference,
         selectedId,
       )
     }
@@ -362,7 +371,10 @@ function render(): void {
         listWrap.className = 'map-split__list'
         split.append(mapWrap, listWrap)
         viewEl.appendChild(split)
-        mapView.render(state.pos, sorted, state.settings.fuel, selectStation, { selectedId })
+        mapView.render(state.pos, sorted, state.settings.fuel, selectStation, {
+          selectedId,
+          reference,
+        })
         if (radarHits.length > 0) mapView.renderRadars(radarHits.map((h) => h.radar))
         else mapView.clearRadars()
         if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map((h) => h.area))
@@ -376,6 +388,7 @@ function render(): void {
             state.settings.fuel,
             state.pos,
             state.settings.sort,
+            reference,
             selectedId,
           )
         if (radarHits.length > 0)
@@ -442,7 +455,7 @@ function render(): void {
   const announcement = inline && notice ? joinNotice(viewNoticeText(notice, !navigator.onLine)) : ''
   if (announceEl.textContent !== announcement) announceEl.textContent = announcement
 
-  renderCard()
+  renderCard(reference)
 }
 
 store.subscribe(render)

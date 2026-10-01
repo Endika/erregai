@@ -5,7 +5,13 @@ import type { FuelId } from '../core/fuels'
 import type { LatLon } from '../core/geo'
 import type { Radar } from '../core/radars'
 import { serviceAreaStatus, type ServiceArea } from '../core/services'
-import { bandForThresholds, bandThresholds, priceOf, type PriceBand } from '../core/pricing'
+import {
+  priceOf,
+  priceReference,
+  stationBand,
+  type PriceBand,
+  type PriceReference,
+} from '../core/pricing'
 import { glyphSvg, serviceGlyph, type Glyph } from './map-icons'
 import { t } from '../i18n'
 import { formatPrice } from '../i18n/format'
@@ -120,7 +126,9 @@ export class MapView {
     stations: Station[],
     fuel: FuelId,
     onSelect: (s: Station) => void,
-    opts: { recenter?: boolean; selectedId?: string } = {},
+    // Pass the radius reference whenever the map draws a different set than the
+    // list, or a pin's colour will disagree with its row.
+    opts: { recenter?: boolean; selectedId?: string; reference?: PriceReference } = {},
   ): void {
     if (!this.map) this.init(pos)
     if (!this.map || !this.markers) return
@@ -129,16 +137,12 @@ export class MapView {
     this.userMarker?.setLatLng([pos.lat, pos.lon])
     this.markers.clearLayers()
 
-    const knownPrices = stations
-      .map((s) => priceOf(s, fuel))
-      .filter((p): p is number => p !== undefined)
-    const thresholds = bandThresholds(knownPrices)
+    const reference = opts.reference ?? priceReference(stations, fuel)
     const colors = readMarkerColors()
 
     for (const station of stations) {
       const price = priceOf(station, fuel)
-      const kind: MarkerKind =
-        price !== undefined ? bandForThresholds(price, thresholds) : 'unknown'
+      const kind: MarkerKind = stationBand(station, fuel, reference) ?? 'unknown'
       const selected = station.id === opts.selectedId
       const size = selected ? PIN_SIZE_SELECTED : PIN_SIZE
       const marker = L.marker([station.pos.lat, station.pos.lon], {

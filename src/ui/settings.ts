@@ -278,6 +278,9 @@ export function renderSettings(
     item.textContent = t(`band.${band}`)
     legend.appendChild(item)
   }
+  const legendNote = document.createElement('p')
+  legendNote.className = 'legend__note'
+  legendNote.textContent = t('band.legend.about')
   const dataCredit = document.createElement('p')
   dataCredit.className = 'settings-about__credit'
   dataCredit.textContent = t('about.data')
@@ -287,7 +290,7 @@ export function renderSettings(
   const version = document.createElement('p')
   version.className = 'settings-about__version'
   version.textContent = `v${__APP_VERSION__}`
-  about.append(aboutTitle, legend, dataCredit, mapCredit, version)
+  about.append(aboutTitle, legend, legendNote, dataCredit, mapCredit, version)
 
   form.append(general, services, radar, fuel, about)
   container.replaceChildren(form)

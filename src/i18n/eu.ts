@@ -33,6 +33,9 @@ export const eu: Record<string, string> = {
   'band.mid': 'Ertaina',
   'band.expensive': 'Garestia',
   'price.withBand': '{price} €/l, {band}',
+  'band.legend': 'Zure {radius} km-ko erradioan:',
+  'band.legend.about':
+    'Prezio bakoitza zure erradioko gasolindegiekin alderatzen da: merkea heren merkeenean dago, eta garestia garestienean.',
 
   'trip.start': 'Hasi bidaia',
   'trip.stop': 'Gelditu bidaia',
@@ -54,6 +57,8 @@ export const eu: Record<string, string> = {
   'detail.directions': 'Nola iritsi',
   'detail.otherFuels': 'Beste erregaiak ({n})',
   'detail.noPrice': 'Erregai honen preziorik ez',
+  'detail.vsAverage': '{delta} zent. batez bestekoarekiko',
+  'detail.atAverage': 'Batez bestekoan',
   'detail.schedule': 'Ordutegia',
   'schedule.open': 'Orain irekita',
   'schedule.closed': 'Orain itxita',

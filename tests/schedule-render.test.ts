@@ -20,7 +20,7 @@ const origin = { lat: 40, lon: -3 }
 
 const renderRows = (stations: Station[]): HTMLElement => {
   const el = document.createElement('div')
-  renderList(el, stations, 'gasoleoA', origin, () => {}, undefined, lateWednesday)
+  renderList(el, stations, 'gasoleoA', origin, () => {}, { now: lateWednesday })
   return el
 }
 

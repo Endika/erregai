@@ -130,6 +130,7 @@ describe('renderSettings', () => {
       t('band.mid'),
       t('band.expensive'),
     ])
+    expect(el.querySelector('.legend__note')?.textContent).toBe(t('band.legend.about'))
   })
 
   it('lays out every on/off setting as a labelled switch row', () => {

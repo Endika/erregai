@@ -33,6 +33,9 @@ export const en: Record<string, string> = {
   'band.mid': 'Mid',
   'band.expensive': 'Expensive',
   'price.withBand': '{price} €/l, {band}',
+  'band.legend': 'Within your {radius} km radius:',
+  'band.legend.about':
+    'Each price is compared with the stations within your radius: cheap is in the lowest third, expensive in the highest.',
 
   'trip.start': 'Start trip',
   'trip.stop': 'Stop trip',
@@ -53,6 +56,8 @@ export const en: Record<string, string> = {
   'detail.directions': 'Directions',
   'detail.otherFuels': 'Other fuels ({n})',
   'detail.noPrice': 'No price for this fuel',
+  'detail.vsAverage': '{delta} ct vs. the average',
+  'detail.atAverage': 'At the average',
   'detail.schedule': 'Schedule',
   'schedule.open': 'Open now',
   'schedule.closed': 'Closed now',

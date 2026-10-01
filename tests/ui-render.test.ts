@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { renderList } from '../src/ui/list'
+import { renderBandLegend, renderList } from '../src/ui/list'
 import { renderRadarList } from '../src/ui/radar-list'
 import { setLocale } from '../src/i18n'
 import type { RadarHit } from '../src/core/radars'
@@ -46,6 +46,23 @@ describe('renderList', () => {
     const price = el.querySelector('.station-row__price')!
     expect(price.getAttribute('aria-label')).toBe('1,739 €/l, barata')
     expect(price.getAttribute('title')).toBe('Barata')
+  })
+})
+
+describe('renderBandLegend', () => {
+  it('names the reference the colours compare against, then the three bands', () => {
+    setLocale('es')
+    const el = renderBandLegend(15)
+    expect(el.querySelector('.band-legend__scope')?.textContent).toBe('En tu radio de 15 km:')
+    const items = [...el.querySelectorAll<HTMLElement>('.legend__item')]
+    expect(items.map((i) => i.dataset.band)).toEqual(['cheap', 'mid', 'expensive'])
+    expect(el.textContent).toBe('En tu radio de 15 km: Barata Media Cara')
+  })
+
+  it('follows the locale and the radius', () => {
+    setLocale('en')
+    expect(renderBandLegend(50).textContent).toBe('Within your 50 km radius: Cheap Mid Expensive')
+    setLocale('es')
   })
 })
 

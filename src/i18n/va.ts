@@ -33,6 +33,9 @@ export const va: Record<string, string> = {
   'band.mid': 'Mitjana',
   'band.expensive': 'Cara',
   'price.withBand': '{price} €/l, {band}',
+  'band.legend': 'En el teu radi de {radius} km:',
+  'band.legend.about':
+    'Cada preu es compara amb les gasolineres del teu radi: barata és en el terç més barat i cara, en el més car.',
 
   'trip.start': 'Iniciar viatge',
   'trip.stop': 'Parar viatge',
@@ -54,6 +57,8 @@ export const va: Record<string, string> = {
   'detail.directions': 'Com arribar-hi',
   'detail.otherFuels': 'Altres combustibles ({n})',
   'detail.noPrice': "Sense preu d'este combustible",
+  'detail.vsAverage': '{delta} cènt. respecte a la mitjana',
+  'detail.atAverage': 'En la mitjana',
   'detail.schedule': 'Horari',
   'schedule.open': 'Obert ara',
   'schedule.closed': 'Tancat ara',

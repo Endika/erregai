@@ -16,14 +16,15 @@
   --band-mid-bg: #fff4e0;
   --band-mid-fg: #8a5300;
   --band-expensive-bg: #fdecea;
-  --band-expensive-fg: #b3261e;
+  /* Raspberry, not the error red: dear is a fact about a price, not a danger. */
+  --band-expensive-fg: #a0365e;
 
   /* Map marker colours: fixed (not theme-conditional) because OSM tiles are
      always light — these need contrast against a light basemap regardless
      of the app's light/dark theme. */
   --map-marker-cheap: #1e7d32;
   --map-marker-mid: #b06d00;
-  --map-marker-expensive: #b3261e;
+  --map-marker-expensive: #a0365e;
   --map-marker-unknown: #6b6b6b;
   --map-marker-user: #0b57d0;
   /* Radar hazard hue — a distinct violet so it never collides with the price
@@ -53,7 +54,7 @@
     --band-mid-bg: #3a2c05;
     --band-mid-fg: #e6bf5a;
     --band-expensive-bg: #3a1414;
-    --band-expensive-fg: #f4a29b;
+    --band-expensive-fg: #f2a7bd;
   }
 }
 
@@ -72,7 +73,7 @@
   --band-mid-bg: #3a2c05;
   --band-mid-fg: #e6bf5a;
   --band-expensive-bg: #3a1414;
-  --band-expensive-fg: #f4a29b;
+  --band-expensive-fg: #f2a7bd;
 }
 
 * {
@@ -417,9 +418,10 @@ body {
   white-space: nowrap;
 }
 
+/* Closed keeps the error red: it is the one state here worth a warning. */
 [data-schedule='closed'] {
   background: var(--band-expensive-bg);
-  color: var(--band-expensive-fg);
+  color: var(--color-danger);
 }
 
 [data-schedule='closing-soon'] {
@@ -551,6 +553,13 @@ body {
 
 .station-detail__lead[data-band='expensive'] .station-detail__lead-price {
   background: var(--band-expensive-bg);
+}
+
+.station-detail__delta {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .station-detail__lead-missing {
@@ -1115,6 +1124,25 @@ body {
   margin-bottom: 0.75rem;
 }
 
+/* One line under the sort bar; the pills are the ones the rows wear. */
+.band-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.375rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+}
+
+.band-legend .legend__item {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+}
+
 /* Drawn as the list's price pills, so the legend is the thing it explains. */
 .legend {
   display: flex;
@@ -1143,6 +1171,13 @@ body {
 .legend__item[data-band='expensive'] {
   background: var(--band-expensive-bg);
   color: var(--band-expensive-fg);
+}
+
+.legend__note {
+  margin: 0 0 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  max-width: 65ch;
 }
 
 .settings-about__credit {
