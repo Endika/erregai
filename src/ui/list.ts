@@ -52,7 +52,10 @@ export function renderBandLegend(radiusKm: number): HTMLElement {
   const about = document.createElement('p')
   about.className = 'band-legend__about'
   about.textContent = t('band.legend.about')
-  legend.append(summary, about)
+  const straightLine = document.createElement('p')
+  straightLine.className = 'band-legend__about'
+  straightLine.textContent = t('band.legend.straightLine')
+  legend.append(summary, about, straightLine)
   return legend
 }
 

@@ -43,6 +43,8 @@ export const en: Record<string, string> = {
   'band.legend': 'Within your {radius} km radius:',
   'band.legend.about':
     'Each price is compared with the stations within your radius: cheap is in the lowest third, expensive in the highest.',
+  'band.legend.straightLine':
+    'The radius and the distances are measured in a straight line, not by road.',
 
   'trip.start': 'Start trip',
   'trip.stop': 'Stop trip',
@@ -65,6 +67,7 @@ export const en: Record<string, string> = {
   'trip.slot.more.fuel': 'Nearby',
   'trip.slot.empty': 'No alerts right now',
 
+  'detail.distance.straightLine': 'in a straight line',
   'detail.directions': 'Directions',
   'detail.directions.tripNote':
     'Once you open navigation, Erregai stops warning you about radars and stations until you come back.',

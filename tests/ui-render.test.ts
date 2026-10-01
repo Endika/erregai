@@ -105,6 +105,19 @@ describe('renderBandLegend', () => {
     expect(el.querySelector('.band-legend__about')?.textContent).toBe(t('band.legend.about'))
   })
 
+  // Every distance is haversine; said once here rather than on every row.
+  it('says once that the radius and the distances are straight-line', () => {
+    setLocale('es')
+    const notes = [...renderBandLegend(15).querySelectorAll('.band-legend__about')]
+    expect(notes.map((n) => n.textContent)).toEqual([
+      t('band.legend.about'),
+      'El radio y las distancias se miden en línea recta, no por carretera.',
+    ])
+    const list = document.createElement('div')
+    renderList(list, [s('a', 1.5)], 'gasoleoA', { lat: 40.1, lon: -3 }, () => {})
+    expect(list.textContent).not.toContain('línea recta')
+  })
+
   it('stays open across re-renders once the reader opened it', () => {
     const first = renderBandLegend(15) as HTMLDetailsElement
     first.open = true

@@ -43,6 +43,8 @@ export const va: Record<string, string> = {
   'band.legend': 'En el teu radi de {radius} km:',
   'band.legend.about':
     'Cada preu es compara amb les gasolineres del teu radi: barata és en el terç més barat i cara, en el més car.',
+  'band.legend.straightLine':
+    'El radi i les distàncies es mesuren en línia recta, no per carretera.',
 
   'trip.start': 'Iniciar viatge',
   'trip.stop': 'Parar viatge',
@@ -66,6 +68,7 @@ export const va: Record<string, string> = {
   'trip.slot.more.fuel': 'A prop',
   'trip.slot.empty': 'Cap avís ara mateix',
 
+  'detail.distance.straightLine': 'en línia recta',
   'detail.directions': 'Com arribar-hi',
   'detail.directions.tripNote':
     "En obrir la navegació, Erregai deixa d'avisar-te de radars i gasolineres fins que tornes.",

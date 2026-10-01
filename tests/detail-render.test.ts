@@ -61,7 +61,9 @@ describe('station detail card', () => {
     expect(lead?.querySelector('.station-detail__lead-fuel')?.textContent).toBe('Gasóleo A')
     expect(lead?.querySelector('.station-detail__lead-price')?.textContent).toContain('1,400')
     expect(lead?.querySelector('.station-detail__band')?.textContent).toBe('Barata')
-    expect(lead?.querySelector('.station-detail__distance')?.textContent).toBe('1,0 km')
+    expect(lead?.querySelector('.station-detail__distance')?.textContent).toBe(
+      '1,0 km en línea recta',
+    )
   })
 
   it('says how far the price sits from the reference average, in céntimos', () => {

@@ -43,6 +43,8 @@ export const eu: Record<string, string> = {
   'band.legend': 'Zure {radius} km-ko erradioan:',
   'band.legend.about':
     'Prezio bakoitza zure erradioko gasolindegiekin alderatzen da: merkea heren merkeenean dago, eta garestia garestienean.',
+  'band.legend.straightLine':
+    'Erradioa eta distantziak lerro zuzenean neurtzen dira, ez errepidetik.',
 
   'trip.start': 'Hasi bidaia',
   'trip.stop': 'Gelditu bidaia',
@@ -66,6 +68,7 @@ export const eu: Record<string, string> = {
   'trip.slot.more.fuel': 'Gertu',
   'trip.slot.empty': 'Ez dago abisurik orain',
 
+  'detail.distance.straightLine': 'lerro zuzenean',
   'detail.directions': 'Nola iritsi',
   'detail.directions.tripNote':
     'Nabigazioa irekitzen duzunean, Erregaik ez zaitu radarrez eta gasolindegiez ohartaraziko itzultzen zaren arte.',
