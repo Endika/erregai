@@ -90,4 +90,58 @@ describe('renderSettings', () => {
     )
     expect(labels).toEqual(['300 m', '500 m', '800 m', '1 km', '1,5 km'])
   })
+
+  it('offers the radius as fixed choices within what one province load can fill', () => {
+    setLocale('es')
+    const el = document.createElement('div')
+    const partials: Record<string, unknown>[] = []
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
+    const radius = el.querySelector<HTMLSelectElement>('[data-field="radiusKm"]')!
+    expect(radius.tagName).toBe('SELECT')
+    expect([...radius.options].map((o) => o.textContent)).toEqual([
+      '5 km',
+      '10 km',
+      '15 km',
+      '25 km',
+      '50 km',
+    ])
+    expect(radius.value).toBe(String(DEFAULT_SETTINGS.radiusKm))
+    radius.value = '25'
+    radius.dispatchEvent(new Event('change'))
+    expect(partials).toEqual([{ radiusKm: 25 }])
+  })
+
+  it('shows a radius saved before the choices existed instead of silently picking another', () => {
+    setLocale('es')
+    const el = document.createElement('div')
+    renderSettings(el, { ...DEFAULT_SETTINGS, radiusKm: 500 }, () => {})
+    const radius = el.querySelector<HTMLSelectElement>('[data-field="radiusKm"]')!
+    expect(radius.value).toBe('500')
+    expect([...radius.options].map((o) => o.value)).toEqual(['5', '10', '15', '25', '50', '500'])
+  })
+
+  it('explains all three price colours in the legend', () => {
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    const items = [...el.querySelectorAll<HTMLElement>('.legend__item')]
+    expect(items.map((i) => i.dataset.band)).toEqual(['cheap', 'mid', 'expensive'])
+    expect(items.map((i) => i.textContent)).toEqual([
+      t('band.cheap'),
+      t('band.mid'),
+      t('band.expensive'),
+    ])
+  })
+
+  it('lays out every on/off setting as a labelled switch row', () => {
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    const toggles = [...el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')]
+    expect(toggles).toHaveLength(6)
+    for (const toggle of toggles) {
+      expect(toggle.getAttribute('role')).toBe('switch')
+      const label = toggle.closest('label')!
+      expect(label.classList.contains('settings-form__field--toggle')).toBe(true)
+      expect(label.querySelector('.settings-form__label')!.textContent).not.toBe('')
+    }
+  })
 })
