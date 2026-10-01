@@ -46,8 +46,10 @@ describe('formatKm', () => {
 })
 
 describe('formatDistance', () => {
-  it('shows whole metres below a kilometre', () => {
+  it('rounds to ten metres below a kilometre, so a live distance does not jitter', () => {
     expect(formatDistance(0.8504, 'es')).toBe('850 m')
+    expect(formatDistance(0.8546, 'es')).toBe('850 m')
+    expect(formatDistance(0.8556, 'es')).toBe('860 m')
     expect(formatDistance(0.3, 'eu')).toBe('300 m')
     expect(formatDistance(0.0004, 'en')).toBe('0 m')
   })
@@ -55,6 +57,7 @@ describe('formatDistance', () => {
   it('switches to kilometres from 1000 m, including what rounds up to it', () => {
     expect(formatDistance(1, 'es')).toBe('1,0 km')
     expect(formatDistance(0.9996, 'es')).toBe('1,0 km')
+    expect(formatDistance(0.996, 'es')).toBe('1,0 km')
     expect(formatDistance(1.5, 'ca')).toBe('1,5 km')
     expect(formatDistance(1.5, 'en')).toBe('1.5 km')
   })
