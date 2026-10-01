@@ -555,7 +555,9 @@ function render(): void {
             selectedId,
           )
         if (radarHits.length > 0)
-          listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP))
+          listWrap.appendChild(
+            renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP, state.pos),
+          )
       }
     } else if (introducing) {
       renderFirstRunIn(viewEl)
