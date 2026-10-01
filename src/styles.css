@@ -836,7 +836,8 @@ body {
 .detail-card__close {
   position: absolute;
   top: 0.5rem;
-  right: 0.5rem;
+  /* At the right edge of the list's column, not of a wide screen. */
+  right: max(0.5rem, calc((100% - 36rem) / 2));
   width: 2.75rem;
   height: 2.75rem;
   border: none;
@@ -860,12 +861,15 @@ body {
   cursor: pointer;
 }
 
+/* Its content shares the list's 36rem column, so on a wide screen the card
+   opens under the rows it came from rather than at the far left. */
 .station-detail {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem 1rem 1.5rem;
-  max-width: min(100%, 36rem);
+  max-width: min(100%, 38rem);
+  margin-inline: auto;
 }
 
 .station-detail__brand {
