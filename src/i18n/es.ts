@@ -93,8 +93,17 @@ export const es: Record<string, string> = {
   'about.data': 'Precios: Ministerio de Transición Ecológica',
   'about.map': 'Mapa: OpenStreetMap',
 
-  'error.location': 'No se pudo obtener la ubicación',
-  'error.network': 'Error de red',
+  'error.location.denied': 'Erregai no tiene permiso para usar tu ubicación',
+  'error.location.deniedHint':
+    'Permite el acceso a la ubicación para este sitio en los ajustes del navegador y vuelve a intentarlo.',
+  'error.location.unavailable': 'No se ha podido saber dónde estás',
+  'error.location.unavailableHint':
+    'Comprueba que la ubicación del dispositivo está activada y vuelve a intentarlo.',
+  'error.load.title': 'No se han podido cargar los precios',
+  'error.load.offline': 'No hay conexión a internet; vuelve a intentarlo cuando tengas cobertura.',
+  'error.load.server': 'El servicio de precios no responde; vuelve a intentarlo en unos minutos.',
+  'status.cached.offline': 'Precios de {age} · sin conexión',
+  'status.cached.failed': 'Precios de {age} · no se han podido actualizar',
   'error.refreshFailed': 'No se pudo actualizar; se muestran los últimos datos guardados',
   'error.storage':
     'El almacenamiento del dispositivo no está disponible; los datos no se guardarán para usarlos sin conexión',

@@ -116,6 +116,21 @@ describe('store.loadFor', () => {
     expect(store.state.stations.length).toBe(1) // stale data still visible
     expect(store.state.error).toBeUndefined() // failure with cache present is not the no-data error
     expect(store.state.refreshError).toBe('offline') // but it is still reported
+    expect(store.state.dataStoredAt).toBe(1000) // so the UI can say how old the prices are
+  })
+  it('refresh() after a first load that failed with no cache retries that province', async () => {
+    let online = false
+    const fake = async () => {
+      if (!online) throw new Error('offline')
+      return { fecha: 'f1', stations: [stn('1')] }
+    }
+    const store = new Store({ fetchProvince: fake, kv: memKv(), now: () => 1000 })
+    await store.loadFor({ lat: 40.4168, lon: -3.7038 })
+    expect(store.state.error).toBe('offline')
+    online = true
+    await store.refresh()
+    expect(store.state.error).toBeUndefined()
+    expect(store.state.stations.length).toBe(1)
   })
   it('a failed refresh() over cached data reports refreshError, and the next good refresh clears it', async () => {
     let online = true

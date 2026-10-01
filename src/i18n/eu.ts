@@ -93,8 +93,17 @@ export const eu: Record<string, string> = {
   'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',
   'about.map': 'Mapa: OpenStreetMap',
 
-  'error.location': 'Ezin izan da kokapena lortu',
-  'error.network': 'Sareko errorea',
+  'error.location.denied': 'Erregaik ez du zure kokapena erabiltzeko baimenik',
+  'error.location.deniedHint':
+    'Eman gune honi kokapena erabiltzeko baimena nabigatzailearen ezarpenetan, eta saiatu berriro.',
+  'error.location.unavailable': 'Ezin izan da jakin non zauden',
+  'error.location.unavailableHint':
+    'Egiaztatu gailuaren kokapena aktibatuta dagoela, eta saiatu berriro.',
+  'error.load.title': 'Ezin izan dira prezioak kargatu',
+  'error.load.offline': 'Ez dago Interneteko konexiorik; saiatu berriro estaldura duzunean.',
+  'error.load.server': 'Prezioen zerbitzuak ez du erantzuten; saiatu berriro minutu batzuk barru.',
+  'status.cached.offline': 'Prezioak: {age} · konexiorik gabe',
+  'status.cached.failed': 'Prezioak: {age} · ezin izan dira eguneratu',
   'error.refreshFailed': 'Ezin izan da eguneratu; gordetako azken datuak erakusten dira',
   'error.storage':
     'Gailuaren biltegiratzea ez dago erabilgarri; datuak ez dira gordeko konexiorik gabe erabiltzeko',

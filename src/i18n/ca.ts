@@ -93,8 +93,17 @@ export const ca: Record<string, string> = {
   'about.data': 'Preus: Ministeri de Transició Ecològica',
   'about.map': 'Mapa: OpenStreetMap',
 
-  'error.location': "No s'ha pogut obtenir la ubicació",
-  'error.network': 'Error de xarxa',
+  'error.location.denied': 'Erregai no té permís per fer servir la teva ubicació',
+  'error.location.deniedHint':
+    'Permet la ubicació per a aquest lloc a la configuració del navegador i torna-ho a provar.',
+  'error.location.unavailable': "No s'ha pogut saber on ets",
+  'error.location.unavailableHint':
+    'Comprova que la ubicació del dispositiu està activada i torna-ho a provar.',
+  'error.load.title': "No s'han pogut carregar els preus",
+  'error.load.offline': 'No hi ha connexió a internet; torna-ho a provar quan tinguis cobertura.',
+  'error.load.server': "El servei de preus no respon; torna-ho a provar d'aquí a uns minuts.",
+  'status.cached.offline': 'Preus de {age} · sense connexió',
+  'status.cached.failed': "Preus de {age} · no s'han pogut actualitzar",
   'error.refreshFailed': "No s'ha pogut actualitzar; es mostren les últimes dades desades",
   'error.storage':
     "L'emmagatzematge del dispositiu no està disponible; les dades no es desaran per a usar-les sense connexió",

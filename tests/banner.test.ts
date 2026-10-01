@@ -10,34 +10,54 @@ const state = (over: Partial<AppState>): AppState => ({
   ...over,
 })
 
+const HOUR = 3_600_000
+const ctx = { online: true, now: 10 * HOUR }
+
 describe('statusBanner', () => {
   it('shows nothing when every load went fine', () => {
-    expect(statusBanner(state({}))).toBeUndefined()
+    expect(statusBanner(state({}), ctx)).toBeUndefined()
   })
-  it('a refresh failure over cached data is a notice, not the no-data error', () => {
-    expect(statusBanner(state({ refreshError: 'offline' }))).toEqual({
-      text: t('error.refreshFailed'),
+  it('a refresh failure over cached data says how old the prices are', () => {
+    expect(statusBanner(state({ refreshError: 'x', dataStoredAt: 7 * HOUR }), ctx)).toEqual({
+      text: t('status.cached.failed').replace('{age}', 'hace 3 horas'),
       tone: 'notice',
     })
+    expect(
+      statusBanner(state({ refreshError: 'x', dataStoredAt: 7 * HOUR }), { ...ctx, online: false })
+        ?.text,
+    ).toBe(t('status.cached.offline').replace('{age}', 'hace 3 horas'))
   })
-  it('a failure that left no data is an error and wins over a refresh notice', () => {
-    expect(statusBanner(state({ error: 'boom', refreshError: 'offline' }))).toEqual({
-      text: `${t('error.network')}: boom`,
+  it('falls back to the plain refresh notice when the cache age is unknown', () => {
+    expect(statusBanner(state({ refreshError: 'x' }), ctx)?.text).toBe(t('error.refreshFailed'))
+  })
+  it('a failure that left no data is a human error, without the technical detail', () => {
+    const banner = statusBanner(state({ error: 'Failed to fetch', refreshError: 'x' }), ctx)
+    expect(banner).toEqual({
+      text: `${t('error.load.title')}. ${t('error.load.server')}`,
       tone: 'error',
     })
+    expect(banner?.text).not.toContain('Failed to fetch')
   })
   it('a location error wins over everything', () => {
-    expect(statusBanner(state({ error: 'boom' }), t('error.location'))).toEqual({
-      text: t('error.location'),
+    expect(statusBanner(state({ error: 'boom' }), { ...ctx, locationError: 'denied' })).toEqual({
+      text: `${t('error.location.denied')}. ${t('error.location.deniedHint')}`,
       tone: 'error',
     })
   })
+  it('errors the view already shows inline are not repeated in the banner', () => {
+    expect(
+      statusBanner(state({ error: 'boom' }), { ...ctx, locationError: 'denied', inline: true }),
+    ).toBeUndefined()
+    expect(
+      statusBanner(state({ error: 'boom', storageFailed: true }), { ...ctx, inline: true }),
+    ).toEqual({ text: t('error.storage'), tone: 'notice' })
+  })
   it('a storage failure is a notice, shown alongside a refresh notice', () => {
-    expect(statusBanner(state({ storageFailed: true }))).toEqual({
+    expect(statusBanner(state({ storageFailed: true }), ctx)).toEqual({
       text: t('error.storage'),
       tone: 'notice',
     })
-    expect(statusBanner(state({ refreshError: 'offline', storageFailed: true }))?.text).toBe(
+    expect(statusBanner(state({ refreshError: 'x', storageFailed: true }), ctx)?.text).toBe(
       `${t('error.refreshFailed')} · ${t('error.storage')}`,
     )
   })
