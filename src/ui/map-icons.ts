@@ -2,7 +2,7 @@ import type { ServiceKind } from '../core/services'
 
 // Stroke-only glyphs: at 14–18 px on a coloured disc a filled shape turns into a
 // blob, while a 2 px outline still reads as a pump, a camera or a fork.
-export type Glyph = 'fuel' | 'camera' | 'cutlery' | 'cup' | 'shop'
+export type Glyph = 'fuel' | 'camera' | 'cutlery' | 'cup' | 'shop' | 'frame'
 
 const PATHS: Record<Glyph, string> = {
   fuel: 'M7 21V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v16M5 21h12M9 7h4M15 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0v-5',
@@ -11,6 +11,7 @@ const PATHS: Record<Glyph, string> = {
   cutlery: 'M5.5 3v5a2.5 2.5 0 0 0 5 0V3M8 8v13M16.5 21V3c2 1.5 3 4 3 6.5 0 2-1.2 3.2-3 3.5',
   cup: 'M4 8h11v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8zM15 9h2.5a2.5 2.5 0 0 1 0 5H15M3 21h13',
   shop: 'M4 9h16v11H4V9zM3 9l2-5h14l2 5M9 20v-6h6v6',
+  frame: 'M12 2v4M12 18v4M2 12h4M18 12h4M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z',
 }
 
 const SERVICE_GLYPH_PRIORITY: readonly (readonly [ServiceKind, Glyph])[] = [

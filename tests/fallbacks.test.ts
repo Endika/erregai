@@ -25,6 +25,7 @@ vi.mock('../src/ui/map', () => ({
     renderServiceAreas(): void {}
     clearServiceAreas(): void {}
     invalidateSize(): void {}
+    fitRadius(): void {}
     focus(): void {}
     panTo(): void {}
   },

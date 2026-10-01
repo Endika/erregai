@@ -71,6 +71,9 @@ let gpsDenied = false
 let placeQuery = ''
 let places: Promise<readonly Place[]> | undefined
 let freshnessTimer: number | undefined
+// What the Map tab last framed: entering the tab or a new position reframes the
+// radius, while a mere data refresh keeps the user's own pan and zoom.
+let mapFramedFor: string | undefined
 
 const root: HTMLElement =
   document.getElementById('app') ??
@@ -138,6 +141,7 @@ root.addEventListener('click', (e) => {
 function showTab(tab: Tab): void {
   const previousTab = activeTab
   activeTab = tab
+  if (tab === 'map' && previousTab !== 'map') mapFramedFor = undefined
   render()
   if (activeTab !== previousTab) viewEl.scrollTop = 0
   if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
@@ -481,12 +485,18 @@ function render(): void {
         mapView.render(state.pos, sorted, state.settings.fuel, selectStation, {
           selectedId,
           reference,
+          radiusKm: state.settings.radiusKm,
         })
         if (radarHits.length > 0) mapView.renderRadars(radarHits.map((h) => h.radar))
         else mapView.clearRadars()
         if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map((h) => h.area))
         else mapView.clearServiceAreas()
         mapView.invalidateSize()
+        const frame = `${state.pos.lat},${state.pos.lon},${state.settings.radiusKm}`
+        if (frame !== mapFramedFor) {
+          mapFramedFor = frame
+          mapView.fitRadius(state.pos, state.settings.radiusKm)
+        }
         if (selectedStation) mapView.panTo(selectedStation.pos)
         if (sorted.length > 0)
           renderStationList(

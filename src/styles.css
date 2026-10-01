@@ -1543,6 +1543,42 @@ body {
   display: block;
 }
 
+/* The radius the list and the price bands are measured over. Dashed and in the
+   accent, so it reads as a boundary rather than as one more layer of data. */
+.map-radius {
+  stroke: var(--color-accent);
+  stroke-opacity: 0.85;
+}
+
+/* Map controls of our own: themed like the app's bars, not Leaflet's white, and
+   a full 44 px target where Leaflet's zoom buttons are 30. */
+.map-control {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-raised);
+  color: var(--color-fg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  font-family: inherit;
+}
+
+.map-control__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.map-control__button:hover {
+  background: var(--color-selected);
+}
+
 /* Fallback for a service area with no glyph-worthy amenity: still a square, so
    it never reads as one of the round pins. */
 .map-service-marker__box {
