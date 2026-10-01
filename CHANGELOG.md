@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.27.4](https://github.com/Endika/erregai/compare/v1.27.3...v1.27.4) (2026-10-01)
+
+
+### Bug Fixes
+
+* give the sort buttons their own 44px touch target ([09d8076](https://github.com/Endika/erregai/commit/09d80769dae454af7d64c116ffd8a71919f96807))
+* make the header refresh a quiet icon button ([8abbc78](https://github.com/Endika/erregai/commit/8abbc78d8a31fcb46e51c6e0e0271907698341a5))
+* open the station card in the list's column on wide screens ([ea33215](https://github.com/Endika/erregai/commit/ea33215b3079a4ef6a591626b9221bae3249bd8d))
+* say that distances are measured in a straight line ([546f292](https://github.com/Endika/erregai/commit/546f292c05d05bda0bf80f997dadff6cf30cc19a))
+* say which way each nearby radar lies ([96a63d2](https://github.com/Endika/erregai/commit/96a63d2be6a550ee405e9f040e4e03a2ecc353c0))
+* show the card's address and hours in readable case under icons ([5dda901](https://github.com/Endika/erregai/commit/5dda901c822e71b98c59435b3e7766f629781394))
+
 ## [1.27.3](https://github.com/Endika/erregai/compare/v1.27.2...v1.27.3) (2026-10-01)
 
 
