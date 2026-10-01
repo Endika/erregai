@@ -73,6 +73,9 @@ let gpsDenied = false
 let placeQuery = ''
 // Before the browser's own prompt, a first visit says what the location is for.
 let firstRun: 'checking' | 'intro' | 'search' | undefined
+// Asked on the intro screen and saved only once the user moves on from it, so a
+// reload before that still shows the intro instead of skipping it.
+let firstRunFuel = store.state.settings.fuel
 let places: Promise<readonly Place[]> | undefined
 let freshnessTimer: number | undefined
 // What the Map tab last framed: entering the tab or a new position reframes the
@@ -215,6 +218,8 @@ function renderCard(reference: PriceReference | undefined): void {
 
 function endFirstRun(): void {
   if (!firstRun) return
+  // Skipped while still checking the permission: the default fuel stands.
+  if (firstRun !== 'checking') store.setSettings({ fuel: firstRunFuel })
   firstRun = undefined
   markFirstRunDone()
 }
@@ -346,6 +351,10 @@ function renderFirstRunIn(container: HTMLElement): void {
     renderFirstRun({
       onLocate: locate,
       onPickTown: pickTownFirst,
+      fuel: firstRunFuel,
+      onFuel: (fuel) => {
+        firstRunFuel = fuel
+      },
       search:
         firstRun === 'search'
           ? {

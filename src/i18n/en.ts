@@ -166,6 +166,8 @@ export const en: Record<string, string> = {
   'firstRun.title': 'Fuel stations near you',
   'firstRun.body': 'Your location is only used on this device, to find the stations nearby.',
   'firstRun.pickTown': 'Choose a town',
+  'firstRun.fuel': 'Which fuel do you use?',
+  'firstRun.fuelOther': 'Other…',
   'radar.offline.offer': 'See radars (they work offline)',
   'trip.needsLocation':
     'A trip needs your live location: allow location access in your browser settings.',

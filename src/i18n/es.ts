@@ -169,6 +169,8 @@ export const es: Record<string, string> = {
   'firstRun.body':
     'Tu ubicación se usa solo en este dispositivo, para encontrar las gasolineras cercanas.',
   'firstRun.pickTown': 'Elegir municipio',
+  'firstRun.fuel': '¿Qué carburante usas?',
+  'firstRun.fuelOther': 'Otro…',
   'radar.offline.offer': 'Ver radares (funcionan sin conexión)',
   'trip.needsLocation':
     'El viaje necesita tu ubicación en tiempo real: permite el acceso a la ubicación en los ajustes del navegador.',
