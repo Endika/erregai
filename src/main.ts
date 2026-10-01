@@ -12,6 +12,7 @@ import { MapView } from './ui/map'
 import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
+import { createAnnouncer } from './ui/announcer'
 import {
   freshnessStamp,
   freshnessText,
@@ -104,6 +105,7 @@ const tripController = new TripController(
     if (activeTab === 'trip') render()
   },
   selectStation,
+  createAnnouncer(document.body),
 )
 
 root.addEventListener('click', (e) => {

@@ -33,6 +33,7 @@ import { renderSortBar } from './sortBar'
 import { renderRadarList } from './radar-list'
 import type { MapView } from './map'
 import type { Store } from '../app/store'
+import type { Announce } from './announcer'
 
 const DEFAULT_CORRIDOR_DEG = 45
 const ADJACENT_PROVINCES = 2
@@ -44,9 +45,8 @@ type GpsStatus = 'waiting' | 'active' | 'lost'
 // 'heading': fixes are arriving but the car has not moved far enough to tell where it is going.
 type GpsLine = GpsStatus | 'heading'
 
-// The banner shows the distance from the latest fix, but screen readers get
-// the text as it was when the alert fired: every fix re-renders the view, and
-// a live region whose text changed each time would keep re-announcing.
+// The banner shows the distance from the latest fix, but screen readers hear
+// the text once, as it was when the alert fired.
 interface Alert {
   id: string
   target: LatLon
@@ -88,6 +88,7 @@ export class TripController {
     private map: MapView,
     private onChange: () => void,
     private onSelect: (station: Station) => void,
+    private announce: Announce = () => {},
   ) {}
 
   get isActive(): boolean {
@@ -194,6 +195,7 @@ export class TripController {
         (d) => `${priceLabel} · ${formatKm(d)}`,
         km,
       )
+      this.announce(this.banner.spoken, 'polite')
     }
 
     if (settings.radarAlertsEnabled) {
@@ -224,6 +226,7 @@ export class TripController {
           distanceLabel(t('radar.alert.banner')),
           nearest.distanceKm,
         )
+        this.announce(this.radarBanner.spoken, 'assertive')
         notify(t('radar.alert.title'), body)
         if (settings.radarSound) playRadarBeep({ volume: settings.alertVolume })
         if (settings.alertVibrate) vibrateRadar()
@@ -280,6 +283,7 @@ export class TripController {
           distanceLabel(t('fuel.alert.banner').replace('{brand}', nearest.station.brand)),
           nearest.distanceKm,
         )
+        this.announce(this.fuelBanner.spoken, 'polite')
         notify(
           t('fuel.alert.title'),
           t('fuel.alert.body').replace('{brand}', nearest.station.brand),
@@ -296,28 +300,28 @@ export class TripController {
     const wrapper = document.createElement('div')
     wrapper.className = 'trip-view'
 
-    if (this.active) {
-      wrapper.appendChild(this.renderGpsStatus())
-    } else {
-      wrapper.appendChild(this.renderIntro())
-    }
-
     const toggle = document.createElement('button')
     toggle.type = 'button'
     toggle.className = 'trip-view__toggle'
+    toggle.classList.toggle('trip-view__toggle--stop', this.active)
     toggle.textContent = this.active ? t('trip.stop') : t('trip.start')
     toggle.addEventListener('click', () => {
       void (this.active ? this.stop() : this.start())
     })
-    wrapper.appendChild(toggle)
 
-    const pos = this.tripState.lastPos
-    if (this.radarBanner)
-      wrapper.appendChild(renderBanner(this.radarBanner, pos, 'radar', 'assertive'))
-    if (this.banner) wrapper.appendChild(renderBanner(this.banner, pos, 'cheapest', 'polite'))
-    if (this.fuelBanner) wrapper.appendChild(renderBanner(this.fuelBanner, pos, 'fuel', 'polite'))
+    // Alerts sit right under the map, the radar first, so a glance finds them
+    // without scrolling; stopping is rare and can wait one row lower.
+    const alerts = this.renderAlerts()
+    if (alerts) wrapper.appendChild(alerts)
 
-    if (this.active) {
+    if (!this.active) {
+      wrapper.append(this.renderIntro(), toggle)
+    } else {
+      const controls = document.createElement('div')
+      controls.className = 'trip-view__controls'
+      controls.append(this.renderGpsStatus(), toggle)
+      wrapper.appendChild(controls)
+
       const { tripSort, fuel } = this.store.state.settings
       wrapper.appendChild(
         renderSortBar(tripSort, (key) => this.store.setSettings({ tripSort: key }), {
@@ -342,6 +346,20 @@ export class TripController {
     this.banner = undefined
     this.tripState = { ...this.tripState, bestSeenPrice: undefined }
     this.store.setSettings({ fuel })
+  }
+
+  private renderAlerts(): HTMLElement | undefined {
+    const pos = this.tripState.lastPos
+    const banners = [
+      this.radarBanner && renderBanner(this.radarBanner, pos, 'radar'),
+      this.banner && renderBanner(this.banner, pos, 'cheapest'),
+      this.fuelBanner && renderBanner(this.fuelBanner, pos, 'fuel'),
+    ].filter((b): b is HTMLElement => b !== undefined)
+    if (banners.length === 0) return undefined
+    const alerts = document.createElement('div')
+    alerts.className = 'trip-view__alerts'
+    alerts.append(...banners)
+    return alerts
   }
 
   private renderAhead(update: TripUpdate | undefined, selectedId?: string): HTMLElement {
@@ -443,23 +461,15 @@ function renderBanner(
   alert: Alert,
   pos: LatLon | undefined,
   kind: 'radar' | 'cheapest' | 'fuel',
-  politeness: 'assertive' | 'polite',
 ): HTMLElement {
   const banner = document.createElement('div')
   banner.className = `trip-view__banner trip-view__banner--${kind}`
-  banner.setAttribute('aria-live', politeness)
-  banner.setAttribute('aria-atomic', 'true')
   const key = document.createElement('span')
   key.className = 'trip-view__banner-key'
-  key.setAttribute('aria-hidden', 'true')
   key.textContent = alert.key(pos ? haversineKm(pos, alert.target) : 0)
   const label = document.createElement('span')
   label.className = 'trip-view__banner-label'
-  label.setAttribute('aria-hidden', 'true')
   label.textContent = alert.label
-  const spoken = document.createElement('span')
-  spoken.className = 'visually-hidden'
-  spoken.textContent = alert.spoken
-  banner.append(key, label, spoken)
+  banner.append(key, label)
   return banner
 }

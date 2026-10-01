@@ -685,6 +685,27 @@ body {
   cursor: pointer;
 }
 
+/* Mid-trip the alerts are what matter; Stop steps back to an outline so no
+   filled block competes with them. */
+.trip-view__toggle--stop {
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.trip-view__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.trip-view__alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .trip-view__banner {
   display: flex;
   flex-direction: column;
@@ -725,14 +746,31 @@ body {
   color: var(--map-marker-radar-fg);
 }
 
+.trip-view__banner--cheapest,
+.trip-view__banner--fuel {
+  padding: 0.5rem 0.75rem;
+}
+
+.trip-view__banner--cheapest .trip-view__banner-key,
+.trip-view__banner--fuel .trip-view__banner-key {
+  font-size: 1.125rem;
+}
+
 .trip-view__banner--cheapest {
   background: var(--band-cheap-bg);
   color: var(--band-cheap-fg);
 }
 
+/* A neutral surface, not the accent fill of the Stop button: it informs, it
+   cannot be pressed. Green stays for cheap prices, violet for radars. */
 .trip-view__banner--fuel {
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-raised);
+  color: var(--color-fg);
+}
+
+.trip-view__banner--fuel .trip-view__banner-label {
+  color: var(--color-muted);
 }
 
 .trip-view__list {
