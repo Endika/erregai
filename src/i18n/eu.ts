@@ -7,6 +7,8 @@ export const eu: Record<string, string> = {
   'fuel.glp': 'GLP',
   'fuel.gnc': 'Gas Natural Konprimitua',
   'fuel.gnl': 'Gas Natural Likidotua',
+  'fuel.group.common': 'Ohikoenak',
+  'fuel.group.other': 'Besteak',
 
   'app.title': 'Erregai',
   'app.updated': 'Eguneratua',
@@ -46,7 +48,7 @@ export const eu: Record<string, string> = {
   'trip.gps.heading': 'Norabidearen zain…',
   'trip.gps.lost': 'Ez dago GPS seinalerik',
   'trip.mediaSession.title': 'Bidaia modua',
-  'trip.cheapestAhead': 'Merkeena aurrean',
+  'trip.cheapestAhead': '{fuel} merkeena aurrean',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
 
   'detail.directions': 'Nola iritsi',

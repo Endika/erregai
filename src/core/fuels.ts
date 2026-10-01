@@ -19,3 +19,11 @@ export const FUELS: readonly Fuel[] = [
 ] as const
 
 export const DEFAULT_FUEL: FuelId = 'gasoleoA'
+
+// What most drivers in Spain fill up with; the quick picker lists these first.
+export const COMMON_FUELS: readonly FuelId[] = [
+  'gasolina95',
+  'gasoleoA',
+  'gasolina98',
+  'gasoleoPremium',
+] as const

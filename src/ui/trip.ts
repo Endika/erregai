@@ -1,4 +1,5 @@
 import type { Station } from '../core/station'
+import type { FuelId } from '../core/fuels'
 import type { LatLon } from '../core/geo'
 import { haversineKm } from '../core/geo'
 import {
@@ -184,11 +185,12 @@ export class TripController {
       const price = priceOf(update.alert, cfg.fuel)
       const km = haversineKm(pos, update.alert.pos)
       const priceLabel = price !== undefined ? formatPrice(price) : '—'
-      notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${formatKm(km)}`)
+      const title = t('trip.cheapestAhead').replace('{fuel}', t(`fuel.${cfg.fuel}`))
+      notify(title, `${update.alert.brand} · ${priceLabel} · ${formatKm(km)}`)
       this.banner = makeAlert(
         update.alert.id,
         update.alert.pos,
-        `${t('trip.cheapestAhead')}: ${update.alert.brand}`,
+        `${title}: ${update.alert.brand}`,
         (d) => `${priceLabel} · ${formatKm(d)}`,
         km,
       )
@@ -316,8 +318,13 @@ export class TripController {
     if (this.fuelBanner) wrapper.appendChild(renderBanner(this.fuelBanner, pos, 'fuel', 'polite'))
 
     if (this.active) {
-      const sort = this.store.state.settings.tripSort
-      wrapper.appendChild(renderSortBar(sort, (key) => this.store.setSettings({ tripSort: key })))
+      const { tripSort, fuel } = this.store.state.settings
+      wrapper.appendChild(
+        renderSortBar(tripSort, (key) => this.store.setSettings({ tripSort: key }), {
+          current: fuel,
+          onChange: (next) => this.changeFuel(next),
+        }),
+      )
       wrapper.appendChild(this.renderAhead(update, selectedId))
       if (this.store.state.settings.radarAlertsEnabled) {
         if (this.radarHits.length > 0)
@@ -327,6 +334,14 @@ export class TripController {
     }
 
     container.replaceChildren(wrapper)
+  }
+
+  // The cheapest-ahead banner and the best price seen so far belong to the old
+  // fuel: keeping either would show, or measure against, the wrong price.
+  private changeFuel(fuel: FuelId): void {
+    this.banner = undefined
+    this.tripState = { ...this.tripState, bestSeenPrice: undefined }
+    this.store.setSettings({ fuel })
   }
 
   private renderAhead(update: TripUpdate | undefined, selectedId?: string): HTMLElement {

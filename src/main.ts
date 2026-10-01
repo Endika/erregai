@@ -221,7 +221,12 @@ function renderStationList(
   sort: SortKey,
   selectedId?: string,
 ): void {
-  container.appendChild(renderSortBar(sort, (key) => store.setSettings({ sort: key })))
+  container.appendChild(
+    renderSortBar(sort, (key) => store.setSettings({ sort: key }), {
+      current: fuel,
+      onChange: (next) => store.setSettings({ fuel: next }),
+    }),
+  )
   const listContainer = document.createElement('div')
   container.appendChild(listContainer)
   renderList(listContainer, sorted, fuel, origin, selectStation, selectedId)
