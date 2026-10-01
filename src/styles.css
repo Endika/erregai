@@ -1035,12 +1035,33 @@ body {
 }
 
 /* One alert and the collapsed line under it always fit: the slot keeps this
-   height with or without alerts, so the rows below it never jump. */
+   height with or without alerts, so the rows below it never jump. The key may
+   take two lines (a station's name, then its price and distance). */
 .trip-view__slot {
   display: flex;
   flex: none;
   flex-direction: column;
-  height: 6.5rem;
+  height: 10rem;
+  container-type: inline-size;
+}
+
+.trip-view__slot > .trip-view__alerts {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* A new alert, or the radar after the one just passed, settles in place
+   instead of snapping; the distance itself just updates. */
+@media (prefers-reduced-motion: no-preference) {
+  .trip-view__slot--enter > * {
+    animation: trip-slot-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes trip-slot-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .trip-view__slot-empty {
@@ -1073,10 +1094,12 @@ body {
 
 .trip-view__banner {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
+  justify-content: center;
   gap: 0.125rem;
   min-width: 0;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 1rem;
   border-radius: 0.5rem;
 }
 
@@ -1092,24 +1115,41 @@ body {
   border: 0;
 }
 
-/* Each line of the slot holds one line: wrapping would outgrow its height. */
-.trip-view__banner-key,
+/* Read at a glance from the mount: what and how far. A station's name takes
+   the first line on its own when it does not fit beside the figures. */
+.trip-view__banner-key {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.25em;
+  /* 2.5rem, short of what keeps "1,149 · 13,8 km" on one line in a narrow phone. */
+  font-size: min(2.5rem, 10cqi);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
 .trip-view__banner-label {
+  overflow: hidden;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A long station name gives way; price and distance never do. */
+.trip-view__banner-brand,
+.trip-view__more-brand {
+  flex: 0 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.trip-view__banner-key {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-.trip-view__banner-label {
-  font-size: 0.9375rem;
-  font-weight: 600;
+.trip-view__key-rest {
+  flex: none;
+  white-space: nowrap;
 }
 
 /* Violet like the radar pins on the map: a hazard must never read as the
@@ -1150,13 +1190,15 @@ body {
 }
 
 .trip-view__more {
+  display: flex;
+  column-gap: 0.3em;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .trip-view__more-tag {
+  flex: none;
   color: var(--color-muted);
 }
 
@@ -1318,8 +1360,8 @@ body {
 .trip-view__radar-notice {
   margin: 0;
   color: var(--color-muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
+  line-height: 1.45;
 }
 
 .settings-form {

@@ -36,7 +36,14 @@ import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
 import { formatDate, formatKm, formatPrice, priceWithBand } from '../i18n/format'
 import { renderSortBar } from './sortBar'
-import { composeSlot, fuelKey, radarKey, renderSlotArea, type SlotAlert } from './alert-slot'
+import {
+  composeSlot,
+  fuelKey,
+  radarKey,
+  renderSlotArea,
+  slotId,
+  type SlotAlert,
+} from './alert-slot'
 import { renderRadarList } from './radar-list'
 import type { MapView } from './map'
 import type { Store } from '../app/store'
@@ -90,6 +97,8 @@ export class TripController {
   private tripFuel: FuelId | undefined
   private releaseWakeLock: (() => void) | undefined
   private gps: GpsStatus = 'waiting'
+  // The alert last drawn in the slot, so only a different one fades in.
+  private shownSlotId = ''
 
   constructor(
     private store: Store,
@@ -166,6 +175,7 @@ export class TripController {
     this.alertedFuelIds = new Set<string>()
     this.announcedFuelIds = new Set<string>()
     this.tripFuel = undefined
+    this.shownSlotId = ''
   }
 
   // While a trip runs the map shows only what is ahead, like the list below it.
@@ -350,7 +360,10 @@ export class TripController {
       wrapper.classList.add('trip-view--active')
       // The slot is reserved right under the map so a glance finds it without
       // scrolling, and keeps its height so the rows under it stay put.
-      wrapper.appendChild(renderSlotArea(composeSlot(this.liveAlerts())))
+      const slot = composeSlot(this.liveAlerts())
+      const id = slotId(slot)
+      wrapper.appendChild(renderSlotArea(slot, { entering: id !== this.shownSlotId }))
+      this.shownSlotId = id
       wrapper.appendChild(this.renderAhead(update, selectedId, reference))
       if (this.store.state.settings.radarAlertsEnabled) {
         if (this.radarHits.length > 0)
@@ -377,6 +390,7 @@ export class TripController {
     if (this.radarBanner) {
       alerts.push({
         kind: 'radar',
+        id: this.radarBanner.id,
         key: radarKey(haversineKm(pos, this.radarBanner.target)),
         label: t('radar.alert.body').replace('{via}', this.radarBanner.via),
       })
@@ -395,6 +409,8 @@ export class TripController {
     const fuel = this.store.state.settings.fuel
     return {
       kind: 'cheapest',
+      id: station.id,
+      brand: station.brand,
       key: fuelKey(station.brand, priceOf(station, fuel)!, haversineKm(pos, station.pos)),
       label: t('trip.cheapestAhead').replace('{fuel}', t(`fuel.${fuel}`)),
     }
@@ -404,6 +420,8 @@ export class TripController {
     const fuel = this.store.state.settings.fuel
     return {
       kind: 'fuel',
+      id: station.id,
+      brand: station.brand,
       key: fuelKey(station.brand, priceOf(station, fuel)!, haversineKm(pos, station.pos)),
       label: t('fuel.alert.title'),
     }
