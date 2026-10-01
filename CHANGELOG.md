@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.1](https://github.com/Endika/erregai/compare/v1.23.0...v1.23.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* band every price against the stations within your radius ([3c5dc37](https://github.com/Endika/erregai/commit/3c5dc3734ca983c86b26bf5a7582a2fb58271e53))
+* lay list rows out in two lines so the brand is never truncated ([6489adb](https://github.com/Endika/erregai/commit/6489adb443e6bdc10f5855092e3b2b66dec06ae4))
+
 ## [1.23.0](https://github.com/Endika/erregai/compare/v1.22.4...v1.23.0) (2026-10-01)
 
 
