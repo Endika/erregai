@@ -108,3 +108,37 @@ export function averageDelta(cents: number, locale: Locale = getLocale()): strin
     `${sign}${formatNumber(Math.abs(cents), locale)}`,
   )
 }
+
+// The row's short form: "−20 cént.", "+5 cént.", "en la media".
+export function rowAverageDelta(cents: number, locale: Locale = getLocale()): string {
+  if (cents === 0) return t('list.atAverage', locale)
+  const sign = cents < 0 ? '\u2212' : '+'
+  return t('list.vsAverage', locale).replace(
+    '{delta}',
+    `${sign}${formatNumber(Math.abs(cents), locale)}`,
+  )
+}
+
+// Spelled out for a screen reader, which would read "cént." as a stray word.
+// Every app locale has one plural form at exactly 1 and another for the rest.
+export function spokenAverageDelta(cents: number, locale: Locale = getLocale()): string {
+  if (cents === 0) return t('list.atAverage', locale)
+  const side = cents < 0 ? 'below' : 'above'
+  const n = Math.abs(cents)
+  return t(`price.${side}.${n === 1 ? 'one' : 'other'}`, locale).replace(
+    '{n}',
+    formatNumber(n, locale),
+  )
+}
+
+export function priceWithBandAndDelta(
+  price: number,
+  band: PriceBand,
+  cents: number,
+  locale: Locale = getLocale(),
+): string {
+  return t('price.withBandDelta', locale)
+    .replace('{price}', formatPrice(price, locale))
+    .replace('{band}', t(`band.${band}`, locale).toLocaleLowerCase(intlLocale(locale)))
+    .replace('{delta}', spokenAverageDelta(cents, locale))
+}

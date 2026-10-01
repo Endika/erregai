@@ -33,6 +33,13 @@ export const va: Record<string, string> = {
   'band.mid': 'Mitjana',
   'band.expensive': 'Cara',
   'price.withBand': '{price} €/l, {band}',
+  'price.withBandDelta': '{price} €/l, {band}, {delta}',
+  'list.vsAverage': '{delta} cènt.',
+  'list.atAverage': 'en la mitjana',
+  'price.below.one': '{n} cèntim per davall de la mitjana',
+  'price.below.other': '{n} cèntims per davall de la mitjana',
+  'price.above.one': '{n} cèntim per damunt de la mitjana',
+  'price.above.other': '{n} cèntims per damunt de la mitjana',
   'band.legend': 'En el teu radi de {radius} km:',
   'band.legend.about':
     'Cada preu es compara amb les gasolineres del teu radi: barata és en el terç més barat i cara, en el més car.',

@@ -33,6 +33,13 @@ export const gl: Record<string, string> = {
   'band.mid': 'Media',
   'band.expensive': 'Cara',
   'price.withBand': '{price} €/l, {band}',
+  'price.withBandDelta': '{price} €/l, {band}, {delta}',
+  'list.vsAverage': '{delta} cént.',
+  'list.atAverage': 'na media',
+  'price.below.one': '{n} céntimo por debaixo da media',
+  'price.below.other': '{n} céntimos por debaixo da media',
+  'price.above.one': '{n} céntimo por riba da media',
+  'price.above.other': '{n} céntimos por riba da media',
   'band.legend': 'No teu radio de {radius} km:',
   'band.legend.about':
     'Cada prezo compárase coas gasolineiras do teu radio: barata está no terzo máis barato e cara, no máis caro.',
