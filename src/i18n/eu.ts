@@ -61,6 +61,7 @@ export const eu: Record<string, string> = {
   'trip.slot.radar': 'Radarra',
   'trip.slot.more.cheapest': 'Merkeena',
   'trip.slot.more.fuel': 'Gertu',
+  'trip.slot.empty': 'Ez dago abisurik orain',
 
   'detail.directions': 'Nola iritsi',
   'detail.otherFuels': 'Beste erregaiak ({n})',

@@ -84,6 +84,14 @@ function makeController(stations: Station[] = [], spoken: Spoken[] = []): TripCo
   )
 }
 
+// Alerts only reach the slot while a trip runs.
+async function running(stations: Station[] = [], spoken: Spoken[] = []): Promise<TripController> {
+  installGeolocation()
+  const c = makeController(stations, spoken)
+  await c.start()
+  return c
+}
+
 const fix = (c: TripController, pos: LatLon): Promise<void> =>
   (c as unknown as { onFix(p: LatLon): Promise<void> }).onFix(pos)
 
@@ -115,7 +123,7 @@ describe('trip radar banner', () => {
     draw(c).querySelector<HTMLElement>('.trip-view__banner--radar')
 
   it('renders as a hazard, not as a fuel banner, with distance and road', async () => {
-    const c = makeController()
+    const c = await running()
     await fix(c, behind)
     await fix(c, near)
     const banner = radarBanner(c)!
@@ -128,7 +136,7 @@ describe('trip radar banner', () => {
 
   it('tracks the distance on every fix but announces the alert once, assertively', async () => {
     const spoken: Spoken[] = []
-    const c = makeController([], spoken)
+    const c = await running([], spoken)
     await fix(c, behind)
     await fix(c, near)
     draw(c)
@@ -144,7 +152,7 @@ describe('trip radar banner', () => {
   })
 
   it('leaves announcing to the persistent regions, not to the re-rendered banner', async () => {
-    const c = makeController()
+    const c = await running()
     await fix(c, behind)
     await fix(c, near)
     const el = draw(c)
@@ -152,7 +160,7 @@ describe('trip radar banner', () => {
   })
 
   it('goes away once the radar has been passed', async () => {
-    const c = makeController()
+    const c = await running()
     await fix(c, behind)
     await fix(c, near)
     await fix(c, passed)
@@ -169,7 +177,7 @@ describe('trip fuel banners', () => {
 
   it('cheapest-ahead banner reads brand, price and distance and is announced politely once', async () => {
     const spoken: Spoken[] = []
-    const c = makeController([CHEAP, PRICEY], spoken)
+    const c = await running([CHEAP, PRICEY], spoken)
     await fix(c, behind) // first fix: no heading yet, so nothing alerts
     await fix(c, near) // heading north: CHEAP is the cheapest ahead
     const latest = { lat: 40.025, lon: 0 } // the distance follows the latest fix, not the one that alerted
@@ -190,7 +198,7 @@ describe('trip fuel banners', () => {
 
   it('collapses the nearby station into one line under the cheapest, announced politely once', async () => {
     const spoken: Spoken[] = []
-    const c = makeController([CHEAP, PRICEY], spoken)
+    const c = await running([CHEAP, PRICEY], spoken)
     c['store'].setSettings({ fuelAlertMode: 'any' })
     await fix(c, behind)
     await fix(c, near)
@@ -221,7 +229,7 @@ describe('trip fuel alerts expire', () => {
   beforeEach(() => setLocale('es'))
 
   it('drops the cheapest and nearby banners once the station is behind', async () => {
-    const c = makeController([CHEAP, PRICEY])
+    const c = await running([CHEAP, PRICEY])
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     expect(draw(c).querySelector('.trip-view__banner--cheapest')).not.toBeNull()
@@ -252,7 +260,7 @@ describe('trip fuel alerts expire', () => {
   it('alerts again when a cheaper station than the one passed comes into range', async () => {
     const spoken: Spoken[] = []
     const BETTER = st('better', 40.2, 0.9) // beyond the 15 km radius at the start
-    const c = makeController([CHEAP, BETTER], spoken)
+    const c = await running([CHEAP, BETTER], spoken)
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     await fix(c, { lat: 40.07, lon: 0 })
@@ -262,7 +270,7 @@ describe('trip fuel alerts expire', () => {
 
   it('shows a station that comes back ahead without announcing it again', async () => {
     const spoken: Spoken[] = []
-    const c = makeController([CHEAP], spoken)
+    const c = await running([CHEAP], spoken)
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     await fix(c, { lat: 40.036, lon: 0 }) // just past it
@@ -274,7 +282,7 @@ describe('trip fuel alerts expire', () => {
   })
 
   it('drops the nearby line once that station is behind', async () => {
-    const c = makeController([CHEAP, PRICEY])
+    const c = await running([CHEAP, PRICEY])
     c['store'].setSettings({ fuelAlertMode: 'any' })
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
@@ -289,7 +297,7 @@ describe('trip fuel alerts expire', () => {
 describe('trip fuel name', () => {
   it('names the fuel in the cheapest-ahead banner', async () => {
     setLocale('es')
-    const c = makeController([CHEAP, PRICEY])
+    const c = await running([CHEAP, PRICEY])
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
     const label = draw(c).querySelector('.trip-view__banner--cheapest .trip-view__banner-label')!
@@ -326,18 +334,47 @@ describe('trip fuel name', () => {
 })
 
 describe('trip layout', () => {
-  it('puts the alerts above the stop control while a trip runs', async () => {
+  // Where Stop sits among the view's children, and what sits around it.
+  const stopPlace = (view: Element) => {
+    const dock = view.querySelector('.trip-view__dock')!
+    return {
+      last: view.lastElementChild === dock,
+      stop: dock.querySelector('.trip-view__toggle')!.textContent,
+      gps: dock.querySelector('.trip-view__gps') !== null,
+    }
+  }
+
+  it('docks Stop with the GPS line as the last row, wherever the alerts come and go', async () => {
     installGeolocation()
     const c = makeController([CHEAP, PRICEY])
     await c.start()
+    const waiting = draw(c).querySelector('.trip-view')!
     await fix(c, { lat: 40.0, lon: 0 })
     await fix(c, { lat: 40.02, lon: 0 })
-    const view = draw(c).querySelector('.trip-view')!
-    expect(view.firstElementChild!.classList.contains('trip-view__alerts')).toBe(true)
-    expect(view.querySelector('.trip-view__alerts + .trip-view__controls')).not.toBeNull()
-    expect(view.querySelector('.trip-view__controls .trip-view__toggle')!.textContent).toBe(
-      t('trip.stop'),
-    )
+    const alerting = draw(c).querySelector('.trip-view')!
+    expect(alerting.querySelector('.trip-view__banner')).not.toBeNull()
+    await fix(c, { lat: 40.04, lon: 0 }) // both stations behind: the alert is gone
+    const cleared = draw(c).querySelector('.trip-view')!
+    expect(cleared.querySelector('.trip-view__banner')).toBeNull()
+
+    for (const view of [waiting, alerting, cleared]) {
+      expect(view.querySelectorAll('.trip-view__dock .trip-view__toggle')).toHaveLength(1)
+      expect(stopPlace(view)).toEqual({ last: true, stop: t('trip.stop'), gps: true })
+      // The slot is the first row in every state, so nothing above Stop changes kind.
+      expect(view.firstElementChild!.classList.contains('trip-view__slot')).toBe(true)
+    }
+    c.stop()
+  })
+
+  it('reserves the alert slot while a trip runs, with a calm line when nothing alerts', async () => {
+    installGeolocation()
+    const c = makeController()
+    expect(draw(c).querySelector('.trip-view__slot')).toBeNull()
+    await c.start()
+    const slot = draw(c).querySelector('.trip-view__slot')!
+    expect(slot).not.toBeNull()
+    expect(slot.querySelector('.trip-view__banner')).toBeNull()
+    expect(slot.querySelector('.trip-view__slot-empty')!.textContent).toBe(t('trip.slot.empty'))
     c.stop()
   })
 

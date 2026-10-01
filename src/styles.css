@@ -980,22 +980,86 @@ body {
 /* Mid-trip the alerts are what matter; Stop steps back to an outline so no
    filled block competes with them. */
 .trip-view__toggle--stop {
-  flex-shrink: 0;
   background: transparent;
   color: var(--color-accent);
 }
 
-.trip-view__controls {
+/* Mid-trip the view fills the scroller under the map, so the dock rests at
+   its foot even when little is listed, and stays there once it scrolls. */
+.app-main:has(> .trip-readout > .trip-view--active) {
   display: flex;
+  flex-direction: column;
+}
+
+.app-main:has(> .trip-readout > .trip-view--active) > .trip-map {
+  flex: none;
+}
+
+.trip-readout:has(> .trip-view--active) {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.trip-view--active {
+  flex: 1 0 auto;
+  padding-bottom: 0;
+}
+
+/* Leaflet stacks its panes up to z-index 1000; kept in their own context they
+   can never paint over the dock. */
+.trip-map {
+  isolation: isolate;
+}
+
+/* Stop sits just above the tab bar whatever comes and goes above it. The GPS
+   line grows upwards if it wraps, so Stop's own position never changes. */
+.trip-view__dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  margin-inline: -1rem;
+  padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) 0.75rem
+    max(1rem, env(safe-area-inset-left, 0px));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-raised);
+}
+
+.trip-view__dock .trip-view__toggle {
+  align-self: stretch;
+  min-height: 3.5rem;
+}
+
+/* One alert and the collapsed line under it always fit: the slot keeps this
+   height with or without alerts, so the rows below it never jump. */
+.trip-view__slot {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  height: 6.5rem;
+}
+
+.trip-view__slot-empty {
+  display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: center;
+  margin: 0;
+  border-radius: 0.5rem;
+  background: var(--color-bg-raised);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
 }
 
 .trip-view__alerts {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
+  min-width: 0;
 }
 
 /* The idle trip view already pads its column: the bar sits in it as a row,
@@ -1011,9 +1075,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
+  min-width: 0;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  overflow-wrap: break-word;
 }
 
 .visually-hidden {
@@ -1026,6 +1090,14 @@ body {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* Each line of the slot holds one line: wrapping would outgrow its height. */
+.trip-view__banner-key,
+.trip-view__banner-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trip-view__banner-key {
@@ -1068,8 +1140,7 @@ body {
    the alert's colour without a second banner. */
 .trip-view__alerts-more {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: 1rem;
   margin: 0;
   padding: 0 0.25rem;
   color: var(--color-fg);
@@ -1080,7 +1151,9 @@ body {
 
 .trip-view__more {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trip-view__more-tag {
