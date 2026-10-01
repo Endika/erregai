@@ -989,6 +989,23 @@ body {
   overflow-wrap: break-word;
 }
 
+/* The pin and the clock hang in the margin, so a wrapped address lines up
+   under its own first word. */
+.station-detail__fact {
+  position: relative;
+  padding-inline-start: 1.5rem;
+}
+
+.station-detail__fact > .map-glyph {
+  position: absolute;
+  top: 0.15em;
+  left: 0;
+}
+
+.station-detail__fact + .station-detail__fact {
+  margin-top: 0.25rem;
+}
+
 .station-detail__others {
   margin-top: 1rem;
   border-top: 1px solid var(--color-border);

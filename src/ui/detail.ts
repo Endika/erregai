@@ -5,6 +5,8 @@ import { centsFromAverage, priceOf, stationBand, type PriceReference } from '../
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
 import { averageDelta, formatKm, formatPrice } from '../i18n/format'
+import { readableAddress, readableSchedule } from '../core/address'
+import { glyphSvg, type Glyph } from './map-icons'
 
 // Deep-link that respects the device's default maps app: Apple Maps on iOS
 // (which does not handle geo:), the OS chooser via geo: elsewhere (Android
@@ -116,6 +118,18 @@ function priceList(station: Station, fuels: readonly Fuel[]): HTMLElement {
   return list
 }
 
+// The icon names the line for the eye; the label stays for screen readers.
+function factLine(className: string, glyph: Glyph, labelKey: string, text: string): HTMLElement {
+  const line = document.createElement('p')
+  line.className = `station-detail__fact ${className}`
+  const label = document.createElement('span')
+  label.className = 'visually-hidden'
+  label.textContent = `${t(labelKey)}: `
+  line.innerHTML = glyphSvg(glyph, 16)
+  line.append(label, text)
+  return line
+}
+
 // Without a context (no fuel chosen yet) there is nothing to lead with, so the
 // priced fuels are listed openly instead of folded.
 export function renderDetail(
@@ -132,15 +146,21 @@ export function renderDetail(
   heading.textContent = station.brand
   wrapper.appendChild(heading)
 
-  const address = document.createElement('p')
-  address.className = 'station-detail__address'
-  address.textContent = `${t('detail.address')}: ${station.address}, ${station.town}`
+  const address = factLine(
+    'station-detail__address',
+    'pin',
+    'detail.address',
+    `${readableAddress(station.address)}, ${station.town}`,
+  )
 
   // The raw text stays visible whatever we make of it: the derived state is an
   // aid, not a replacement for what the Ministerio actually published.
-  const schedule = document.createElement('p')
-  schedule.className = 'station-detail__schedule'
-  schedule.textContent = `${t('detail.schedule')}: ${station.schedule}`
+  const schedule = factLine(
+    'station-detail__schedule',
+    'clock',
+    'detail.schedule',
+    readableSchedule(station.schedule),
+  )
   const status = scheduleStatus(parseSchedule(station.schedule), now)
   if (status !== 'unknown') {
     const badge = document.createElement('span')
