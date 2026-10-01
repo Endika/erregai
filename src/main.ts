@@ -74,8 +74,8 @@ root.innerHTML = `
   </div>
   <main class="app-main" data-view></main>
   <aside class="detail-card" data-card hidden></aside>
-  <nav class="tab-bar" role="tablist">
-    ${TABS.map((tab) => `<button type="button" class="tab-bar__tab" role="tab" data-tab="${tab}"></button>`).join('')}
+  <nav class="tab-bar">
+    ${TABS.map((tab) => `<button type="button" class="tab-bar__tab" data-tab="${tab}"></button>`).join('')}
   </nav>
 `
 
@@ -109,13 +109,17 @@ const tripController = new TripController(
 root.addEventListener('click', (e) => {
   const target = e.target as HTMLElement
   if (target.closest('[data-refresh]')) {
-    void store.refresh()
+    // Without a position there is nothing to refresh yet: get one, as Retry does.
+    if (store.state.pos) void store.refresh()
+    else locate()
     return
   }
   const tabButton = target.closest<HTMLElement>('[data-tab]')
   if (tabButton) {
+    const previousTab = activeTab
     activeTab = tabButton.dataset.tab as Tab
     render()
+    if (activeTab !== previousTab) viewEl.scrollTop = 0
     if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
     if (activeTab === 'trip') {
       const tp = tripController.currentUpdate?.state.lastPos ?? store.state.pos
@@ -288,7 +292,8 @@ function render(): void {
   for (const button of tabButtons) {
     const isActive = button.dataset.tab === activeTab
     button.classList.toggle('is-active', isActive)
-    button.setAttribute('aria-selected', String(isActive))
+    if (isActive) button.setAttribute('aria-current', 'page')
+    else button.removeAttribute('aria-current')
   }
 
   const busy = state.loading || locating
