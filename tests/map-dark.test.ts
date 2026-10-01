@@ -110,6 +110,29 @@ describe('dark map', () => {
     }
   })
 
+  it('outlines the app’s own map controls like Leaflet’s zoom buttons, at 3:1 on the dark map', () => {
+    const control = rules(css).find((r) => r.selector === '.map-control')!
+    expect(control.body).toMatch(/border:[^;]*var\(--map-chrome-edge\)/)
+    expect(control.body).toMatch(/background:[^;]*var\(--map-chrome-bg\)/)
+    expect(control.body).toMatch(/color:[^;]*var\(--map-chrome-fg\)/)
+    for (const hover of ['.map-control__button:hover', '.map-legend__toggle:hover'])
+      expect(rules(css).find((r) => r.selector === hover)!.body).toContain(
+        'var(--map-chrome-hover)',
+      )
+    expect(rules(css).find((r) => r.selector === '.map-legend__panel')!.body).toContain(
+      'var(--map-chrome-divider)',
+    )
+    for (const selector of DARK_SELECTORS) {
+      const dark = darkPalette(selector)
+      for (const ground of DARK_BASEMAP)
+        expect(contrast(dark('--map-chrome-edge'), ground)).toBeGreaterThanOrEqual(3)
+      expect(
+        contrast(dark('--color-muted'), dark('--map-chrome-bg')),
+        'legend heading',
+      ).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
   it('keeps Leaflet’s own white chrome in the light theme', () => {
     const light = tokens(':root')
     expect(light.get('--map-chrome-bg')).toBe('#ffffff')
