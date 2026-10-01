@@ -23,7 +23,7 @@ import {
   stopBackgroundAudio,
 } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
-import { priceOf, sortStations } from '../core/pricing'
+import { bandForThresholds, bandThresholds, priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
 import { renderSortBar } from './sortBar'
@@ -37,19 +37,46 @@ const NEARBY_RADARS = 3
 // Max radars drawn as icons on the trip map (bounds DOM/Leaflet in dense areas).
 const RADAR_LAYER_CAP = 60
 
+type GpsStatus = 'waiting' | 'active' | 'lost'
+
+// The banner shows the distance from the latest fix, but screen readers get
+// the text as it was when the alert fired: every fix re-renders the view, and
+// a live region whose text changed each time would keep re-announcing.
+interface Alert {
+  id: string
+  target: LatLon
+  label: string
+  key: (km: number) => string
+  spoken: string
+}
+
+function makeAlert(
+  id: string,
+  target: LatLon,
+  label: string,
+  key: (km: number) => string,
+  km: number,
+): Alert {
+  return { id, target, label, key, spoken: `${key(km)}. ${label}` }
+}
+
+const metersLabel = (template: string) => (km: number) =>
+  template.replace('{m}', String(Math.round(km * 1000)))
+
 export class TripController {
   private tripState: TripState = newTripState()
   private lastUpdate: TripUpdate | undefined
   private lastProvinceId: string | undefined
   private stopFn: (() => void) | undefined
   private active = false
-  private banner: Station | undefined
-  private radarBanner: string | undefined
+  private banner: Alert | undefined
+  private radarBanner: Alert | undefined
   private alertedRadarIds = new Set<string>()
   private radarHits: RadarHit[] = []
-  private fuelBanner: string | undefined
+  private fuelBanner: Alert | undefined
   private alertedFuelIds = new Set<string>()
   private releaseWakeLock: (() => void) | undefined
+  private gps: GpsStatus = 'waiting'
 
   constructor(
     private store: Store,
@@ -86,6 +113,7 @@ export class TripController {
     this.radarHits = []
     this.fuelBanner = undefined
     this.alertedFuelIds = new Set<string>()
+    this.gps = 'waiting'
     this.map.clearRadars()
     this.releaseWakeLock = keepScreenAwake()
 
@@ -93,10 +121,13 @@ export class TripController {
 
     this.stopFn = watchPosition(
       (pos) => {
+        this.gps = 'active'
         void this.onFix(pos)
       },
       () => {
-        /* location errors surface via the app-wide location banner */
+        if (this.gps === 'lost') return
+        this.gps = 'lost'
+        this.onChange()
       },
     )
     this.onChange()
@@ -141,10 +172,16 @@ export class TripController {
 
     if (update.alert) {
       const price = priceOf(update.alert, cfg.fuel)
-      const distanceKm = haversineKm(pos, update.alert.pos).toFixed(1)
+      const km = haversineKm(pos, update.alert.pos)
       const priceLabel = price !== undefined ? price.toFixed(3) : '—'
-      notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${distanceKm} km`)
-      this.banner = update.alert
+      notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${km.toFixed(1)} km`)
+      this.banner = makeAlert(
+        update.alert.id,
+        update.alert.pos,
+        `${t('trip.cheapestAhead')}: ${update.alert.brand}`,
+        (d) => `${priceLabel} · ${d.toFixed(1)} km`,
+        km,
+      )
     }
 
     if (settings.radarAlertsEnabled) {
@@ -162,14 +199,26 @@ export class TripController {
       this.alertedRadarIds = alertedIds
       if (newlyAlerted.length > 0) {
         const nearest = newlyAlerted[0]
-        const meters = Math.round(nearest.distanceKm * 1000)
-        this.radarBanner = t('radar.alert.banner').replace('{m}', String(meters))
-        notify(t('radar.alert.title'), t('radar.alert.body').replace('{via}', nearest.radar.via))
+        const body = t('radar.alert.body').replace('{via}', nearest.radar.via)
+        this.radarBanner = makeAlert(
+          nearest.radar.id,
+          { lat: nearest.radar.lat, lon: nearest.radar.lon },
+          body,
+          metersLabel(t('radar.alert.banner')),
+          nearest.distanceKm,
+        )
+        notify(t('radar.alert.title'), body)
         if (settings.radarSound) playRadarBeep({ volume: settings.alertVolume })
         if (settings.alertVibrate) vibrateRadar()
       }
     } else {
       this.radarHits = []
+    }
+    // A radar that is no longer ahead has been passed; a hazard banner left
+    // behind would show a distance to something already behind the car.
+    const radarId = this.radarBanner?.id
+    if (radarId && !this.radarHits.some((h) => h.radar.id === radarId)) {
+      this.radarBanner = undefined
     }
 
     // Map visibility has its own toggle, independent of the audio/notification
@@ -198,10 +247,13 @@ export class TripController {
       this.alertedFuelIds = alertedIds
       if (newlyAlerted.length > 0) {
         const nearest = hits.find((h) => h.station.id === newlyAlerted[0].id)!
-        const meters = Math.round(nearest.distanceKm * 1000)
-        this.fuelBanner = t('fuel.alert.banner')
-          .replace('{brand}', nearest.station.brand)
-          .replace('{m}', String(meters))
+        this.fuelBanner = makeAlert(
+          nearest.station.id,
+          nearest.station.pos,
+          t('fuel.alert.title'),
+          metersLabel(t('fuel.alert.banner').replace('{brand}', nearest.station.brand)),
+          nearest.distanceKm,
+        )
         notify(
           t('fuel.alert.title'),
           t('fuel.alert.body').replace('{brand}', nearest.station.brand),
@@ -218,10 +270,11 @@ export class TripController {
     const wrapper = document.createElement('div')
     wrapper.className = 'trip-view'
 
-    const note = document.createElement('p')
-    note.className = 'trip-view__note'
-    note.textContent = t('trip.foregroundOnly')
-    wrapper.appendChild(note)
+    if (this.active) {
+      wrapper.appendChild(this.renderGpsStatus())
+    } else {
+      wrapper.appendChild(this.renderIntro())
+    }
 
     const toggle = document.createElement('button')
     toggle.type = 'button'
@@ -232,27 +285,11 @@ export class TripController {
     })
     wrapper.appendChild(toggle)
 
-    if (this.banner) {
-      const banner = document.createElement('div')
-      banner.className = 'trip-view__banner'
-      const price = priceOf(this.banner, this.store.state.settings.fuel)
-      banner.textContent = `${t('trip.cheapestAhead')}: ${this.banner.brand} · ${price !== undefined ? price.toFixed(3) : '—'}`
-      wrapper.appendChild(banner)
-    }
-
-    if (this.radarBanner) {
-      const radarBanner = document.createElement('div')
-      radarBanner.className = 'trip-view__banner trip-view__banner--radar'
-      radarBanner.textContent = this.radarBanner
-      wrapper.appendChild(radarBanner)
-    }
-
-    if (this.fuelBanner) {
-      const fuelBanner = document.createElement('div')
-      fuelBanner.className = 'trip-view__banner trip-view__banner--fuel'
-      fuelBanner.textContent = this.fuelBanner
-      wrapper.appendChild(fuelBanner)
-    }
+    const pos = this.tripState.lastPos
+    if (this.radarBanner)
+      wrapper.appendChild(renderBanner(this.radarBanner, pos, 'radar', 'assertive'))
+    if (this.banner) wrapper.appendChild(renderBanner(this.banner, pos, 'cheapest', 'polite'))
+    if (this.fuelBanner) wrapper.appendChild(renderBanner(this.fuelBanner, pos, 'fuel', 'polite'))
 
     if (this.active) {
       const sort = this.store.state.settings.tripSort
@@ -286,6 +323,9 @@ export class TripController {
       return list
     }
 
+    const thresholds = bandThresholds(
+      ahead.map((s) => priceOf(s, fuel)).filter((p): p is number => p !== undefined),
+    )
     const display = origin
       ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort)
       : ahead
@@ -309,6 +349,13 @@ export class TripController {
       const priceEl = document.createElement('span')
       priceEl.className = 'trip-view__row-price'
       priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
+      if (price !== undefined) {
+        const band = bandForThresholds(price, thresholds)
+        row.dataset.band = band
+        const bandLabel = t(`band.${band}`)
+        priceEl.title = bandLabel
+        priceEl.setAttribute('aria-label', bandLabel)
+      }
 
       row.append(brand, distance, priceEl)
       row.addEventListener('click', () => this.onSelect(station))
@@ -318,6 +365,31 @@ export class TripController {
     return list
   }
 
+  private renderIntro(): HTMLElement {
+    const intro = document.createElement('ul')
+    intro.className = 'trip-view__intro'
+    for (const key of [
+      'trip.intro.follow',
+      'trip.intro.alerts',
+      'trip.intro.notifications',
+      'trip.intro.screen',
+      'trip.foregroundOnly',
+    ]) {
+      const item = document.createElement('li')
+      item.textContent = t(key)
+      intro.appendChild(item)
+    }
+    return intro
+  }
+
+  private renderGpsStatus(): HTMLElement {
+    const status = document.createElement('p')
+    status.className = 'trip-view__gps'
+    status.dataset.gps = this.gps
+    status.textContent = t(`trip.gps.${this.gps}`)
+    return status
+  }
+
   private renderRadarNotice(): HTMLElement {
     const notice = document.createElement('p')
     notice.className = 'trip-view__radar-notice'
@@ -325,4 +397,29 @@ export class TripController {
     notice.textContent = `${t('radar.notice.fixedOnly')} ${dataset}`
     return notice
   }
+}
+
+function renderBanner(
+  alert: Alert,
+  pos: LatLon | undefined,
+  kind: 'radar' | 'cheapest' | 'fuel',
+  politeness: 'assertive' | 'polite',
+): HTMLElement {
+  const banner = document.createElement('div')
+  banner.className = `trip-view__banner trip-view__banner--${kind}`
+  banner.setAttribute('aria-live', politeness)
+  banner.setAttribute('aria-atomic', 'true')
+  const key = document.createElement('span')
+  key.className = 'trip-view__banner-key'
+  key.setAttribute('aria-hidden', 'true')
+  key.textContent = alert.key(pos ? haversineKm(pos, alert.target) : 0)
+  const label = document.createElement('span')
+  label.className = 'trip-view__banner-label'
+  label.setAttribute('aria-hidden', 'true')
+  label.textContent = alert.label
+  const spoken = document.createElement('span')
+  spoken.className = 'visually-hidden'
+  spoken.textContent = alert.spoken
+  banner.append(key, label, spoken)
+  return banner
 }

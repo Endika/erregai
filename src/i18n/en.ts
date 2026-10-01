@@ -32,7 +32,15 @@ export const en: Record<string, string> = {
 
   'trip.start': 'Start trip',
   'trip.stop': 'Stop trip',
-  'trip.foregroundOnly': 'Foreground only',
+  'trip.intro.follow': 'Follows your position by GPS and shows the stations ahead of you.',
+  'trip.intro.alerts':
+    'Warns you about fixed radars and cheap stations on your way, as set in Settings.',
+  'trip.intro.notifications': 'May ask for permission to show notifications.',
+  'trip.intro.screen': 'Keeps the screen on if the browser allows it.',
+  'trip.foregroundOnly': 'Only works with the app open in the foreground.',
+  'trip.gps.waiting': 'Waiting for GPS…',
+  'trip.gps.active': 'GPS active',
+  'trip.gps.lost': 'No GPS signal',
   'trip.mediaSession.title': 'Trip mode',
   'trip.cheapestAhead': 'Cheapest ahead',
   'trip.noneAhead': 'No stations ahead yet',

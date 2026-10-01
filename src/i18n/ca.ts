@@ -32,7 +32,16 @@ export const ca: Record<string, string> = {
 
   'trip.start': 'Iniciar viatge',
   'trip.stop': 'Aturar viatge',
-  'trip.foregroundOnly': 'Només en primer pla',
+  'trip.intro.follow':
+    'Segueix la teva posició pel GPS i et mostra les benzineres que tens al davant.',
+  'trip.intro.alerts':
+    "T'avisa dels radars fixos i de les benzineres barates del camí, segons els teus ajustos.",
+  'trip.intro.notifications': 'Pot demanar-te permís per mostrar notificacions.',
+  'trip.intro.screen': 'Manté la pantalla encesa si el navegador ho permet.',
+  'trip.foregroundOnly': "Només funciona amb l'app oberta en primer pla.",
+  'trip.gps.waiting': 'Esperant senyal GPS…',
+  'trip.gps.active': 'GPS actiu',
+  'trip.gps.lost': 'Sense senyal GPS',
   'trip.mediaSession.title': 'Mode viatge',
   'trip.cheapestAhead': 'La més barata al davant',
   'trip.noneAhead': 'Encara no hi ha benzineres al davant',

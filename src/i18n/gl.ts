@@ -32,7 +32,15 @@ export const gl: Record<string, string> = {
 
   'trip.start': 'Iniciar viaxe',
   'trip.stop': 'Deter viaxe',
-  'trip.foregroundOnly': 'Só en primeiro plano',
+  'trip.intro.follow': 'Segue a túa posición polo GPS e móstrache as gasolineiras que tes diante.',
+  'trip.intro.alerts':
+    'Avísate dos radares fixos e das gasolineiras baratas no teu camiño, segundo os teus axustes.',
+  'trip.intro.notifications': 'Pode pedirche permiso para amosar notificacións.',
+  'trip.intro.screen': 'Mantén a pantalla acesa se o navegador o permite.',
+  'trip.foregroundOnly': 'Só funciona coa app aberta en primeiro plano.',
+  'trip.gps.waiting': 'Agardando sinal GPS…',
+  'trip.gps.active': 'GPS activo',
+  'trip.gps.lost': 'Sen sinal GPS',
   'trip.mediaSession.title': 'Modo viaxe',
   'trip.cheapestAhead': 'A máis barata diante',
   'trip.noneAhead': 'Aínda non hai gasolineiras diante',
