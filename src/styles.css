@@ -406,8 +406,8 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: none;
   border-radius: 50%;
   background: var(--color-bg);
@@ -430,26 +430,140 @@ body {
 }
 
 .station-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   padding: 0.5rem 1rem 1.5rem;
-  max-width: 100%;
+  max-width: min(100%, 36rem);
 }
 
 .station-detail__brand {
-  margin: 0.5rem 0;
+  margin: 0.5rem 0 0;
+  /* Keep a long brand clear of the absolutely positioned close button. */
+  padding-right: 3rem;
+  overflow-wrap: break-word;
+}
+
+.station-detail__lead {
+  margin-top: 0.25rem;
+}
+
+.station-detail__lead-fuel {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.station-detail__lead-figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin: 0.25rem 0 0;
+}
+
+.station-detail__lead-price {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.station-detail__lead-unit {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.station-detail__band {
+  font-weight: 600;
+}
+
+.station-detail__lead[data-band='cheap'] :is(.station-detail__lead-price, .station-detail__band) {
+  color: var(--band-cheap-fg);
+}
+
+.station-detail__lead[data-band='mid'] :is(.station-detail__lead-price, .station-detail__band) {
+  color: var(--band-mid-fg);
+}
+
+.station-detail__lead[data-band='expensive']
+  :is(.station-detail__lead-price, .station-detail__band) {
+  color: var(--band-expensive-fg);
+}
+
+.station-detail__lead[data-band='cheap'] .station-detail__lead-price {
+  background: var(--band-cheap-bg);
+}
+
+.station-detail__lead[data-band='mid'] .station-detail__lead-price {
+  background: var(--band-mid-bg);
+}
+
+.station-detail__lead[data-band='expensive'] .station-detail__lead-price {
+  background: var(--band-expensive-bg);
+}
+
+.station-detail__lead-missing {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.station-detail__distance {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.station-detail__directions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.station-detail__directions:focus-visible,
+.station-detail__others > summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .station-detail__address,
 .station-detail__schedule {
-  margin: 0.25rem 0;
+  margin: 0;
   color: var(--color-muted);
   overflow-wrap: break-word;
 }
 
+.station-detail__others {
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.station-detail__others > summary {
+  min-height: 2.75rem;
+  padding: 0.75rem 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .station-detail__prices {
   list-style: none;
-  margin: 1rem 0;
+  margin: 0;
   padding: 0;
   border-top: 1px solid var(--color-border);
+}
+
+.station-detail > .station-detail__prices {
+  margin-top: 1rem;
 }
 
 .station-detail__price-row {
@@ -462,17 +576,6 @@ body {
 
 .station-detail__price-value {
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-
-.station-detail__maps-link {
-  display: inline-block;
-  min-height: 2.75rem;
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
-  text-decoration: none;
   font-weight: 600;
 }
 

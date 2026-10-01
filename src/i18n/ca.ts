@@ -37,7 +37,9 @@ export const ca: Record<string, string> = {
   'trip.cheapestAhead': 'La més barata al davant',
   'trip.noneAhead': 'Encara no hi ha benzineres al davant',
 
-  'detail.openInMaps': 'Obrir a Maps',
+  'detail.directions': 'Com arribar-hi',
+  'detail.otherFuels': 'Altres combustibles ({n})',
+  'detail.noPrice': "Sense preu d'aquest combustible",
   'detail.schedule': 'Horari',
   'schedule.open': 'Obert ara',
   'schedule.closed': 'Tancat ara',

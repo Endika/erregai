@@ -37,7 +37,9 @@ export const eu: Record<string, string> = {
   'trip.cheapestAhead': 'Merkeena aurrean',
   'trip.noneAhead': 'Oraindik ez dago gasolindegirik aurrean',
 
-  'detail.openInMaps': 'Ireki Maps-en',
+  'detail.directions': 'Nola iritsi',
+  'detail.otherFuels': 'Beste erregaiak ({n})',
+  'detail.noPrice': 'Erregai honen preziorik ez',
   'detail.schedule': 'Ordutegia',
   'schedule.open': 'Orain irekita',
   'schedule.closed': 'Orain itxita',
