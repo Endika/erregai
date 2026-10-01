@@ -13,6 +13,7 @@ import { renderSortBar } from './ui/sortBar'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
 import { createAnnouncer } from './ui/announcer'
+import { watchConnectivity } from './app/connectivity'
 import { renderPlaceSearch, renderPlaceStrip } from './ui/place-search'
 import { placesFromRows, type Place } from './core/places'
 import {
@@ -20,6 +21,7 @@ import {
   freshnessText,
   joinNotice,
   locationProblem,
+  needsRefreshOnReconnect,
   viewNotice,
   viewNoticeText,
   type LocationProblem,
@@ -52,6 +54,7 @@ const FRESHNESS_TICK_MS = 60_000
 // Service areas are far sparser than radars, so a lower cap still covers any
 // realistic radius without crowding the map.
 const SERVICE_MARKER_CAP = 30
+const RECONNECT_SETTLE_MS = 2_000
 
 const store = new Store({ fetchProvince, kv: openIdbKv(), now: () => Date.now() })
 
@@ -579,6 +582,12 @@ store.subscribe(render)
 render()
 document.addEventListener('visibilitychange', syncFreshnessTimer)
 syncFreshnessTimer()
+watchConnectivity(window, {
+  delayMs: RECONNECT_SETTLE_MS,
+  onChange: render,
+  shouldRefresh: () => needsRefreshOnReconnect(store.state, Date.now()),
+  refresh: () => store.refresh(),
+})
 
 // A town picked by hand outlives a reload: asking for the location again would
 // only bring back the prompt or the refusal the user already worked around.

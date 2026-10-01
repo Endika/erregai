@@ -3,6 +3,7 @@ import {
   freshnessStamp,
   freshnessText,
   locationProblem,
+  needsRefreshOnReconnect,
   viewNotice,
   viewNoticeText,
 } from '../src/ui/status'
@@ -127,5 +128,32 @@ describe('formatAge without Intl data for the locale', () => {
     expect(formatAge(7 * 3_600_000, 'eu')).toBe('duela 7 h')
     expect(formatAge(3 * 86_400_000, 'eu')).toBe('duela 3 egun')
     expect(formatAge(7 * 3_600_000, 'gl', 'short')).toBe('hai 7 h')
+  })
+})
+
+describe('needsRefreshOnReconnect', () => {
+  const HOUR = 3_600_000
+  const NOW = 100 * HOUR
+  const pos = { lat: 43.263, lon: -2.935 }
+
+  it('refreshes after a load that failed with nothing to show', () => {
+    expect(needsRefreshOnReconnect(state({ pos, error: 'x' }), NOW)).toBe(true)
+  })
+  it('refreshes after a refresh that failed over cached prices', () => {
+    expect(
+      needsRefreshOnReconnect(state({ pos, refreshError: 'x', dataStoredAt: NOW - HOUR }), NOW),
+    ).toBe(true)
+  })
+  it('refreshes prices older than the cache keeps them', () => {
+    expect(needsRefreshOnReconnect(state({ pos, dataStoredAt: NOW - 7 * HOUR }), NOW)).toBe(true)
+  })
+  it('leaves fresh prices that loaded fine alone', () => {
+    expect(needsRefreshOnReconnect(state({ pos, dataStoredAt: NOW - HOUR }), NOW)).toBe(false)
+  })
+  it('waits while a load is already running', () => {
+    expect(needsRefreshOnReconnect(state({ pos, error: 'x', loading: true }), NOW)).toBe(false)
+  })
+  it('has nothing to refresh without a position', () => {
+    expect(needsRefreshOnReconnect(state({ error: 'x' }), NOW)).toBe(false)
   })
 })

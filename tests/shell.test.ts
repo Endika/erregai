@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { vi } from 'vitest'
 import type { LatLon } from '../src/core/geo'
+import { t as translate, type Locale } from '../src/i18n'
 
 const mocks = vi.hoisted(() => ({
   getOnce: vi.fn<() => Promise<LatLon>>(),
@@ -129,5 +130,71 @@ describe('app shell', () => {
 
     tab(root, 'map').click()
     expect(current()).toEqual(['map'])
+  })
+})
+
+describe('connectivity', () => {
+  let online = true
+  // Each boot is a fresh app on the same window; earlier ones must not answer.
+  const added: [string, EventListenerOrEventListenerObject][] = []
+  beforeEach(() => {
+    online = true
+    vi.spyOn(navigator, 'onLine', 'get').mockImplementation(() => online)
+    const add = window.addEventListener.bind(window)
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, options) => {
+      if (listener) added.push([type, listener])
+      add(type, listener, options)
+    })
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    for (const [type, listener] of added.splice(0)) window.removeEventListener(type, listener)
+  })
+
+  // The booted app picked its own locale from the browser; read it back.
+  const t = (key: string): string => translate(key, document.documentElement.lang as Locale)
+  const hint = (root: HTMLElement): string | null | undefined =>
+    root.querySelector('.notice__hint')?.textContent
+
+  it('says the connection is gone, not the service, as soon as coverage drops', async () => {
+    mocks.getOnce.mockResolvedValue(BILBAO)
+    mocks.fetchProvince.mockRejectedValue(new Error('Failed to fetch'))
+    const root = await boot()
+    expect(hint(root)).toBe(t('error.load.server'))
+
+    online = false
+    window.dispatchEvent(new Event('offline'))
+    expect(hint(root)).toBe(t('error.load.offline'))
+    expect(mocks.fetchProvince).toHaveBeenCalledTimes(1)
+  })
+
+  it('reloads once by itself when the connection comes back after a failed load', async () => {
+    mocks.getOnce.mockResolvedValue(BILBAO)
+    mocks.fetchProvince.mockRejectedValue(new Error('Failed to fetch'))
+    online = false
+    const root = await boot()
+    expect(hint(root)).toBe(t('error.load.offline'))
+
+    vi.useFakeTimers()
+    mocks.fetchProvince.mockResolvedValue({ fecha: '01/10/2026 08:00:00', stations: [] })
+    online = true
+    window.dispatchEvent(new Event('online'))
+    expect(hint(root)).toBe(t('error.load.server'))
+    window.dispatchEvent(new Event('online'))
+    await vi.advanceTimersByTimeAsync(10_000)
+
+    expect(mocks.fetchProvince).toHaveBeenCalledTimes(2)
+    expect(root.querySelector('.notice')).toBeNull()
+  })
+
+  it('does not fetch on reconnect when the prices loaded fine and are fresh', async () => {
+    mocks.getOnce.mockResolvedValue(BILBAO)
+    await boot()
+    vi.useFakeTimers()
+    window.dispatchEvent(new Event('offline'))
+    window.dispatchEvent(new Event('online'))
+    await vi.advanceTimersByTimeAsync(10_000)
+    expect(mocks.fetchProvince).toHaveBeenCalledTimes(1)
   })
 })

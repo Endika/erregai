@@ -260,7 +260,8 @@ body {
 
 /* Failure states: a box toned from the existing tokens (danger for prices that
    could not load, the amber notice for a refused location) with a way forward
-   inside it. Text stays in the foreground colour; only the title takes the tone. */
+   inside it. The tone is in the fill, the border and the title, never a side
+   stripe; body text stays in the foreground colour. */
 .notice {
   --notice-fg: var(--color-danger);
   --notice-bg: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg));
@@ -270,7 +271,6 @@ body {
   margin: 1rem max(1rem, calc((100% - 36rem) / 2));
   padding: 1rem;
   border: 1px solid color-mix(in srgb, var(--notice-fg) 35%, transparent);
-  border-inline-start-width: 0.25rem;
   border-radius: 0.5rem;
   background: var(--notice-bg);
   color: var(--color-fg);
