@@ -58,6 +58,8 @@ export const gl: Record<string, string> = {
   'trip.mediaSession.title': 'Modo viaxe',
   'trip.cheapestAhead': 'A máis barata en {fuel} diante',
   'trip.noneAhead': 'Aínda non hai gasolineiras diante',
+  'trip.ahead.showAll': 'Ver todas ({n})',
+  'trip.ahead.showFewer': 'Ver menos',
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Máis barata',
   'trip.slot.more.fuel': 'Preto',

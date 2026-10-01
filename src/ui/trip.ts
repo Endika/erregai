@@ -25,17 +25,11 @@ import {
   stopBackgroundAudio,
 } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
-import {
-  priceOf,
-  radiusReference,
-  sortStations,
-  stationBand,
-  type PriceReference,
-} from '../core/pricing'
+import { priceOf, radiusReference, stationBand, type PriceReference } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
 import { formatDate, formatKm, formatPrice, priceWithBand } from '../i18n/format'
-import { renderSortBar } from './sortBar'
+import { renderFuelControl } from './sortBar'
 import {
   composeSlot,
   fuelKey,
@@ -52,6 +46,8 @@ import type { Announce } from './announcer'
 const DEFAULT_CORRIDOR_DEG = 45
 const ADJACENT_PROVINCES = 2
 const NEARBY_RADARS = 3
+// Mid-trip only the best few stations ahead are listed; the rest wait behind a toggle.
+const AHEAD_ROWS = 3
 // Max radars drawn as icons on the trip map (bounds DOM/Leaflet in dense areas).
 const RADAR_LAYER_CAP = 60
 
@@ -99,6 +95,9 @@ export class TripController {
   private gps: GpsStatus = 'waiting'
   // The alert last drawn in the slot, so only a different one fades in.
   private shownSlotId = ''
+  private showAllAhead = false
+  // Set by the list toggle, whose own click re-renders it away.
+  private refocusAheadToggle = false
 
   constructor(
     private store: Store,
@@ -176,6 +175,7 @@ export class TripController {
     this.announcedFuelIds = new Set<string>()
     this.tripFuel = undefined
     this.shownSlotId = ''
+    this.showAllAhead = false
   }
 
   // While a trip runs the map shows only what is ahead, like the list below it.
@@ -338,24 +338,22 @@ export class TripController {
       toggle.setAttribute('aria-describedby', reason.id)
       wrapper.append(toggle, reason)
     } else if (!this.active && pricesUnavailable) {
-      // Without prices the fuel and order pickers have nothing to act on, and
-      // Start must stay above the fold: one line says what the trip still does.
-      const note = document.createElement('p')
-      note.className = 'trip-view__note'
-      note.textContent = t('trip.radarsOnly')
-      wrapper.append(toggle, note)
+      // Without prices the fuel picker has nothing to act on, and Start must
+      // stay above the fold: one line says what the trip still does.
+      wrapper.append(toggle, renderRadarsOnlyNote())
     } else if (!this.active) {
-      // Fuel and order are chosen before setting off; mid-trip they would only
-      // compete with the alerts, and the List tab still changes the fuel.
-      const { tripSort, fuel } = this.store.state.settings
-      wrapper.append(
-        renderSortBar(tripSort, (key) => this.store.setSettings({ tripSort: key }), {
-          current: fuel,
+      // The fuel is chosen before setting off; mid-trip it would only compete
+      // with the alerts, and the List tab still changes it. There is no order
+      // to pick: a trip is after the cheapest fuel ahead.
+      const fuelPicker = document.createElement('div')
+      fuelPicker.className = 'trip-view__fuel'
+      fuelPicker.appendChild(
+        renderFuelControl({
+          current: this.store.state.settings.fuel,
           onChange: (next) => this.store.setSettings({ fuel: next }),
         }),
-        this.renderIntro(),
-        toggle,
       )
+      wrapper.append(fuelPicker, this.renderIntro(), toggle)
     } else {
       wrapper.classList.add('trip-view--active')
       // The slot is reserved right under the map so a glance finds it without
@@ -364,7 +362,13 @@ export class TripController {
       const id = slotId(slot)
       wrapper.appendChild(renderSlotArea(slot, { entering: id !== this.shownSlotId }))
       this.shownSlotId = id
-      wrapper.appendChild(this.renderAhead(update, selectedId, reference))
+      // The top banner stays quiet on this tab, so this is the one place that
+      // says why no station is listed.
+      wrapper.appendChild(
+        pricesUnavailable
+          ? renderRadarsOnlyNote()
+          : this.renderAhead(update, selectedId, reference),
+      )
       if (this.store.state.settings.radarAlertsEnabled) {
         if (this.radarHits.length > 0)
           wrapper.appendChild(renderRadarList(this.radarHits, 'radar.list.title', NEARBY_RADARS))
@@ -379,6 +383,10 @@ export class TripController {
     }
 
     container.replaceChildren(wrapper)
+    if (this.refocusAheadToggle) {
+      this.refocusAheadToggle = false
+      wrapper.querySelector<HTMLElement>('.trip-view__ahead-toggle')?.focus({ preventScroll: true })
+    }
   }
 
   // Every alert is rebuilt from the latest fix, so a station that is no longer
@@ -433,20 +441,24 @@ export class TripController {
     radiusRef?: PriceReference,
   ): HTMLElement {
     const { fuel, radiusKm } = this.store.state.settings
-    // update.ahead is price-sorted by the selector, so its head is the cheapest
-    // regardless of the display order the user picks below.
+    // update.ahead is sorted by price, the only order a trip needs: its head is
+    // the cheapest, and the first few rows are the best on offer.
     const ahead = update?.ahead ?? []
     const cheapestId = ahead[0]?.id
     const origin = update?.state.lastPos
+    const section = document.createElement('div')
+    section.className = 'trip-view__ahead'
     const list = document.createElement('div')
     list.className = 'trip-view__list'
+    list.id = 'trip-ahead-list'
+    section.appendChild(list)
 
     if (ahead.length === 0) {
       const empty = document.createElement('p')
       empty.className = 'trip-view__empty'
       empty.textContent = t('trip.noneAhead')
       list.appendChild(empty)
-      return list
+      return section
     }
 
     // Banded against the whole radius like the List, not the few stations
@@ -454,9 +466,7 @@ export class TripController {
     const reference =
       radiusRef ??
       (origin ? radiusReference(this.store.state.stations, fuel, origin, radiusKm) : undefined)
-    const display = origin
-      ? sortStations(ahead, fuel, origin, this.store.state.settings.tripSort)
-      : ahead
+    const display = this.showAllAhead ? ahead : ahead.slice(0, AHEAD_ROWS)
 
     for (const station of display) {
       const price = priceOf(station, fuel)
@@ -501,7 +511,24 @@ export class TripController {
       list.appendChild(row)
     }
 
-    return list
+    if (ahead.length > AHEAD_ROWS) {
+      const more = document.createElement('button')
+      more.type = 'button'
+      more.className = 'trip-view__ahead-toggle'
+      more.setAttribute('aria-controls', list.id)
+      more.setAttribute('aria-expanded', String(this.showAllAhead))
+      more.textContent = this.showAllAhead
+        ? t('trip.ahead.showFewer')
+        : t('trip.ahead.showAll').replace('{n}', String(ahead.length))
+      more.addEventListener('click', () => {
+        this.showAllAhead = !this.showAllAhead
+        this.refocusAheadToggle = true
+        this.onChange()
+      })
+      section.appendChild(more)
+    }
+
+    return section
   }
 
   private renderIntro(): HTMLElement {
@@ -532,4 +559,11 @@ export class TripController {
     notice.textContent = `${t('radar.notice.fixedOnly')} ${dataset}`
     return notice
   }
+}
+
+function renderRadarsOnlyNote(): HTMLElement {
+  const note = document.createElement('p')
+  note.className = 'trip-view__note'
+  note.textContent = t('trip.radarsOnly')
+  return note
 }

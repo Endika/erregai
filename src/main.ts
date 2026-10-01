@@ -570,9 +570,14 @@ function render(): void {
     const readout = document.createElement('div')
     readout.className = 'trip-readout'
     viewEl.appendChild(readout)
+    const pricesUnavailable = state.error !== undefined && state.stations.length === 0
+    // The trip view says what is left without prices; the top banner would say
+    // it twice. A refused location takes that place while no trip runs.
+    if (pricesUnavailable && (tripController.isActive || !gpsDenied))
+      notice = { kind: 'loadFailed' }
     tripController.render(readout, tripController.currentUpdate, selectedId, {
       locationDenied: gpsDenied,
-      pricesUnavailable: state.error !== undefined && state.stations.length === 0,
+      pricesUnavailable,
       reference: tripReference,
     })
   } else if (activeTab === 'settings') {

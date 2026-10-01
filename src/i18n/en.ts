@@ -57,6 +57,8 @@ export const en: Record<string, string> = {
   'trip.mediaSession.title': 'Trip mode',
   'trip.cheapestAhead': 'Cheapest {fuel} ahead',
   'trip.noneAhead': 'No stations ahead yet',
+  'trip.ahead.showAll': 'Show all ({n})',
+  'trip.ahead.showFewer': 'Show fewer',
   'trip.slot.radar': 'Radar',
   'trip.slot.more.cheapest': 'Cheapest',
   'trip.slot.more.fuel': 'Nearby',

@@ -971,9 +971,14 @@ body {
   font-size: 0.875rem;
 }
 
+/* The one word on missing prices while on this tab: the top banner stays
+   quiet, so it wears the same notice surface. */
 .trip-view__note {
   margin: 0;
-  color: var(--color-muted);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--band-mid-bg);
+  color: var(--band-mid-fg);
   font-size: 0.875rem;
 }
 
@@ -991,8 +996,12 @@ body {
   flex-direction: column;
 }
 
+/* Mid-trip the map gives up height to the alert and the rows: the road ahead
+   needs a glance, not half the screen. */
 .app-main:has(> .trip-readout > .trip-view--active) > .trip-map {
   flex: none;
+  height: 30vh;
+  min-height: 10rem;
 }
 
 .trip-readout:has(> .trip-view--active) {
@@ -1012,15 +1021,15 @@ body {
   isolation: isolate;
 }
 
-/* Stop sits just above the tab bar whatever comes and goes above it. The GPS
-   line grows upwards if it wraps, so Stop's own position never changes. */
+/* Stop sits just above the tab bar whatever comes and goes above it. It hangs
+   from the dock's foot, so a GPS line that wraps beside it never moves it. */
 .trip-view__dock {
   position: sticky;
   bottom: 0;
   z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: flex-end;
+  gap: 0.75rem;
   margin-top: auto;
   margin-inline: -1rem;
   padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) 0.75rem
@@ -1029,9 +1038,18 @@ body {
   background: var(--color-bg-raised);
 }
 
+.trip-view__dock .trip-view__gps {
+  flex: 1 1 auto;
+  align-self: center;
+  min-width: 0;
+}
+
 .trip-view__dock .trip-view__toggle {
-  align-self: stretch;
+  flex: none;
+  align-self: auto;
+  min-width: 11rem;
   min-height: 3.5rem;
+  padding-inline: 1.5rem;
 }
 
 /* One alert and the collapsed line under it always fit: the slot keeps this
@@ -1083,13 +1101,8 @@ body {
   min-width: 0;
 }
 
-/* The idle trip view already pads its column: the bar sits in it as a row,
-   not as the sticky, edge-to-edge strip it is above the station list. */
-.trip-view > .sort-bar {
-  position: static;
-  padding: 0;
-  border-bottom: 0;
-  background: none;
+.trip-view__fuel {
+  display: flex;
 }
 
 .trip-view__banner {
@@ -1206,10 +1219,23 @@ body {
   color: var(--band-cheap-fg);
 }
 
+.trip-view__ahead,
 .trip-view__list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.trip-view__ahead-toggle {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .trip-view__row {
