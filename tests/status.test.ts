@@ -1,5 +1,6 @@
 import {
   formatAge,
+  freshnessStamp,
   freshnessText,
   locationProblem,
   viewNotice,
@@ -58,14 +59,40 @@ describe('viewNoticeText', () => {
 })
 
 describe('freshnessText', () => {
+  const storedAt = new Date(2026, 9, 1, 16, 56, 12).getTime()
+  const loaded = state({ dataDate: '01/10/2026 16:56:12', dataStoredAt: storedAt })
+
   it('leaves "Loading…" once a load ends in error', () => {
-    expect(freshnessText(state({ error: 'boom' }), false)).toBe('')
+    expect(freshnessText(state({ error: 'boom' }), false, storedAt)).toBe('')
   })
-  it('reports refreshing while busy and the data date once loaded', () => {
-    expect(freshnessText(state({}), true)).toBe(t('app.refreshing'))
-    expect(freshnessText(state({ dataDate: '01/10/2026 16:56:12' }), false)).toBe(
-      `${t('app.updated')} 01/10/2026 16:56:12`,
-    )
+  it('reports refreshing while busy', () => {
+    expect(freshnessText(loaded, true, storedAt)).toBe(t('app.refreshing'))
+  })
+  it('says how old the prices are, short enough for the header', () => {
+    setLocale('es')
+    expect(freshnessText(loaded, false, storedAt + 25 * 60_000)).toBe('Actualizado hace 25 min')
+    setLocale('eu')
+    expect(freshnessText(loaded, false, storedAt + 7 * 3_600_000)).toBe('Eguneratua duela 7 ordu')
+    setLocale('va')
+    expect(freshnessText(loaded, false, storedAt + 2 * 3_600_000)).toBe('Actualitzat fa 2 h')
+    setLocale('es')
+  })
+  it('agrees with the offline banner on the age it reports', () => {
+    const now = storedAt + 7 * 3_600_000 + 10 * 60_000
+    expect(freshnessText(loaded, false, now)).toContain('7 h')
+    expect(formatAge(now - storedAt)).toBe('hace 7 horas')
+  })
+})
+
+describe('freshnessStamp', () => {
+  it('keeps the absolute time for the tooltip and a machine-readable datetime', () => {
+    setLocale('es')
+    const storedAt = new Date(2026, 9, 1, 16, 56, 12).getTime()
+    expect(freshnessStamp(state({ dataStoredAt: storedAt }))).toEqual({
+      datetime: new Date(storedAt).toISOString(),
+      title: 'Actualizado: 1 oct 2026, 16:56',
+    })
+    expect(freshnessStamp(state({}))).toBeUndefined()
   })
 })
 
@@ -90,3 +117,15 @@ describe('locationProblem', () => {
 })
 
 afterAll(() => setLocale('es'))
+
+describe('formatAge without Intl data for the locale', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('falls back to the locale own words, never to English', () => {
+    vi.spyOn(Intl.RelativeTimeFormat, 'supportedLocalesOf').mockReturnValue([])
+    expect(formatAge(25 * 60_000, 'eu')).toBe('duela 25 min')
+    expect(formatAge(7 * 3_600_000, 'eu')).toBe('duela 7 h')
+    expect(formatAge(3 * 86_400_000, 'eu')).toBe('duela 3 egun')
+    expect(formatAge(7 * 3_600_000, 'gl', 'short')).toBe('hai 7 h')
+  })
+})

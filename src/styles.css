@@ -135,9 +135,9 @@ body {
   min-width: 0;
   color: var(--color-muted);
   font-size: 0.875rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-wrap: balance;
 }
 
 .app-header__refresh {

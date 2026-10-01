@@ -10,6 +10,7 @@ export const gl: Record<string, string> = {
 
   'app.title': 'Erregai',
   'app.updated': 'Actualizado',
+  'app.updatedAgo': 'Actualizado {age}',
   'app.refresh': 'Actualizar',
   'app.loading': 'Cargando…',
   'app.refreshing': 'Actualizando…',
@@ -29,6 +30,7 @@ export const gl: Record<string, string> = {
   'band.cheap': 'Barata',
   'band.mid': 'Media',
   'band.expensive': 'Cara',
+  'price.withBand': '{price} €/l, {band}',
 
   'trip.start': 'Iniciar viaxe',
   'trip.stop': 'Deter viaxe',
@@ -84,7 +86,7 @@ export const gl: Record<string, string> = {
   'radar.settings.testSound': 'Probar o son',
   'radar.alert.title': 'Radar diante',
   'radar.alert.body': 'Radar fixo en {via}',
-  'radar.alert.banner': 'Radar a {m} m',
+  'radar.alert.banner': 'Radar a {distance}',
   'fuel.settings.mode': 'Avisos de gasolineira',
   'fuel.settings.mode.cheap': 'Só baratas preto',
   'fuel.settings.mode.any': 'Calquera preto',
@@ -94,7 +96,7 @@ export const gl: Record<string, string> = {
   'fuel.settings.testSound': 'Probar o son',
   'fuel.alert.title': 'Gasolineira preto',
   'fuel.alert.body': '{brand} na túa ruta',
-  'fuel.alert.banner': '{brand} a {m} m',
+  'fuel.alert.banner': '{brand} a {distance}',
   'radar.list.title': 'Radares diante',
   'radar.nearby.title': 'Radares próximos',
   'radar.notice.fixedOnly': 'Só radares fixos oficiais (sen móbiles nin de tramo).',
@@ -114,6 +116,9 @@ export const gl: Record<string, string> = {
   'error.load.server': 'O servizo de prezos non responde; volve tentalo dentro duns minutos.',
   'status.cached.offline': 'Prezos de {age} · sen conexión',
   'status.cached.failed': 'Prezos de {age} · non se puideron actualizar',
+  'age.minute': 'hai {n} min',
+  'age.hour': 'hai {n} h',
+  'age.day': 'hai {n} días',
   'error.refreshFailed': 'Non se puido actualizar; móstranse os últimos datos gardados',
   'error.storage':
     'O almacenamento do dispositivo non está dispoñible; os datos non se gardarán para usalos sen conexión',

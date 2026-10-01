@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderSettings } from '../src/ui/settings'
 import { DEFAULT_SETTINGS } from '../src/app/settings'
-import { t } from '../src/i18n'
+import { setLocale, t } from '../src/i18n'
 
 describe('renderSettings', () => {
   it('renders the general, services, radar and fuel section headings in order', () => {
@@ -79,5 +79,15 @@ describe('renderSettings', () => {
     vibrate.checked = false
     vibrate.dispatchEvent(new Event('change'))
     expect(partials).toContainEqual({ alertVibrate: false })
+  })
+
+  it('labels whole-kilometre distance options without a trailing decimal', () => {
+    setLocale('es')
+    const el = document.createElement('div')
+    renderSettings(el, DEFAULT_SETTINGS, () => {})
+    const labels = [...el.querySelectorAll('[data-field="radarAlertDistanceM"] option')].map(
+      (o) => o.textContent,
+    )
+    expect(labels).toEqual(['300 m', '500 m', '800 m', '1 km', '1,5 km'])
   })
 })

@@ -10,6 +10,7 @@ export const es: Record<string, string> = {
 
   'app.title': 'Erregai',
   'app.updated': 'Actualizado',
+  'app.updatedAgo': 'Actualizado {age}',
   'app.refresh': 'Actualizar',
   'app.loading': 'Cargando…',
   'app.refreshing': 'Actualizando…',
@@ -29,6 +30,7 @@ export const es: Record<string, string> = {
   'band.cheap': 'Barata',
   'band.mid': 'Media',
   'band.expensive': 'Cara',
+  'price.withBand': '{price} €/l, {band}',
 
   'trip.start': 'Iniciar viaje',
   'trip.stop': 'Detener viaje',
@@ -85,7 +87,7 @@ export const es: Record<string, string> = {
   'radar.settings.testSound': 'Probar sonido',
   'radar.alert.title': 'Radar delante',
   'radar.alert.body': 'Radar fijo en {via}',
-  'radar.alert.banner': 'Radar a {m} m',
+  'radar.alert.banner': 'Radar a {distance}',
   'fuel.settings.mode': 'Avisos de gasolinera',
   'fuel.settings.mode.cheap': 'Solo baratas cercanas',
   'fuel.settings.mode.any': 'Cualquiera cercana',
@@ -95,7 +97,7 @@ export const es: Record<string, string> = {
   'fuel.settings.testSound': 'Probar sonido',
   'fuel.alert.title': 'Gasolinera cerca',
   'fuel.alert.body': '{brand} en tu ruta',
-  'fuel.alert.banner': '{brand} a {m} m',
+  'fuel.alert.banner': '{brand} a {distance}',
   'radar.list.title': 'Radares delante',
   'radar.nearby.title': 'Radares cercanos',
   'radar.notice.fixedOnly': 'Solo radares fijos oficiales (sin móviles ni de tramo).',
@@ -115,6 +117,9 @@ export const es: Record<string, string> = {
   'error.load.server': 'El servicio de precios no responde; vuelve a intentarlo en unos minutos.',
   'status.cached.offline': 'Precios de {age} · sin conexión',
   'status.cached.failed': 'Precios de {age} · no se han podido actualizar',
+  'age.minute': 'hace {n} min',
+  'age.hour': 'hace {n} h',
+  'age.day': 'hace {n} días',
   'error.refreshFailed': 'No se pudo actualizar; se muestran los últimos datos guardados',
   'error.storage':
     'El almacenamiento del dispositivo no está disponible; los datos no se guardarán para usarlos sin conexión',

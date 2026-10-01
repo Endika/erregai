@@ -2,6 +2,7 @@ import { FUELS } from '../core/fuels'
 import type { FuelAlertMode, Settings, Theme } from '../app/settings'
 import type { SortKey } from '../core/pricing'
 import { getLocale, LOCALE_ORDER, t, type Locale } from '../i18n'
+import { formatDistance, formatNumber } from '../i18n/format'
 import { playRadarBeep, playFuelChime, unlockAudio } from '../adapters/audio'
 import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 
@@ -134,7 +135,10 @@ function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement
 }
 
 function metersOptions(values: readonly number[]): SelectOption[] {
-  return values.map((m) => ({ value: String(m), label: `${m} m` }))
+  return values.map((m) => ({
+    value: String(m),
+    label: m % 1000 === 0 ? `${formatNumber(m / 1000)} km` : formatDistance(m / 1000),
+  }))
 }
 
 export function renderSettings(

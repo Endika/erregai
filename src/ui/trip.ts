@@ -26,6 +26,7 @@ import { vibrateRadar, vibrateFuel } from '../adapters/vibrate'
 import { bandForThresholds, bandThresholds, priceOf, sortStations } from '../core/pricing'
 import { provinceFor } from '../core/provinces'
 import { t } from '../i18n'
+import { formatDate, formatDistance, formatKm, formatPrice, priceWithBand } from '../i18n/format'
 import { renderSortBar } from './sortBar'
 import { renderRadarList } from './radar-list'
 import type { MapView } from './map'
@@ -60,8 +61,8 @@ function makeAlert(
   return { id, target, label, key, spoken: `${key(km)}. ${label}` }
 }
 
-const metersLabel = (template: string) => (km: number) =>
-  template.replace('{m}', String(Math.round(km * 1000)))
+const distanceLabel = (template: string) => (km: number) =>
+  template.replace('{distance}', formatDistance(km))
 
 export class TripController {
   private tripState: TripState = newTripState()
@@ -173,13 +174,13 @@ export class TripController {
     if (update.alert) {
       const price = priceOf(update.alert, cfg.fuel)
       const km = haversineKm(pos, update.alert.pos)
-      const priceLabel = price !== undefined ? price.toFixed(3) : '—'
-      notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${km.toFixed(1)} km`)
+      const priceLabel = price !== undefined ? formatPrice(price) : '—'
+      notify(t('trip.cheapestAhead'), `${update.alert.brand} · ${priceLabel} · ${formatKm(km)}`)
       this.banner = makeAlert(
         update.alert.id,
         update.alert.pos,
         `${t('trip.cheapestAhead')}: ${update.alert.brand}`,
-        (d) => `${priceLabel} · ${d.toFixed(1)} km`,
+        (d) => `${priceLabel} · ${formatKm(d)}`,
         km,
       )
     }
@@ -204,7 +205,7 @@ export class TripController {
           nearest.radar.id,
           { lat: nearest.radar.lat, lon: nearest.radar.lon },
           body,
-          metersLabel(t('radar.alert.banner')),
+          distanceLabel(t('radar.alert.banner')),
           nearest.distanceKm,
         )
         notify(t('radar.alert.title'), body)
@@ -251,7 +252,7 @@ export class TripController {
           nearest.station.id,
           nearest.station.pos,
           t('fuel.alert.title'),
-          metersLabel(t('fuel.alert.banner').replace('{brand}', nearest.station.brand)),
+          distanceLabel(t('fuel.alert.banner').replace('{brand}', nearest.station.brand)),
           nearest.distanceKm,
         )
         notify(
@@ -344,17 +345,16 @@ export class TripController {
 
       const distance = document.createElement('span')
       distance.className = 'trip-view__row-distance'
-      if (origin) distance.textContent = `${haversineKm(origin, station.pos).toFixed(1)} km`
+      if (origin) distance.textContent = formatKm(haversineKm(origin, station.pos))
 
       const priceEl = document.createElement('span')
       priceEl.className = 'trip-view__row-price'
-      priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
+      priceEl.textContent = price !== undefined ? formatPrice(price) : '—'
       if (price !== undefined) {
         const band = bandForThresholds(price, thresholds)
         row.dataset.band = band
-        const bandLabel = t(`band.${band}`)
-        priceEl.title = bandLabel
-        priceEl.setAttribute('aria-label', bandLabel)
+        priceEl.title = t(`band.${band}`)
+        priceEl.setAttribute('aria-label', priceWithBand(price, band))
       }
 
       row.append(brand, distance, priceEl)
@@ -393,7 +393,7 @@ export class TripController {
   private renderRadarNotice(): HTMLElement {
     const notice = document.createElement('p')
     notice.className = 'trip-view__radar-notice'
-    const dataset = t('radar.notice.dataset').replace('{date}', RADARS_DATASET_DATE)
+    const dataset = t('radar.notice.dataset').replace('{date}', formatDate(RADARS_DATASET_DATE))
     notice.textContent = `${t('radar.notice.fixedOnly')} ${dataset}`
     return notice
   }

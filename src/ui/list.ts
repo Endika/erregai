@@ -4,6 +4,7 @@ import { haversineKm, type LatLon } from '../core/geo'
 import { bandForThresholds, bandThresholds, priceOf } from '../core/pricing'
 import { parseSchedule, scheduleStatus } from '../core/schedule'
 import { t } from '../i18n'
+import { formatKm, formatPrice, priceWithBand } from '../i18n/format'
 
 // Only the states worth interrupting for get a badge: more than half the feed
 // is 24 h, so marking those "open" would put a label on most rows and mean
@@ -49,18 +50,17 @@ export function renderList(
 
     const distance = document.createElement('span')
     distance.className = 'station-row__distance'
-    distance.textContent = `${haversineKm(origin, station.pos).toFixed(1)} km`
+    distance.textContent = formatKm(haversineKm(origin, station.pos))
 
     const priceEl = document.createElement('span')
     priceEl.className = 'station-row__price'
-    priceEl.textContent = price !== undefined ? price.toFixed(3) : '—'
+    priceEl.textContent = price !== undefined ? formatPrice(price) : '—'
 
     if (price !== undefined) {
       const band = bandForThresholds(price, thresholds)
       row.dataset.band = band
-      const bandLabel = t(`band.${band}`)
-      priceEl.title = bandLabel
-      priceEl.setAttribute('aria-label', bandLabel)
+      priceEl.title = t(`band.${band}`)
+      priceEl.setAttribute('aria-label', priceWithBand(price, band))
     }
 
     const cells: HTMLElement[] = [brand, town, distance]

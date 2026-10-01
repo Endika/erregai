@@ -6,8 +6,9 @@ import { Store } from '../src/app/store'
 import type { Kv, CacheEntry } from '../src/adapters/cache'
 import { haversineKm, type LatLon } from '../src/core/geo'
 import type { Station } from '../src/core/station'
-import { RADARS } from '../src/core/radars.data'
+import { RADARS, RADARS_DATASET_DATE } from '../src/core/radars.data'
 import { t } from '../src/i18n'
+import { formatDate, formatDistance, formatKm } from '../src/i18n/format'
 import { bandFor } from '../src/core/pricing'
 
 const memKv = (): Kv => {
@@ -105,7 +106,7 @@ describe('trip radar banner', () => {
   const nearer: LatLon = { lat: RADAR.lat - 0.00226, lon: RADAR.lon }
   const passed: LatLon = { lat: RADAR.lat + 0.00226, lon: RADAR.lon }
   const metersTo = (p: LatLon) =>
-    t('radar.alert.banner').replace('{m}', String(Math.round(haversineKm(p, at) * 1000)))
+    t('radar.alert.banner').replace('{distance}', formatDistance(haversineKm(p, at)))
   const radarBanner = (c: TripController) =>
     draw(c).querySelector<HTMLElement>('.trip-view__banner--radar')
 
@@ -154,10 +155,8 @@ describe('trip fuel banners', () => {
     expect(banner.getAttribute('aria-live')).toBe('polite')
     expect(banner.textContent).toContain(t('trip.cheapestAhead'))
     expect(banner.textContent).toContain(CHEAP.brand)
-    const km = haversineKm(near, CHEAP.pos).toFixed(1)
-    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(
-      `${(1.0).toFixed(3)} · ${km} km`,
-    )
+    const km = formatKm(haversineKm(near, CHEAP.pos))
+    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toBe(`1,000 · ${km}`)
   })
 
   it('proximity fuel banner keeps its distance and is a polite live region', async () => {
@@ -167,7 +166,9 @@ describe('trip fuel banners', () => {
     const banner = draw(c).querySelector<HTMLElement>('.trip-view__banner--fuel')!
     expect(banner).not.toBeNull()
     expect(banner.getAttribute('aria-live')).toBe('polite')
-    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toMatch(/\d+ m/)
+    expect(banner.querySelector('.trip-view__banner-key')!.textContent).toMatch(
+      /^.+ a (\d+ m|\d+,\d km)$/,
+    )
   })
 })
 
@@ -189,6 +190,34 @@ describe('trip rows', () => {
       expect(row.dataset.band).toBe(bandFor(station.prices.gasoleoA!, prices))
     }
     expect(new Set(rows.map((r) => r.dataset.band)).has('cheap')).toBe(true)
+    c.stop()
+  })
+
+  it('voice the price before its band, not the band instead of the price', async () => {
+    installGeolocation()
+    const c = makeController([CHEAP, MID, PRICEY])
+    await c.start()
+    await fix(c, { lat: 40.0, lon: 0 })
+    await fix(c, { lat: 40.02, lon: 0 })
+    const cheap = [...draw(c).querySelectorAll<HTMLElement>('.trip-view__row')].find(
+      (r) => r.dataset.band === 'cheap',
+    )!
+    const price = cheap.querySelector('.trip-view__row-price')!
+    expect(price.textContent).toBe('1,000')
+    expect(price.getAttribute('aria-label')).toBe('1,000 €/l, barata')
+    c.stop()
+  })
+})
+
+describe('trip radar dataset notice', () => {
+  it("dates the radar dataset in the reader's locale, not ISO", async () => {
+    installGeolocation()
+    const c = makeController()
+    c['store'].setSettings({ radarAlertsEnabled: true })
+    await c.start()
+    const notice = draw(c).querySelector('.trip-view__radar-notice')!
+    expect(notice.textContent).toContain(formatDate(RADARS_DATASET_DATE))
+    expect(notice.textContent).not.toContain(RADARS_DATASET_DATE)
     c.stop()
   })
 })

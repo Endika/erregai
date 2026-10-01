@@ -10,6 +10,7 @@ export const en: Record<string, string> = {
 
   'app.title': 'Erregai',
   'app.updated': 'Updated',
+  'app.updatedAgo': 'Updated {age}',
   'app.refresh': 'Refresh',
   'app.loading': 'Loading…',
   'app.refreshing': 'Refreshing…',
@@ -29,6 +30,7 @@ export const en: Record<string, string> = {
   'band.cheap': 'Cheap',
   'band.mid': 'Mid',
   'band.expensive': 'Expensive',
+  'price.withBand': '{price} €/l, {band}',
 
   'trip.start': 'Start trip',
   'trip.stop': 'Stop trip',
@@ -84,7 +86,7 @@ export const en: Record<string, string> = {
   'radar.settings.testSound': 'Test sound',
   'radar.alert.title': 'Radar ahead',
   'radar.alert.body': 'Fixed radar on {via}',
-  'radar.alert.banner': 'Radar in {m} m',
+  'radar.alert.banner': 'Radar in {distance}',
   'fuel.settings.mode': 'Fuel station alerts',
   'fuel.settings.mode.cheap': 'Only cheap nearby',
   'fuel.settings.mode.any': 'Any nearby',
@@ -94,7 +96,7 @@ export const en: Record<string, string> = {
   'fuel.settings.testSound': 'Test sound',
   'fuel.alert.title': 'Fuel station ahead',
   'fuel.alert.body': '{brand} on your route',
-  'fuel.alert.banner': '{brand} in {m} m',
+  'fuel.alert.banner': '{brand} in {distance}',
   'radar.list.title': 'Radars ahead',
   'radar.nearby.title': 'Nearby radars',
   'radar.notice.fixedOnly': 'Official fixed radars only (no mobile or section-control).',
@@ -113,6 +115,9 @@ export const en: Record<string, string> = {
   'error.load.server': "The price service isn't responding; try again in a few minutes.",
   'status.cached.offline': 'Prices from {age} · offline',
   'status.cached.failed': "Prices from {age} · couldn't update",
+  'age.minute': '{n} min ago',
+  'age.hour': '{n} h ago',
+  'age.day': '{n} days ago',
   'error.refreshFailed': 'Could not refresh; showing the last saved data',
   'error.storage': "This device's storage is unavailable; data will not be kept for offline use",
 }
