@@ -156,3 +156,57 @@ describe('MapView stacking', () => {
     expect(paneZ(radarPin)).toBeLessThan(paneZ(stationPin))
   })
 })
+
+describe('MapView container resize', () => {
+  let observed: Element[] = []
+  let notify: () => void = () => {}
+  let disconnected = false
+
+  beforeEach(() => {
+    observed = []
+    disconnected = false
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          notify = callback
+        }
+        observe(el: Element): void {
+          observed.push(el)
+        }
+        disconnect(): void {
+          disconnected = true
+        }
+      },
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('resizes the map when its own container changes size, not only the window', () => {
+    view.render(BILBAO, [], 'gasoleoA', () => {})
+    expect(observed).toEqual([container])
+    const resize = vi.spyOn(leafletOf(view), 'invalidateSize')
+    notify()
+    expect(resize).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores the 0×0 of a container taken off the page between tabs', () => {
+    view.render(BILBAO, [], 'gasoleoA', () => {})
+    const resize = vi.spyOn(leafletOf(view), 'invalidateSize')
+    container.remove()
+    notify()
+    document.body.appendChild(container)
+    Object.defineProperty(container, 'clientHeight', { configurable: true, value: 0 })
+    notify()
+    expect(resize).not.toHaveBeenCalled()
+  })
+
+  it('stops watching once destroyed', () => {
+    view.render(BILBAO, [], 'gasoleoA', () => {})
+    view.destroy()
+    expect(disconnected).toBe(true)
+  })
+})
