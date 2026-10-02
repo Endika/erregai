@@ -557,7 +557,7 @@ export class TripController {
     const notice = document.createElement('p')
     notice.className = 'trip-view__radar-notice'
     const dataset = t('radar.notice.dataset').replace('{date}', formatDate(RADARS_DATASET_DATE))
-    notice.textContent = `${t('radar.notice.fixedOnly')} ${dataset}`
+    notice.textContent = `${t('radar.notice.coverage')} ${dataset}`
     return notice
   }
 }

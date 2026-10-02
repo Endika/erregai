@@ -143,7 +143,7 @@ export const eu: Record<string, string> = {
   'radar.dir.to': '{place} noranzkoan',
   'radar.dir.creciente': 'noranzko gorakorrean',
   'radar.dir.decreciente': 'noranzko beherakorrean',
-  'radar.notice.fixedOnly': 'Radar finko ofizialak soilik (mugikorrik edo tarteko radarrik gabe).',
+  'radar.notice.coverage': 'Radar finko ofizialak eta tarteko batzuk; radar mugikorrik gabe.',
   'radar.notice.dataset': 'Datuak eguneratuta: {date}.',
   'settings.about': 'Honi buruz',
   'about.data': 'Prezioak: Trantsizio Ekologikoaren Ministerioa',

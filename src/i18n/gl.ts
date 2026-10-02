@@ -142,7 +142,7 @@ export const gl: Record<string, string> = {
   'radar.dir.to': 'sentido {place}',
   'radar.dir.creciente': 'sentido crecente',
   'radar.dir.decreciente': 'sentido decrecente',
-  'radar.notice.fixedOnly': 'Só radares fixos oficiais (sen móbiles nin de tramo).',
+  'radar.notice.coverage': 'Radares oficiais fixos e algúns de tramo; sen radares móbiles.',
   'radar.notice.dataset': 'Datos actualizados o {date}.',
   'settings.about': 'Acerca de',
   'about.data': 'Prezos: Ministerio de Transición Ecolóxica',
