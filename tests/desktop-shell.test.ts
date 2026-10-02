@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   getOnce: vi.fn<() => Promise<LatLon>>(),
   fetchProvince: vi.fn(),
   fits: 0,
+  radars: 0,
 }))
 
 vi.mock('../src/adapters/geolocation', () => ({
@@ -21,8 +22,12 @@ vi.mock('../src/adapters/cache', async (importActual) => ({
 vi.mock('../src/ui/map', () => ({
   MapView: class {
     render(): void {}
-    renderRadars(): void {}
-    clearRadars(): void {}
+    renderRadars(radars: readonly unknown[]): void {
+      mocks.radars = radars.length
+    }
+    clearRadars(): void {
+      mocks.radars = 0
+    }
     renderServiceAreas(): void {}
     clearServiceAreas(): void {}
     invalidateSize(): void {}
@@ -55,7 +60,7 @@ const station = (id: string, lat: number, price: number): Station => ({
   pos: { lat, lon: BILBAO.lon },
   address: '',
   town: '',
-  schedule: '',
+  schedule: 'L-D: 24H',
   prices: { gasoleoA: price },
 })
 
@@ -78,7 +83,7 @@ function stubMatchMedia(initial: boolean): void {
   }
 }
 
-async function boot(desktop: boolean): Promise<HTMLElement> {
+async function boot(desktop: boolean, saved: object = {}): Promise<HTMLElement> {
   Element.prototype.scrollIntoView = () => {}
   stubMatchMedia(desktop)
   mocks.getOnce.mockResolvedValue(BILBAO)
@@ -88,8 +93,12 @@ async function boot(desktop: boolean): Promise<HTMLElement> {
   })
   vi.resetModules()
   localStorage.clear()
+  window.sessionStorage.clear()
   localStorage.setItem('erregai.firstRunDone', '1')
-  localStorage.setItem('erregai.settings', JSON.stringify({ locale: 'es', fuel: 'gasoleoA' }))
+  localStorage.setItem(
+    'erregai.settings',
+    JSON.stringify({ locale: 'es', fuel: 'gasoleoA', ...saved }),
+  )
   document.body.innerHTML = '<div id="app"></div>'
   await import('../src/main')
   await flush()
@@ -101,8 +110,23 @@ const tab = (root: HTMLElement, name: string): HTMLButtonElement =>
 const row = (root: HTMLElement, id: string): HTMLButtonElement =>
   root.querySelector<HTMLButtonElement>(`[data-view] [data-station="${id}"]`)!
 
+const visibleTabs = (root: HTMLElement): string[] =>
+  [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')]
+    .filter((b) => !b.hidden)
+    .map((b) => b.textContent!)
+const current = (root: HTMLElement): string | undefined =>
+  root.querySelector<HTMLElement>('[data-tab][aria-current="page"]')?.dataset.tab
+const pane = (root: HTMLElement): HTMLElement => root.querySelector('.map-split__list')!
+const option = (root: HTMLElement, view: 'stations' | 'radars'): HTMLInputElement =>
+  root.querySelector<HTMLInputElement>(`.pane-switch input[value="${view}"]`)!
+const pick = (input: HTMLInputElement): void => {
+  input.checked = true
+  input.dispatchEvent(new Event('change', { bubbles: true }))
+}
+
 beforeEach(() => {
   mocks.fits = 0
+  mocks.radars = 0
 })
 
 afterEach(() => {
@@ -166,7 +190,8 @@ describe('desktop shell', () => {
       const after = root.querySelector('.map-split__list')!
       expect(after).not.toBe(before)
       expect(after.scrollTop).toBe(320)
-      tab(root, 'map').click()
+      tab(root, 'trip').click()
+      tab(root, 'list').click()
       expect(root.querySelector('.map-split__list')!.scrollTop).toBe(0)
     } finally {
       Object.defineProperty(Element.prototype, 'scrollTop', own)
@@ -191,6 +216,107 @@ describe('desktop shell', () => {
   })
 })
 
+describe('desktop stations view', () => {
+  it('has three tabs, Gasolineras in place of List and Map, with the current one marked', async () => {
+    const root = await boot(true)
+    expect(visibleTabs(root)).toEqual(['Gasolineras', 'Viaje', 'Ajustes'])
+    expect(tab(root, 'map').hidden).toBe(true)
+    expect(current(root)).toBe('list')
+    tab(root, 'trip').click()
+    expect(current(root)).toBe('trip')
+    expect(root.querySelectorAll('[aria-current]')).toHaveLength(1)
+  })
+
+  it('leads the pane with the switch, then the sort bar, the answer, the legend and the list', async () => {
+    const root = await boot(true)
+    const order = [...pane(root).children].map((c) => c.className.split(' ')[0])
+    expect(order).toEqual(['pane-switch', 'sort-bar', 'answer-card', 'band-legend', ''])
+    expect(pane(root).lastElementChild!.querySelector('[data-station="1"]')).not.toBeNull()
+    expect(option(root, 'stations').checked).toBe(true)
+    expect(pane(root).querySelector('.radar-list')).toBeNull()
+  })
+
+  it('shows only the radars when Radares is picked, keeping both map layers', async () => {
+    const root = await boot(true)
+    const radars = option(root, 'radars')
+    const listed = Number(/\((\d+)\)/.exec(radars.labels![0].textContent!)![1])
+    expect(listed).toBeGreaterThan(0)
+    pick(radars)
+    const children = [...pane(root).children].map((c) => c.className)
+    expect(children).toEqual(['pane-switch', 'radar-list'])
+    expect(pane(root).querySelectorAll('.radar-list__row')).toHaveLength(listed)
+    expect(mocks.radars).toBeGreaterThan(0)
+    expect(document.activeElement).toBe(option(root, 'radars'))
+    pick(option(root, 'stations'))
+    expect(pane(root).querySelector('[data-station="1"]')).not.toBeNull()
+  })
+
+  it('lands on Gasolineras when the window widens from Map, and back on Map when it narrows', async () => {
+    const root = await boot(false)
+    tab(root, 'map').click()
+    crossTo(true)
+    expect(current(root)).toBe('list')
+    expect(visibleTabs(root)).toEqual(['Gasolineras', 'Viaje', 'Ajustes'])
+    expect(pane(root).previousElementSibling).toBeNull()
+    crossTo(false)
+    expect(current(root)).toBe('map')
+    expect(visibleTabs(root)).toEqual(['Lista', 'Mapa', 'Viaje', 'Ajustes'])
+    expect(root.querySelector('.map-split')!.firstElementChild!.className).toBe('map-split__map')
+  })
+
+  it('narrows back to List when List was the last stations tab on the phone', async () => {
+    const root = await boot(false)
+    tab(root, 'map').click()
+    tab(root, 'list').click()
+    crossTo(true)
+    crossTo(false)
+    expect(current(root)).toBe('list')
+    expect(root.querySelector('[data-view] > .sort-bar')).not.toBeNull()
+  })
+
+  it('keeps Trip and Settings across the breakpoint both ways', async () => {
+    const root = await boot(false)
+    tab(root, 'trip').click()
+    crossTo(true)
+    expect(current(root)).toBe('trip')
+    tab(root, 'settings').click()
+    crossTo(false)
+    expect(current(root)).toBe('settings')
+  })
+
+  it('takes the offline radar offer to the radars in the stations view, layer on', async () => {
+    vi.resetModules()
+    const fresh = await bootFailing()
+    const offer = [...fresh.querySelectorAll<HTMLButtonElement>('[data-view] .notice button')].find(
+      (b) => b.textContent === 'Ver radares (funcionan sin conexión)',
+    )!
+    offer.click()
+    await flush()
+    expect(current(fresh)).toBe('list')
+    expect(option(fresh, 'radars').checked).toBe(true)
+    expect(pane(fresh).querySelector('.radar-list__row')).not.toBeNull()
+    expect(mocks.radars).toBeGreaterThan(0)
+    expect(JSON.parse(localStorage.getItem('erregai.settings')!).radarLayerEnabled).toBe(true)
+  })
+})
+
+async function bootFailing(): Promise<HTMLElement> {
+  stubMatchMedia(true)
+  mocks.getOnce.mockResolvedValue(BILBAO)
+  mocks.fetchProvince.mockRejectedValue(new Error('Failed to fetch'))
+  localStorage.clear()
+  window.sessionStorage.clear()
+  localStorage.setItem('erregai.firstRunDone', '1')
+  localStorage.setItem(
+    'erregai.settings',
+    JSON.stringify({ locale: 'es', radarLayerEnabled: false, servicesLayerEnabled: false }),
+  )
+  document.body.innerHTML = '<div id="app"></div>'
+  await import('../src/main')
+  await flush()
+  return document.getElementById('app')!
+}
+
 describe('phone shell', () => {
   it('keeps the bottom bar, the plain list and the bottom sheet', async () => {
     const root = await boot(false)
@@ -203,4 +329,79 @@ describe('phone shell', () => {
     const view = root.querySelector('[data-view]')!
     expect([...view.children].map((c) => c.className)).toEqual(['trip-map', 'trip-readout'])
   })
+
+  it('keeps the four tabs and a List with no switch', async () => {
+    const root = await boot(false)
+    expect(visibleTabs(root)).toEqual(['Lista', 'Mapa', 'Viaje', 'Ajustes'])
+    expect(current(root)).toBe('list')
+    expect(root.querySelector('.pane-switch')).toBeNull()
+    const view = root.querySelector('[data-view]')!
+    expect([...view.children].map((c) => c.className.split(' ')[0])).toEqual([
+      'sort-bar',
+      'answer-card',
+      'band-legend',
+      '',
+    ])
+  })
+
+  it('puts the switch right under the map, stations first, radars on demand', async () => {
+    const root = await boot(false)
+    tab(root, 'map').click()
+    const split = root.querySelector('.map-split')!
+    expect([...split.children].map((c) => c.className)).toEqual([
+      'map-split__map',
+      'map-split__list',
+    ])
+    expect([...pane(root).children].map((c) => c.className.split(' ')[0])).toEqual([
+      'pane-switch',
+      'sort-bar',
+      'band-legend',
+      '',
+    ])
+    pick(option(root, 'radars'))
+    expect([...pane(root).children].map((c) => c.className)).toEqual(['pane-switch', 'radar-list'])
+  })
+
+  it('remembers the picked view for the session, across tabs and reloads', async () => {
+    const root = await boot(false)
+    tab(root, 'map').click()
+    pick(option(root, 'radars'))
+    tab(root, 'list').click()
+    tab(root, 'map').click()
+    expect(option(root, 'radars').checked).toBe(true)
+    vi.resetModules()
+    document.body.innerHTML = '<div id="app"></div>'
+    await import('../src/main')
+    await flush()
+    const again = document.getElementById('app')!
+    tab(again, 'map').click()
+    expect(option(again, 'radars').checked).toBe(true)
+  })
+
+  it('takes the offline radar offer to Map with Radares picked', async () => {
+    const root = await bootFailingPhone()
+    const offer = [...root.querySelectorAll<HTMLButtonElement>('[data-view] .notice button')].find(
+      (b) => b.textContent === 'Ver radares (funcionan sin conexión)',
+    )!
+    offer.click()
+    await flush()
+    expect(current(root)).toBe('map')
+    expect(option(root, 'radars').checked).toBe(true)
+    expect(pane(root).querySelector('.radar-list__row')).not.toBeNull()
+  })
 })
+
+async function bootFailingPhone(): Promise<HTMLElement> {
+  stubMatchMedia(false)
+  mocks.getOnce.mockResolvedValue(BILBAO)
+  mocks.fetchProvince.mockRejectedValue(new Error('Failed to fetch'))
+  vi.resetModules()
+  localStorage.clear()
+  window.sessionStorage.clear()
+  localStorage.setItem('erregai.firstRunDone', '1')
+  localStorage.setItem('erregai.settings', JSON.stringify({ locale: 'es' }))
+  document.body.innerHTML = '<div id="app"></div>'
+  await import('../src/main')
+  await flush()
+  return document.getElementById('app')!
+}

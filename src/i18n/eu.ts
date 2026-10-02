@@ -22,6 +22,9 @@ export const eu: Record<string, string> = {
   'nav.map': 'Mapa',
   'nav.trip': 'Bidaia',
   'nav.settings': 'Ezarpenak',
+  'nav.stations': 'Gasolindegiak',
+  'pane.label': 'Erakutsi',
+  'pane.radars': 'Radarrak ({count})',
   'nav.close': 'Itxi',
 
   'sort.price': 'Prezioa',
@@ -131,6 +134,7 @@ export const eu: Record<string, string> = {
   'fuel.alert.body': '{brand} zure ibilbidean',
   'radar.list.title': 'Aurrean dauden radarrak',
   'radar.nearby.title': 'Inguruko radarrak',
+  'radar.nearby.empty': '{radius} km-ko erradioan ez dago radarrik',
   'radar.toward.n': '{distance} iparraldera',
   'radar.toward.ne': '{distance} ipar-ekialdera',
   'radar.toward.e': '{distance} ekialdera',

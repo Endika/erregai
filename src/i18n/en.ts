@@ -22,6 +22,9 @@ export const en: Record<string, string> = {
   'nav.map': 'Map',
   'nav.trip': 'Trip',
   'nav.settings': 'Settings',
+  'nav.stations': 'Stations',
+  'pane.label': 'Show',
+  'pane.radars': 'Radars ({count})',
   'nav.close': 'Close',
 
   'sort.price': 'Price',
@@ -130,6 +133,7 @@ export const en: Record<string, string> = {
   'fuel.alert.body': '{brand} on your route',
   'radar.list.title': 'Radars ahead',
   'radar.nearby.title': 'Nearby radars',
+  'radar.nearby.empty': 'No radars within {radius} km',
   'radar.toward.n': '{distance} north',
   'radar.toward.ne': '{distance} northeast',
   'radar.toward.e': '{distance} east',

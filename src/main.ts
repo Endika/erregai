@@ -13,12 +13,23 @@ import { renderSortBar } from './ui/sortBar'
 import { renderAnswerCard } from './ui/answer-card'
 import { bestChoice } from './core/best-choice'
 import { renderRadarList } from './ui/radar-list'
+import { renderPaneSwitch } from './ui/pane-switch'
 import { statusBanner } from './ui/banner'
 import { createAnnouncer } from './ui/announcer'
 import { watchConnectivity } from './app/connectivity'
 import { renderPlaceSearch, renderPlaceStrip } from './ui/place-search'
 import { renderFirstRun } from './ui/first-run'
-import { cardHost, placeNav, watchDesktop } from './ui/layout'
+import {
+  cardHost,
+  navTabs,
+  placeNav,
+  tabAcrossBreakpoint,
+  tabLabelKey,
+  watchDesktop,
+  type PhoneStationsTab,
+} from './ui/layout'
+import { loadPaneView, savePaneView, type PaneView } from './app/pane-view'
+import { formatNumber } from './i18n/format'
 import { geolocationPermission, isFirstRun, markFirstRunDone } from './app/first-run'
 import { placesFromRows, type Place } from './core/places'
 import {
@@ -86,6 +97,12 @@ let freshnessTimer: number | undefined
 let mapFramedFor: string | undefined
 // The tab the view last drew, so a re-render of it keeps a pane's own scroll.
 let renderedTab: Tab | undefined
+// Which of List and Map the phone last showed, to go back to on narrowing.
+let phoneStationsTab: PhoneStationsTab = 'list'
+// Stations or radars beside the map; a new pick starts the pane at the top.
+let paneView: PaneView = loadPaneView()
+let renderedPaneView: PaneView | undefined
+let focusSwitch = false
 
 const root: HTMLElement =
   document.getElementById('app') ??
@@ -131,7 +148,9 @@ const navEl = requireEl<HTMLElement>('.tab-bar')
 
 const isDesktop = watchDesktop(window, (desktop) => {
   placeNav(navEl, desktop, headerEl)
-  render()
+  const tab = tabAcrossBreakpoint(activeTab, desktop, phoneStationsTab)
+  if (tab === activeTab) render()
+  else showTab(tab)
 })
 placeNav(navEl, isDesktop(), headerEl)
 
@@ -164,6 +183,7 @@ root.addEventListener('click', (e) => {
 function showTab(tab: Tab): void {
   const previousTab = activeTab
   activeTab = tab
+  if (!isDesktop() && (tab === 'list' || tab === 'map')) phoneStationsTab = tab
   // On a desktop List shares the map too, and frames the radius like Map does.
   const framesRadius = tab === 'map' || (tab === 'list' && isDesktop())
   if (framesRadius && previousTab !== tab) mapFramedFor = undefined
@@ -193,7 +213,11 @@ function closeCard(): void {
   selectedStation = undefined
   render()
   const rows = viewEl.querySelectorAll<HTMLElement>('[data-station]')
-  ;[...rows].find((row) => row.dataset.station === id)?.focus()
+  // Opened from a map pin while the pane lists radars: no row to go back to.
+  const back =
+    [...rows].find((row) => row.dataset.station === id) ??
+    viewEl.querySelector<HTMLElement>('.pane-switch input:checked')
+  back?.focus()
 }
 
 function renderCard(reference: PriceReference | undefined): void {
@@ -296,9 +320,15 @@ function actionButton(label: string, primary: boolean, onClick: () => void): HTM
   return button
 }
 
+function pickPaneView(view: PaneView): void {
+  paneView = view
+  savePaneView(view)
+}
+
 function showRadars(): void {
+  pickPaneView('radars')
   if (!store.state.settings.radarLayerEnabled) store.setSettings({ radarLayerEnabled: true })
-  showTab('map')
+  showTab(isDesktop() ? 'list' : 'map')
 }
 
 function hasRadarsAround(pos: LatLon): boolean {
@@ -310,10 +340,7 @@ function hasRadarsAround(pos: LatLon): boolean {
 function renderNotice(notice: ViewNotice): void {
   const { title, hint } = viewNoticeText(notice, !navigator.onLine)
   if (notice.kind !== 'location' && notice.kind !== 'loadFailed') {
-    const placeholder = document.createElement('p')
-    placeholder.className = 'placeholder'
-    placeholder.textContent = title
-    viewEl.appendChild(placeholder)
+    viewEl.appendChild(placeholder(title))
     return
   }
   const box = document.createElement('section')
@@ -442,9 +469,12 @@ function refreshStaticCopy(): void {
   titleEl.textContent = t('app.title')
   refreshButton.setAttribute('aria-label', t('app.refresh'))
   refreshButton.title = t('app.refresh')
+  const desktop = isDesktop()
+  const shown = navTabs(desktop)
   for (const button of tabButtons) {
     const tab = button.dataset.tab as Tab
-    button.textContent = t(`nav.${tab}`)
+    button.textContent = t(tabLabelKey(tab, desktop))
+    button.hidden = !shown.includes(tab)
   }
 }
 
@@ -498,15 +528,17 @@ function mapLayersAround(pos: LatLon): {
 }
 
 // The map beside the stations: stacked on a phone, side by side on a desktop,
-// where the list pane comes first so keyboard order follows the eye.
+// where the list pane comes first so keyboard order follows the eye. The pane
+// opens on a switch between the stations and the radars around; the map keeps
+// both layers whichever the pane lists.
 function renderMapSplit(
   pos: LatLon,
   sorted: Station[],
   reference: PriceReference | undefined,
   radarHits: RadarHit[],
   serviceHits: ServiceAreaHit[],
-  withRadarList: boolean,
   answer?: HTMLElement,
+  noStations?: ViewNotice,
 ): void {
   const { settings } = store.state
   const desktop = isDesktop()
@@ -521,6 +553,15 @@ function renderMapSplit(
   listWrap.dataset.pane = ''
   // The open card covers this pane; its rows must not take focus behind it.
   listWrap.inert = selectedStation !== undefined && cardHost(activeTab, desktop) === 'pane'
+  // The list counts what it shows, so it does not hang on the map layer toggle.
+  const listedRadars = nearbyRadars(pos, RADARS, settings.radiusKm, RADAR_LIST_CAP)
+  listWrap.appendChild(
+    renderPaneSwitch(paneView, listedRadars.length, (view) => {
+      pickPaneView(view)
+      focusSwitch = true
+      render()
+    }),
+  )
   renderPlaceStripIn(listWrap)
   if (desktop) split.append(listWrap, mapWrap)
   else split.append(mapWrap, listWrap)
@@ -541,7 +582,15 @@ function renderMapSplit(
     mapView.fitRadius(pos, settings.radiusKm)
   }
   if (selectedStation) mapView.panTo(selectedStation.pos)
-  if (sorted.length > 0)
+  if (paneView === 'radars') {
+    if (listedRadars.length > 0) {
+      listWrap.appendChild(renderRadarList(listedRadars, undefined, RADAR_LIST_CAP, pos))
+    } else {
+      listWrap.appendChild(
+        placeholder(t('radar.nearby.empty').replace('{radius}', formatNumber(settings.radiusKm))),
+      )
+    }
+  } else if (sorted.length > 0) {
     renderStationList(
       listWrap,
       sorted,
@@ -552,8 +601,17 @@ function renderMapSplit(
       selectedId,
       answer,
     )
-  if (withRadarList && radarHits.length > 0)
-    listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP, pos))
+  } else if (noStations && noStations.kind !== 'loadFailed') {
+    // A failed load already speaks from the banner above.
+    listWrap.appendChild(placeholder(viewNoticeText(noStations, !navigator.onLine).title))
+  }
+}
+
+function placeholder(text: string): HTMLElement {
+  const el = document.createElement('p')
+  el.className = 'placeholder'
+  el.textContent = text
+  return el
 }
 
 function render(): void {
@@ -577,10 +635,11 @@ function render(): void {
   // On a desktop the view does not scroll, its panes do; each render rebuilds
   // them, so a re-render of the same tab carries their scroll over.
   const paneScroll =
-    desktop && activeTab === renderedTab
+    desktop && activeTab === renderedTab && paneView === renderedPaneView
       ? (viewEl.querySelector<HTMLElement>('[data-pane]')?.scrollTop ?? 0)
       : 0
   renderedTab = activeTab
+  renderedPaneView = paneView
   viewEl.replaceChildren()
 
   const selectedId = selectedStation?.id
@@ -605,19 +664,30 @@ function render(): void {
 
   if (activeTab === 'list') {
     const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
-    notice = introducing ? undefined : noticeFor(nearby.length)
-    const split = state.pos !== undefined && !introducing && !notice && desktop
+    // On a desktop this is Map's view too: radars drawn on it are worth showing
+    // with no station around, and taking up the offline offer needs just that.
+    const layers = state.pos && desktop ? mapLayersAround(state.pos) : undefined
+    const shown = nearby.length + (layers?.radarHits.length ?? 0)
+    notice = introducing ? undefined : noticeFor(shown)
+    const split = layers !== undefined && !introducing && !notice
     // The split draws the strip in its own list pane.
     if (!split) renderPlaceStripIn(viewEl)
     if (introducing) {
       renderFirstRunIn(viewEl)
     } else if (notice) {
       renderNotice(notice)
-    } else if (state.pos && desktop) {
+    } else if (state.pos && layers) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-      const { radarHits, serviceHits } = mapLayersAround(state.pos)
       const answer = answerCard(nearby, state.pos, reference)
-      renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, false, answer)
+      renderMapSplit(
+        state.pos,
+        sorted,
+        reference,
+        layers.radarHits,
+        layers.serviceHits,
+        answer,
+        noticeFor(nearby.length),
+      )
     } else if (state.pos) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
       renderStationList(
@@ -641,7 +711,7 @@ function render(): void {
         renderNotice(notice)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, true)
+        renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits)
       }
     } else if (introducing) {
       renderFirstRunIn(viewEl)
@@ -734,6 +804,11 @@ function render(): void {
   if (paneScroll > 0) {
     const pane = viewEl.querySelector<HTMLElement>('[data-pane]')
     if (pane) pane.scrollTop = paneScroll
+  }
+  // The pick rebuilt the switch; arrow keys go on from the option just chosen.
+  if (focusSwitch) {
+    focusSwitch = false
+    viewEl.querySelector<HTMLElement>('.pane-switch input:checked')?.focus()
   }
 
   renderCard(cardReference)
