@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.31.1](https://github.com/Endika/erregai/compare/v1.31.0...v1.31.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* say the radar data includes some section-control radars ([280ea1c](https://github.com/Endika/erregai/commit/280ea1cdcaae9b8cff58a1dad0f5f6a6e9811f6f))
+
 ## [1.31.0](https://github.com/Endika/erregai/compare/v1.30.0...v1.31.0) (2026-10-02)
 
 
