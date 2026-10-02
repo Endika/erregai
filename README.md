@@ -38,7 +38,7 @@ npm test        # tests
 npm run build   # type check + production build
 ```
 
-To refresh the bundled data: `npm run data:radars`, `npm run data:services` and `npm run data:places`. Radars and service areas are also refreshed by scheduled GitHub Actions. Euskadi radars can only be fetched from a Spanish connection.
+To refresh the bundled data: `npm run data:radars`, `npm run data:services` and `npm run data:places`. All three are also refreshed by scheduled GitHub Actions. Euskadi radars can only be fetched from a Spanish connection.
 
 ## License
 
