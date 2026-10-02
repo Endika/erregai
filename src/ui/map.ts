@@ -137,6 +137,7 @@ export class MapView {
   // Heading the view leads towards; set by the latest render, so a later
   // focus() keeps what lies ahead on screen too.
   private aheadDeg?: number
+  private resizeObserver?: ResizeObserver
 
   constructor(private container: HTMLElement) {}
 
@@ -344,6 +345,8 @@ export class MapView {
   }
 
   destroy(): void {
+    this.resizeObserver?.disconnect()
+    this.resizeObserver = undefined
     this.map?.remove()
     this.map = undefined
     this.markers = undefined
@@ -389,5 +392,19 @@ export class MapView {
       fillOpacity: 1,
     }).addTo(map)
     this.map = map
+    this.watchSize()
+  }
+
+  // The one map moves between the Map, List and Trip containers, which change
+  // size with the layout and not only with the window Leaflet already tracks.
+  // A detached container measures 0×0 between tabs; sizing to that would pan
+  // the view by half the map, so it is skipped.
+  private watchSize(): void {
+    if (typeof ResizeObserver === 'undefined') return
+    this.resizeObserver = new ResizeObserver(() => {
+      const el = this.container
+      if (el.isConnected && el.clientWidth > 0 && el.clientHeight > 0) this.map?.invalidateSize()
+    })
+    this.resizeObserver.observe(this.container)
   }
 }
