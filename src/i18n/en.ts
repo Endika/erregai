@@ -142,7 +142,7 @@ export const en: Record<string, string> = {
   'radar.dir.to': 'towards {place}',
   'radar.dir.creciente': 'increasing km',
   'radar.dir.decreciente': 'decreasing km',
-  'radar.notice.fixedOnly': 'Official fixed radars only (no mobile or section-control).',
+  'radar.notice.coverage': 'Official fixed radars and some section-control ones; no mobile radars.',
   'radar.notice.dataset': 'Dataset updated on {date}.',
   'settings.about': 'About',
   'about.data': 'Prices: Spanish Ecological Transition Ministry',

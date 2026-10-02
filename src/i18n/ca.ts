@@ -143,7 +143,7 @@ export const ca: Record<string, string> = {
   'radar.dir.to': 'sentit {place}',
   'radar.dir.creciente': 'sentit creixent',
   'radar.dir.decreciente': 'sentit decreixent',
-  'radar.notice.fixedOnly': 'Només radars fixos oficials (sense mòbils ni de tram).',
+  'radar.notice.coverage': 'Radars oficials fixos i alguns de tram; sense radars mòbils.',
   'radar.notice.dataset': 'Dades actualitzades el {date}.',
   'settings.about': 'Quant a',
   'about.data': 'Preus: Ministeri de Transició Ecològica',

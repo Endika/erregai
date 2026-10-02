@@ -27,7 +27,7 @@ Your location never leaves your device. The app only calls the Ministerio price 
 | Service areas | [OpenStreetMap](https://www.openstreetmap.org/copyright) | ODbL |
 | Map tiles | [OpenStreetMap](https://www.openstreetmap.org/copyright) | ODbL |
 
-Fixed radars only, with no mobile or section-control radars. Erregai is not affiliated with any of these sources.
+Fixed radars plus some section-control ones, with no mobile radars. Erregai is not affiliated with any of these sources.
 
 ## Development
 
