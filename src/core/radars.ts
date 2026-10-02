@@ -2,7 +2,20 @@ import { type LatLon, haversineKm, isAhead } from './geo'
 import { nextProximityAlerts } from './proximity'
 
 export type RadarSource = 'dgt' | 'euskadi' | 'catalunya'
-export type Radar = { id: string; lat: number; lon: number; via: string; source: RadarSource }
+// The way a radar faces: a destination as its source names it, or along the PK.
+export type RadarDir = 'creciente' | 'decreciente' | (string & {})
+export type Radar = {
+  id: string
+  lat: number
+  lon: number
+  via: string
+  source: RadarSource
+  // Kilometre point, in km.
+  pk?: number
+  dir?: RadarDir
+  // Posted speed limit, in km/h.
+  limit?: number
+}
 export type RadarHit = { radar: Radar; distanceKm: number }
 export type RadarSelectConfig = { radiusKm: number; corridorDeg: number }
 
