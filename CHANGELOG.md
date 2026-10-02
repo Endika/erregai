@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.31.0](https://github.com/Endika/erregai/compare/v1.30.0...v1.31.0) (2026-10-02)
+
+
+### Features
+
+* answer where to go with a card above the list ([ee98cd5](https://github.com/Endika/erregai/commit/ee98cd5c5399392a97bad828fdcc72e6fe96c213))
+* pick the open station with the highest net saving ([6d0d886](https://github.com/Endika/erregai/commit/6d0d8864e04d5e7d5cc05473a303c10197ed3d8f))
+
 ## [1.30.0](https://github.com/Endika/erregai/compare/v1.29.0...v1.30.0) (2026-10-02)
 
 
