@@ -2101,3 +2101,148 @@ body {
   border-radius: 0.25rem;
   font-weight: 600;
 }
+
+/* --- Desktop: from 64rem (1024 px), matching DESKTOP_QUERY in ui/layout.ts ---
+   A list pane as wide as a phone beside a map of at least ~38rem; any narrower
+   and the map is a strip, so tablets in portrait keep the phone layout. The
+   nav joins the header, the list sits left of the map, and the card takes the
+   pane's place (List, Map) or floats over the map's edge (Trip, Settings). */
+@media (min-width: 64rem) {
+  :root {
+    --pane-width: clamp(25rem, 28vw, 28rem);
+  }
+
+  /* One row for the view; the card shares its cell and lies over it. */
+  #app {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-header {
+    grid-row: 1;
+    gap: 1.5rem;
+    padding-block: 0.5rem;
+  }
+
+  .app-status {
+    grid-row: 2;
+  }
+
+  .app-main,
+  .detail-card {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .app-header__freshness {
+    text-align: end;
+  }
+
+  .app-header > .tab-bar {
+    position: static;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  /* Every tab is set in the active weight, so choosing one moves none. */
+  .app-header .tab-bar__tab {
+    flex: none;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+  }
+
+  .app-header .tab-bar__tab:hover {
+    color: var(--color-fg);
+  }
+
+  .app-header .tab-bar__tab.is-active {
+    background: var(--color-selected);
+    color: var(--color-accent);
+  }
+
+  .map-split {
+    flex-direction: row;
+  }
+
+  .map-split__list {
+    flex: 0 0 var(--pane-width);
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  .map-split__map {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    isolation: isolate;
+  }
+
+  /* The trip's readout is the side pane and scrolls on its own, so the dock
+     rests at the foot of the window beside a map that keeps its full height. */
+  #app .app-main:has(> .trip-map) {
+    display: grid;
+    grid-template-columns: var(--pane-width) minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  #app .app-main:has(> .trip-map) > .trip-map {
+    height: auto;
+    min-height: 0;
+  }
+
+  #app .app-main:has(> .trip-map) > .trip-readout {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  .trip-readout > .trip-view {
+    flex: 1 0 auto;
+  }
+
+  .app-main > .trip-readout:only-child,
+  .app-main > .settings-form {
+    max-width: 40rem;
+    margin-inline: auto;
+  }
+
+  .app-main > .settings-form {
+    padding-block: 2rem;
+  }
+
+  .detail-card {
+    z-index: 2;
+    max-height: none;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .detail-card[data-host='pane'] {
+    justify-self: start;
+    width: var(--pane-width);
+    border-inline-end: 1px solid var(--color-border);
+  }
+
+  .detail-card[data-host='overlay'] {
+    align-self: start;
+    justify-self: end;
+    width: min(var(--pane-width), 100% - 2rem);
+    max-height: calc(100% - 2rem);
+    margin: 1rem;
+    border: 1px solid var(--color-border);
+    border-top: 2px solid var(--color-accent);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  }
+
+  .detail-card__close {
+    right: 0.5rem;
+  }
+}

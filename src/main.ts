@@ -16,6 +16,7 @@ import { createAnnouncer } from './ui/announcer'
 import { watchConnectivity } from './app/connectivity'
 import { renderPlaceSearch, renderPlaceStrip } from './ui/place-search'
 import { renderFirstRun } from './ui/first-run'
+import { cardHost, placeNav, watchDesktop } from './ui/layout'
 import { geolocationPermission, isFirstRun, markFirstRunDone } from './app/first-run'
 import { placesFromRows, type Place } from './core/places'
 import {
@@ -29,9 +30,9 @@ import {
   type LocationProblem,
   type ViewNotice,
 } from './ui/status'
-import { nearbyRadars } from './core/radars'
+import { nearbyRadars, type RadarHit } from './core/radars'
 import { RADARS } from './core/radars.data'
-import { nearbyServiceAreas } from './core/services'
+import { nearbyServiceAreas, type ServiceAreaHit } from './core/services'
 import { SERVICE_AREAS } from './core/services.data'
 import {
   radiusReference,
@@ -81,6 +82,8 @@ let freshnessTimer: number | undefined
 // What the Map tab last framed: entering the tab or a new position reframes the
 // radius, while a mere data refresh keeps the user's own pan and zoom.
 let mapFramedFor: string | undefined
+// The tab the view last drew, so a re-render of it keeps a pane's own scroll.
+let renderedTab: Tab | undefined
 
 const root: HTMLElement =
   document.getElementById('app') ??
@@ -121,6 +124,14 @@ const viewEl = requireEl<HTMLElement>('[data-view]')
 const cardEl = requireEl<HTMLElement>('[data-card]')
 const refreshButton = requireEl<HTMLButtonElement>('[data-refresh]')
 const tabButtons = root.querySelectorAll<HTMLButtonElement>('[data-tab]')
+const headerEl = requireEl<HTMLElement>('.app-header')
+const navEl = requireEl<HTMLElement>('.tab-bar')
+
+const isDesktop = watchDesktop(window, (desktop) => {
+  placeNav(navEl, desktop, headerEl)
+  render()
+})
+placeNav(navEl, isDesktop(), headerEl)
 
 const mapContainer = document.createElement('div')
 mapContainer.className = 'map-view'
@@ -151,7 +162,9 @@ root.addEventListener('click', (e) => {
 function showTab(tab: Tab): void {
   const previousTab = activeTab
   activeTab = tab
-  if (tab === 'map' && previousTab !== 'map') mapFramedFor = undefined
+  // On a desktop List shares the map too, and frames the radius like Map does.
+  const framesRadius = tab === 'map' || (tab === 'list' && isDesktop())
+  if (framesRadius && previousTab !== tab) mapFramedFor = undefined
   render()
   if (activeTab !== previousTab) viewEl.scrollTop = 0
   if (activeTab === 'map' || activeTab === 'trip') mapView.invalidateSize()
@@ -204,6 +217,7 @@ function renderCard(reference: PriceReference | undefined): void {
     tripActive: tripController.isActive,
   })
   cardEl.replaceChildren(close, detailContainer)
+  cardEl.dataset.host = cardHost(activeTab, isDesktop())
   cardEl.hidden = false
   if (focusCard) {
     focusCard = false
@@ -454,8 +468,71 @@ function syncFreshnessTimer(): void {
   }
 }
 
+function mapLayersAround(pos: LatLon): {
+  radarHits: RadarHit[]
+  serviceHits: ServiceAreaHit[]
+} {
+  const { radarLayerEnabled, servicesLayerEnabled, radiusKm } = store.state.settings
+  return {
+    radarHits: radarLayerEnabled ? nearbyRadars(pos, RADARS, radiusKm, RADAR_MARKER_CAP) : [],
+    serviceHits: servicesLayerEnabled
+      ? nearbyServiceAreas(pos, SERVICE_AREAS, radiusKm, SERVICE_MARKER_CAP)
+      : [],
+  }
+}
+
+// The map beside the stations: stacked on a phone, side by side on a desktop,
+// where the list pane comes first so keyboard order follows the eye.
+function renderMapSplit(
+  pos: LatLon,
+  sorted: Station[],
+  reference: PriceReference | undefined,
+  radarHits: RadarHit[],
+  serviceHits: ServiceAreaHit[],
+  withRadarList: boolean,
+): void {
+  const { settings } = store.state
+  const desktop = isDesktop()
+  const selectedId = selectedStation?.id
+  const split = document.createElement('div')
+  split.className = 'map-split'
+  const mapWrap = document.createElement('div')
+  mapWrap.className = 'map-split__map'
+  mapWrap.appendChild(mapContainer)
+  const listWrap = document.createElement('div')
+  listWrap.className = 'map-split__list'
+  listWrap.dataset.pane = ''
+  // The open card covers this pane; its rows must not take focus behind it.
+  listWrap.inert = selectedStation !== undefined && cardHost(activeTab, desktop) === 'pane'
+  renderPlaceStripIn(listWrap)
+  if (desktop) split.append(listWrap, mapWrap)
+  else split.append(mapWrap, listWrap)
+  viewEl.appendChild(split)
+  mapView.render(pos, sorted, settings.fuel, selectStation, {
+    selectedId,
+    reference,
+    radiusKm: settings.radiusKm,
+  })
+  if (radarHits.length > 0) mapView.renderRadars(radarHits.map((h) => h.radar))
+  else mapView.clearRadars()
+  if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map((h) => h.area))
+  else mapView.clearServiceAreas()
+  mapView.invalidateSize()
+  const frame = `${pos.lat},${pos.lon},${settings.radiusKm}`
+  if (frame !== mapFramedFor) {
+    mapFramedFor = frame
+    mapView.fitRadius(pos, settings.radiusKm)
+  }
+  if (selectedStation) mapView.panTo(selectedStation.pos)
+  if (sorted.length > 0)
+    renderStationList(listWrap, sorted, settings.fuel, pos, settings.sort, reference, selectedId)
+  if (withRadarList && radarHits.length > 0)
+    listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP, pos))
+}
+
 function render(): void {
   const state = store.state
+  const desktop = isDesktop()
 
   refreshStaticCopy()
 
@@ -471,6 +548,13 @@ function render(): void {
   refreshButton.disabled = busy
 
   viewEl.classList.toggle('is-loading', state.loading)
+  // On a desktop the view does not scroll, its panes do; each render rebuilds
+  // them, so a re-render of the same tab carries their scroll over.
+  const paneScroll =
+    desktop && activeTab === renderedTab
+      ? (viewEl.querySelector<HTMLElement>('[data-pane]')?.scrollTop ?? 0)
+      : 0
+  renderedTab = activeTab
   viewEl.replaceChildren()
 
   const selectedId = selectedStation?.id
@@ -496,11 +580,17 @@ function render(): void {
   if (activeTab === 'list') {
     const nearby = state.pos ? withinRadius(state.stations, state.pos, state.settings.radiusKm) : []
     notice = introducing ? undefined : noticeFor(nearby.length)
-    renderPlaceStripIn(viewEl)
+    const split = state.pos !== undefined && !introducing && !notice && desktop
+    // The split draws the strip in its own list pane.
+    if (!split) renderPlaceStripIn(viewEl)
     if (introducing) {
       renderFirstRunIn(viewEl)
     } else if (notice) {
       renderNotice(notice)
+    } else if (state.pos && desktop) {
+      const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
+      const { radarHits, serviceHits } = mapLayersAround(state.pos)
+      renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, false)
     } else if (state.pos) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
       renderStationList(
@@ -516,58 +606,14 @@ function render(): void {
   } else if (activeTab === 'map') {
     if (state.pos) {
       const nearby = withinRadius(state.stations, state.pos, state.settings.radiusKm)
-      const radarHits = state.settings.radarLayerEnabled
-        ? nearbyRadars(state.pos, RADARS, state.settings.radiusKm, RADAR_MARKER_CAP)
-        : []
-      const serviceHits = state.settings.servicesLayerEnabled
-        ? nearbyServiceAreas(state.pos, SERVICE_AREAS, state.settings.radiusKm, SERVICE_MARKER_CAP)
-        : []
+      const { radarHits, serviceHits } = mapLayersAround(state.pos)
       notice = noticeFor(nearby.length + radarHits.length + serviceHits.length)
       if (notice) {
         renderPlaceStripIn(viewEl)
         renderNotice(notice)
       } else {
         const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
-        const split = document.createElement('div')
-        split.className = 'map-split'
-        const mapWrap = document.createElement('div')
-        mapWrap.className = 'map-split__map'
-        mapWrap.appendChild(mapContainer)
-        const listWrap = document.createElement('div')
-        listWrap.className = 'map-split__list'
-        renderPlaceStripIn(listWrap)
-        split.append(mapWrap, listWrap)
-        viewEl.appendChild(split)
-        mapView.render(state.pos, sorted, state.settings.fuel, selectStation, {
-          selectedId,
-          reference,
-          radiusKm: state.settings.radiusKm,
-        })
-        if (radarHits.length > 0) mapView.renderRadars(radarHits.map((h) => h.radar))
-        else mapView.clearRadars()
-        if (serviceHits.length > 0) mapView.renderServiceAreas(serviceHits.map((h) => h.area))
-        else mapView.clearServiceAreas()
-        mapView.invalidateSize()
-        const frame = `${state.pos.lat},${state.pos.lon},${state.settings.radiusKm}`
-        if (frame !== mapFramedFor) {
-          mapFramedFor = frame
-          mapView.fitRadius(state.pos, state.settings.radiusKm)
-        }
-        if (selectedStation) mapView.panTo(selectedStation.pos)
-        if (sorted.length > 0)
-          renderStationList(
-            listWrap,
-            sorted,
-            state.settings.fuel,
-            state.pos,
-            state.settings.sort,
-            reference,
-            selectedId,
-          )
-        if (radarHits.length > 0)
-          listWrap.appendChild(
-            renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP, state.pos),
-          )
+        renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, true)
       }
     } else if (introducing) {
       renderFirstRunIn(viewEl)
@@ -582,6 +628,14 @@ function render(): void {
       ? radiusReference(state.stations, state.settings.fuel, tripPos, state.settings.radiusKm)
       : undefined
     cardReference = tripReference
+    const readout = document.createElement('div')
+    readout.className = 'trip-readout'
+    // On a desktop the readout is the side pane, left of the map and first in
+    // keyboard order; on a phone it follows the map down the page.
+    if (desktop) {
+      readout.dataset.pane = ''
+      viewEl.appendChild(readout)
+    }
     if (tripPos) {
       const nearby = withinRadius(state.stations, tripPos, state.settings.radiusKm)
       const mapWrap = document.createElement('div')
@@ -627,9 +681,7 @@ function render(): void {
       }
       mapView.invalidateSize()
     }
-    const readout = document.createElement('div')
-    readout.className = 'trip-readout'
-    viewEl.appendChild(readout)
+    if (!desktop) viewEl.appendChild(readout)
     const pricesUnavailable = state.error !== undefined && state.stations.length === 0
     // The trip view says what is left without prices; the top banner would say
     // it twice. A refused location takes that place while no trip runs.
@@ -650,6 +702,11 @@ function render(): void {
   // The inline error sits in the view, outside the live region; voice it once here.
   const announcement = inline && notice ? joinNotice(viewNoticeText(notice, !navigator.onLine)) : ''
   if (announceEl.textContent !== announcement) announceEl.textContent = announcement
+
+  if (paneScroll > 0) {
+    const pane = viewEl.querySelector<HTMLElement>('[data-pane]')
+    if (pane) pane.scrollTop = paneScroll
+  }
 
   renderCard(cardReference)
 }
