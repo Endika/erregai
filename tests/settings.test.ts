@@ -31,6 +31,12 @@ describe('settings', () => {
     saveSettings(loaded, s)
     expect(s.getItem('erregai.settings')).not.toContain('tripSort')
   })
+  it('gives a save from before the tank setting a 50 l tank', () => {
+    expect(DEFAULT_SETTINGS.tankLitres).toBe(50)
+    const s = memStore()
+    s.setItem('erregai.settings', JSON.stringify({ radiusKm: 20 }))
+    expect(loadSettings(s).tankLitres).toBe(50)
+  })
   it('ignores corrupt json and returns defaults', () => {
     const s = memStore()
     s.setItem('erregai.settings', '{bad')

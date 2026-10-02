@@ -21,6 +21,8 @@ export interface Settings {
   fuel: FuelId
   sort: SortKey
   radiusKm: number
+  // Litres a full tank takes; the List's answer card prices its saving on it.
+  tankLitres: number
   locale?: Locale
   theme: Theme
   alertVolume: number
@@ -40,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   fuel: DEFAULT_FUEL,
   sort: 'price',
   radiusKm: 15,
+  tankLitres: 50,
   theme: 'system',
   alertVolume: 1,
   alertVibrate: true,
