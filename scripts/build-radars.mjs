@@ -71,7 +71,12 @@ const fresh = {
 for (const [name, list] of Object.entries(fresh)) {
   console.log(`  ${name}: ${list.length} rows`)
 }
-const previous = existsSync(OUT) ? parseDataset(readFileSync(OUT, 'utf8')) : null
+let previous = null
+try {
+  previous = parseDataset(readFileSync(OUT, 'utf8'))
+} catch (e) {
+  if (e.code !== 'ENOENT') throw e
+}
 const { bySource, kept, missing } = keepUnreachable(fresh, previous)
 if (missing.length > 0) {
   console.error(`no radars from ${missing.join(', ')} and none to keep - aborting`)
