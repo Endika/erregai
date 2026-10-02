@@ -1,13 +1,13 @@
 import { bearingDeg, type LatLon } from '../core/geo'
-import type { RadarHit } from '../core/radars'
+import type { Radar, RadarHit } from '../core/radars'
 import { t } from '../i18n'
-import { formatDistance } from '../i18n/format'
+import { formatDistance, formatNumber, formatPk } from '../i18n/format'
 import { glyphSvg } from './map-icons'
 
 const COMPASS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'] as const
 
-// The bundled radars carry only their road, so with an origin each row also says
-// which way it lies: "2,5 km al norte" tells seven "A-8" rows apart.
+// Many radars carry only their road, so with an origin each row also says which
+// way it lies: "2,5 km al norte" tells seven "A-8" rows apart.
 function whereText(hit: RadarHit, origin: LatLon | undefined): string {
   const distance = formatDistance(hit.distanceKm)
   if (!origin) return distance
@@ -15,8 +15,47 @@ function whereText(hit: RadarHit, origin: LatLon | undefined): string {
   return t(`radar.toward.${point}`).replace('{distance}', distance)
 }
 
+function dirText(dir: string): string {
+  if (dir === 'creciente' || dir === 'decreciente') return t(`radar.dir.${dir}`)
+  return t('radar.dir.to').replace('{place}', dir)
+}
+
+function part(cls: string, text: string): HTMLElement {
+  const el = document.createElement('span')
+  el.className = `radar-list__${cls}`
+  el.textContent = text
+  return el
+}
+
+// With a PK the row reads "A-8 · PK 112 · sentido Bilbao"; the dots are drawn by
+// CSS so a part that wraps to a new line does not start with one.
+function renderVia(radar: Radar): HTMLElement {
+  if (radar.pk === undefined) return part('via', radar.via)
+  const via = document.createElement('span')
+  via.className = 'radar-list__via radar-list__via--pk'
+  via.append(
+    part('road', radar.via),
+    ' ',
+    part('pk', t('radar.pk').replace('{pk}', formatPk(radar.pk))),
+  )
+  if (radar.dir) {
+    const dir = document.createElement('span')
+    dir.className = 'radar-list__dir'
+    dir.appendChild(part('dir-text', dirText(radar.dir)))
+    via.append(' ', dir)
+  }
+  return via
+}
+
+export function radarAlertLabel(radar: Radar): string {
+  if (radar.limit === undefined) return t('radar.alert.body').replace('{via}', radar.via)
+  return t('radar.alert.bodyLimit')
+    .replace('{via}', radar.via)
+    .replace('{limit}', formatNumber(radar.limit))
+}
+
 // Shared radar list used by both the trip view and the map tab: a titled list of
-// radar hits (road name + distance), nearest first, capped to `limit`.
+// radar hits (road, PK and direction + distance), nearest first, capped to `limit`.
 export function renderRadarList(
   hits: readonly RadarHit[],
   titleKey: string,
@@ -43,9 +82,7 @@ export function renderRadarList(
     icon.setAttribute('aria-hidden', 'true')
     icon.innerHTML = glyphSvg('camera', 14)
 
-    const via = document.createElement('span')
-    via.className = 'radar-list__via'
-    via.textContent = hit.radar.via
+    const via = renderVia(hit.radar)
 
     const distance = document.createElement('span')
     distance.className = 'radar-list__distance'

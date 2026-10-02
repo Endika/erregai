@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import { renderBandLegend, renderList } from '../src/ui/list'
-import { renderRadarList } from '../src/ui/radar-list'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { radarAlertLabel, renderRadarList } from '../src/ui/radar-list'
 import { setLocale, t } from '../src/i18n'
-import type { RadarHit } from '../src/core/radars'
+import type { Radar, RadarHit } from '../src/core/radars'
 import type { Station } from '../src/core/station'
 
 const s = (id: string, price: number): Station => ({
@@ -251,5 +253,106 @@ describe('renderRadarList', () => {
       expect(icon.getAttribute('aria-hidden')).toBe('true')
       expect(icon.querySelector('svg.map-glyph')).not.toBeNull()
     }
+  })
+})
+
+describe('radar rows with a PK and a direction', () => {
+  const origin = { lat: 43, lon: -3 }
+  const row = (extra: Partial<Radar>) => {
+    const radar = { id: 'x', via: 'A-8', lat: 42.99, lon: -3.015, source: 'euskadi', ...extra }
+    const el = renderRadarList(
+      [{ radar, distanceKm: 1.6 } as RadarHit],
+      'radar.nearby.title',
+      5,
+      origin,
+    )
+    return el.querySelector('.radar-list__row')!
+  }
+  const text = (el: Element, cls: string) => el.querySelector(`.radar-list__${cls}`)?.textContent
+
+  beforeEach(() => setLocale('es'))
+
+  it('reads road, PK and direction, with the distance and bearing kept apart', () => {
+    const r = row({ pk: 112, dir: 'Bilbao' })
+    expect(text(r, 'road')).toBe('A-8')
+    expect(text(r, 'pk')).toBe('PK 112')
+    expect(text(r, 'dir')).toBe('sentido Bilbao')
+    expect(text(r, 'via')).toBe('A-8 PK 112 sentido Bilbao')
+    expect(text(r, 'distance')).toBe('1,6 km al suroeste')
+  })
+
+  it('says only road and PK when the source names no direction', () => {
+    const r = row({ pk: 445.35 })
+    expect(text(r, 'via')).toBe('A-8 PK 445,4')
+    expect(r.querySelector('.radar-list__dir')).toBeNull()
+  })
+
+  it("keeps today's row without a PK", () => {
+    const r = row({ dir: 'Bilbao' })
+    expect(text(r, 'via')).toBe('A-8')
+    expect(r.querySelector('.radar-list__via--pk')).toBeNull()
+    expect(r.querySelector('.radar-list__dir')).toBeNull()
+  })
+
+  it('names a direction along the PK', () => {
+    expect(text(row({ pk: 3.97, dir: 'creciente' }), 'dir')).toBe('sentido creciente')
+    expect(text(row({ pk: 3.97, dir: 'decreciente' }), 'dir')).toBe('sentido decreciente')
+  })
+
+  it('writes the PK with at most one decimal and no thousands separator', () => {
+    expect(text(row({ pk: 1106.18 }), 'pk')).toBe('PK 1106,2')
+    setLocale('en')
+    expect(text(row({ pk: 1106.18 }), 'pk')).toBe('km 1106.2')
+  })
+
+  it('in Basque, puts the destination first as Trafikoa does', () => {
+    setLocale('eu')
+    expect(text(row({ pk: 123.5, dir: 'Bilbao' }), 'dir')).toBe(
+      t('radar.dir.to').replace('{place}', 'Bilbao'),
+    )
+  })
+
+  // One line when it fits; at 390px the direction drops below and only it is cut
+  // short, with the separator dot clipped at the start of the line.
+  it('never cuts the road or the PK, only the direction', () => {
+    const css = readFileSync(resolve(import.meta.dirname, '../src/styles.css'), 'utf8').replace(
+      /\/\*[\s\S]*?\*\//g,
+      '',
+    )
+    // Every declaration aimed at a selector, across the rules that list it.
+    const rule = (sel: string) =>
+      [...css.matchAll(/\n([^{}\n][^{}]*)\{([^}]*)\}/g)]
+        .filter((m) => m[1].split(',').some((s) => s.trim() === sel))
+        .map((m) => m[2])
+        .join('')
+    expect(rule('.radar-list__via--pk')).toMatch(/flex-wrap: wrap/)
+    for (const part of ['.radar-list__road', '.radar-list__pk']) {
+      expect(rule(part)).toMatch(/flex: none/)
+      expect(rule(part)).toMatch(/white-space: nowrap/)
+    }
+    expect(rule('.radar-list__dir')).toMatch(/min-width: 0/)
+    expect(rule('.radar-list__dir')).toMatch(/max-width: 100%/)
+    expect(rule('.radar-list__dir-text')).toMatch(/text-overflow: ellipsis/)
+  })
+})
+
+describe('radarAlertLabel', () => {
+  const radar = (limit?: number): Radar => ({
+    id: 'r',
+    lat: 0,
+    lon: 0,
+    via: 'A-2',
+    source: 'catalunya',
+    ...(limit !== undefined && { limit }),
+  })
+
+  it('adds the speed limit when the source publishes one', () => {
+    setLocale('es')
+    expect(radarAlertLabel(radar(120))).toBe('Radar fijo en A-2 · 120 km/h')
+  })
+
+  it('keeps the plain label without one', () => {
+    setLocale('es')
+    expect(radarAlertLabel(radar())).toBe('Radar fijo en A-2')
   })
 })
