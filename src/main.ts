@@ -10,6 +10,8 @@ import { renderSettings } from './ui/settings'
 import { TripController } from './ui/trip'
 import { MapView } from './ui/map'
 import { renderSortBar } from './ui/sortBar'
+import { renderAnswerCard } from './ui/answer-card'
+import { bestChoice } from './core/best-choice'
 import { renderRadarList } from './ui/radar-list'
 import { statusBanner } from './ui/banner'
 import { createAnnouncer } from './ui/announcer'
@@ -397,6 +399,7 @@ function renderStationList(
   sort: SortKey,
   reference: PriceReference | undefined,
   selectedId?: string,
+  answer?: HTMLElement,
 ): void {
   container.appendChild(
     renderSortBar(sort, (key) => store.setSettings({ sort: key }), {
@@ -404,10 +407,23 @@ function renderStationList(
       onChange: (next) => store.setSettings({ fuel: next }),
     }),
   )
+  if (answer) container.appendChild(answer)
   if (reference) container.appendChild(renderBandLegend(store.state.settings.radiusKm))
   const listContainer = document.createElement('div')
   container.appendChild(listContainer)
   renderList(listContainer, sorted, fuel, origin, selectStation, { selectedId, reference })
+}
+
+function answerCard(
+  nearby: readonly Station[],
+  pos: LatLon,
+  reference: PriceReference | undefined,
+): HTMLElement | undefined {
+  const { fuel, tankLitres } = store.state.settings
+  const choice = bestChoice(nearby, fuel, pos, tankLitres, new Date())
+  return (
+    choice && renderAnswerCard(choice, { fuel, reference, tankLitres, onSelect: selectStation })
+  )
 }
 
 function applyTheme(theme: Settings['theme']): void {
@@ -490,6 +506,7 @@ function renderMapSplit(
   radarHits: RadarHit[],
   serviceHits: ServiceAreaHit[],
   withRadarList: boolean,
+  answer?: HTMLElement,
 ): void {
   const { settings } = store.state
   const desktop = isDesktop()
@@ -525,7 +542,16 @@ function renderMapSplit(
   }
   if (selectedStation) mapView.panTo(selectedStation.pos)
   if (sorted.length > 0)
-    renderStationList(listWrap, sorted, settings.fuel, pos, settings.sort, reference, selectedId)
+    renderStationList(
+      listWrap,
+      sorted,
+      settings.fuel,
+      pos,
+      settings.sort,
+      reference,
+      selectedId,
+      answer,
+    )
   if (withRadarList && radarHits.length > 0)
     listWrap.appendChild(renderRadarList(radarHits, 'radar.nearby.title', RADAR_LIST_CAP, pos))
 }
@@ -590,7 +616,8 @@ function render(): void {
     } else if (state.pos && desktop) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
       const { radarHits, serviceHits } = mapLayersAround(state.pos)
-      renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, false)
+      const answer = answerCard(nearby, state.pos, reference)
+      renderMapSplit(state.pos, sorted, reference, radarHits, serviceHits, false, answer)
     } else if (state.pos) {
       const sorted = sortStations(nearby, state.settings.fuel, state.pos, state.settings.sort)
       renderStationList(
@@ -601,6 +628,7 @@ function render(): void {
         state.settings.sort,
         reference,
         selectedId,
+        answerCard(nearby, state.pos, reference),
       )
     }
   } else if (activeTab === 'map') {

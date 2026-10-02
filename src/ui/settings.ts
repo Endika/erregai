@@ -11,6 +11,7 @@ const FUEL_DISTANCES_M: readonly number[] = [1000, 2000, 3000, 5000]
 // Prices come from one province per load, so a radius past ~50 km finds nothing
 // more; a free number let 500 through and looked like it meant something.
 const RADIUS_KM: readonly number[] = [5, 10, 15, 25, 50]
+const TANK_LITRES: readonly number[] = [30, 40, 50, 60, 70, 80]
 // Language endonyms are shown in their own language regardless of the
 // current UI locale (standard language-picker convention), so these are
 // not routed through t().
@@ -135,13 +136,11 @@ function section(titleText: string, fields: readonly HTMLElement[]): HTMLElement
   return section
 }
 
-// A radius saved before the fixed choices existed stays listed, so the control
+// A value saved before the fixed choices existed stays listed, so the control
 // shows what the app is actually using until the user picks another.
-function radiusOptions(current: number): SelectOption[] {
-  const values = RADIUS_KM.includes(current)
-    ? RADIUS_KM
-    : [...RADIUS_KM, current].sort((a, b) => a - b)
-  return values.map((km) => ({ value: String(km), label: `${formatNumber(km)} km` }))
+function numberOptions(choices: readonly number[], current: number, unit: string): SelectOption[] {
+  const values = choices.includes(current) ? choices : [...choices, current].sort((a, b) => a - b)
+  return values.map((n) => ({ value: String(n), label: `${formatNumber(n)} ${unit}` }))
 }
 
 function metersOptions(values: readonly number[]): SelectOption[] {
@@ -168,8 +167,15 @@ export function renderSettings(
       t('settings.radius'),
       'radiusKm',
       String(settings.radiusKm),
-      radiusOptions(settings.radiusKm),
+      numberOptions(RADIUS_KM, settings.radiusKm, 'km'),
       (value) => onChange({ radiusKm: Number(value) }),
+    ),
+    selectField(
+      t('settings.tank'),
+      'tankLitres',
+      String(settings.tankLitres),
+      numberOptions(TANK_LITRES, settings.tankLitres, 'l'),
+      (value) => onChange({ tankLitres: Number(value) }),
     ),
     selectField(
       t('settings.locale'),

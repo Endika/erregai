@@ -65,6 +65,10 @@ export function formatPercent(fraction: number, locale: Locale = getLocale()): s
   )
 }
 
+export function formatEuros(amount: number, locale: Locale = getLocale()): string {
+  return numberFormat(locale, 'eur', { style: 'currency', currency: 'EUR' }).format(amount)
+}
+
 export function formatNumber(n: number, locale: Locale = getLocale()): string {
   return numberFormat(locale, 'plain', {}).format(n)
 }

@@ -11,7 +11,7 @@ import { glyphSvg, type Glyph } from './map-icons'
 // Deep-link that respects the device's default maps app: Apple Maps on iOS
 // (which does not handle geo:), the OS chooser via geo: elsewhere (Android
 // respects the user's default; desktop browsers offer their handler).
-function mapsUrl(station: Station): string {
+export function mapsUrl(station: Station): string {
   const { lat, lon } = station.pos
   const label = encodeURIComponent(station.brand)
   const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)

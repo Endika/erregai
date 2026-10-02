@@ -49,6 +49,7 @@ describe('renderSettings', () => {
     )
     expect(fields).toEqual([
       'radiusKm',
+      'tankLitres',
       'locale',
       'theme',
       'servicesLayerEnabled',
@@ -131,6 +132,28 @@ describe('renderSettings', () => {
     radius.value = '25'
     radius.dispatchEvent(new Event('change'))
     expect(partials).toEqual([{ radiusKm: 25 }])
+  })
+
+  it('offers the tank as common sizes in litres, 50 l by default', () => {
+    setLocale('es')
+    const el = document.createElement('div')
+    const partials: Record<string, unknown>[] = []
+    renderSettings(el, DEFAULT_SETTINGS, (p) => partials.push(p))
+    const tank = el.querySelector<HTMLSelectElement>('[data-field="tankLitres"]')!
+    expect(tank.tagName).toBe('SELECT')
+    expect(tank.closest('label')!.textContent).toContain('Depósito')
+    expect([...tank.options].map((o) => o.textContent)).toEqual([
+      '30 l',
+      '40 l',
+      '50 l',
+      '60 l',
+      '70 l',
+      '80 l',
+    ])
+    expect(tank.value).toBe('50')
+    tank.value = '70'
+    tank.dispatchEvent(new Event('change'))
+    expect(partials).toEqual([{ tankLitres: 70 }])
   })
 
   it('shows a radius saved before the choices existed instead of silently picking another', () => {
