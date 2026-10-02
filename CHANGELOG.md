@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.30.0](https://github.com/Endika/erregai/compare/v1.29.0...v1.30.0) (2026-10-02)
+
+
+### Features
+
+* add PK, direction and speed limit to the bundled radars ([c1fa29e](https://github.com/Endika/erregai/commit/c1fa29e9e06fc9c151218ad9687a91b81505b959))
+* show PK and direction in the radar list and the limit in the radar alert ([4ebb87e](https://github.com/Endika/erregai/commit/4ebb87e2817f510178897bafa78d8728885ed209))
+
 ## [1.29.0](https://github.com/Endika/erregai/compare/v1.28.0...v1.29.0) (2026-10-02)
 
 
