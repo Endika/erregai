@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.32.1](https://github.com/Endika/erregai/compare/v1.32.0...v1.32.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **deps:** bump transitive brace-expansion past GHSA quadratic expansion ([c695aaf](https://github.com/Endika/erregai/commit/c695aaf98e90b92a02e4ac51685344d5c35ebd62))
+* **scripts:** read the previous radar dataset without an existsSync race ([62e2947](https://github.com/Endika/erregai/commit/62e2947f5680de8ece9ef897b29ceb2ebc131b23))
+
 ## [1.32.0](https://github.com/Endika/erregai/compare/v1.31.1...v1.32.0) (2026-10-02)
 
 
