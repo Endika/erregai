@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.29.0](https://github.com/Endika/erregai/compare/v1.28.0...v1.29.0) (2026-10-02)
+
+
+### Features
+
+* give desktop a two-pane layout with the nav in the header ([f780d4f](https://github.com/Endika/erregai/commit/f780d4fa8dd5e4930a5c940c3fa152c078be20ef))
+
+
+### Bug Fixes
+
+* resize the map whenever its container changes size ([71fc83a](https://github.com/Endika/erregai/commit/71fc83ac2947aae477d44e3f3fd9e7913fdfddc9))
+
 ## [1.28.0](https://github.com/Endika/erregai/compare/v1.27.4...v1.28.0) (2026-10-01)
 
 
