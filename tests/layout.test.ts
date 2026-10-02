@@ -1,5 +1,13 @@
 // @vitest-environment jsdom
-import { DESKTOP_QUERY, cardHost, placeNav, watchDesktop } from '../src/ui/layout'
+import {
+  DESKTOP_QUERY,
+  cardHost,
+  navTabs,
+  placeNav,
+  tabAcrossBreakpoint,
+  tabLabelKey,
+  watchDesktop,
+} from '../src/ui/layout'
 
 type Listener = (e: { matches: boolean }) => void
 
@@ -109,5 +117,45 @@ describe('placeNav', () => {
     placeNav(nav, true, header)
     placeNav(nav, true, header)
     expect(header.querySelectorAll('nav')).toHaveLength(1)
+  })
+})
+
+describe('navTabs and tabLabelKey', () => {
+  it('keeps four tabs on a phone, each with its own name', () => {
+    expect(navTabs(false)).toEqual(['list', 'map', 'trip', 'settings'])
+    expect(navTabs(false).map((tab) => tabLabelKey(tab, false))).toEqual([
+      'nav.list',
+      'nav.map',
+      'nav.trip',
+      'nav.settings',
+    ])
+  })
+
+  it('merges List and Map into one stations tab on a desktop', () => {
+    expect(navTabs(true)).toEqual(['list', 'trip', 'settings'])
+    expect(navTabs(true).map((tab) => tabLabelKey(tab, true))).toEqual([
+      'nav.stations',
+      'nav.trip',
+      'nav.settings',
+    ])
+  })
+})
+
+describe('tabAcrossBreakpoint', () => {
+  it('lands Map on the stations view when the window widens', () => {
+    expect(tabAcrossBreakpoint('map', true, 'map')).toBe('list')
+    expect(tabAcrossBreakpoint('list', true, 'list')).toBe('list')
+  })
+
+  it('narrows the stations view back to the last of List and Map used on the phone', () => {
+    expect(tabAcrossBreakpoint('list', false, 'map')).toBe('map')
+    expect(tabAcrossBreakpoint('list', false, 'list')).toBe('list')
+  })
+
+  it('leaves Trip and Settings where they are both ways', () => {
+    for (const tab of ['trip', 'settings'] as const) {
+      expect(tabAcrossBreakpoint(tab, true, 'map')).toBe(tab)
+      expect(tabAcrossBreakpoint(tab, false, 'map')).toBe(tab)
+    }
   })
 })

@@ -754,6 +754,60 @@ body {
   pointer-events: none;
 }
 
+/* Stations or radars beside the map: the sort buttons' segments, as radios.
+   The input covers its segment unseen, so the label's text is what is drawn. */
+.pane-switch {
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding-block: 0.5rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pane-switch__option {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pane-switch__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pane-switch__text {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.pane-switch__input:checked + .pane-switch__text {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  font-weight: 600;
+}
+
+.pane-switch__input:focus-visible + .pane-switch__text {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 /* The List's answer: the station card's type and tokens, in the list's column. */
 .answer-card {
   display: flex;
@@ -925,6 +979,7 @@ body {
 .station-row,
 .band-legend,
 .place-strip,
+.pane-switch,
 :is(.app-main, .map-split__list) > .sort-bar {
   --list-inline: max(1rem, calc((100% - 36rem) / 2));
   padding-inline: var(--list-inline);

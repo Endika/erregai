@@ -54,21 +54,24 @@ export function radarAlertLabel(radar: Radar): string {
     .replace('{limit}', formatNumber(radar.limit))
 }
 
-// Shared radar list used by both the trip view and the map tab: a titled list of
-// radar hits (road, PK and direction + distance), nearest first, capped to `limit`.
+// Shared radar list used by both the trip view and the map tab: a list of radar
+// hits (road, PK and direction + distance), nearest first, capped to `limit`.
+// Without a title where a control above already names it.
 export function renderRadarList(
   hits: readonly RadarHit[],
-  titleKey: string,
+  titleKey: string | undefined,
   limit: number,
   origin?: LatLon,
 ): HTMLElement {
   const section = document.createElement('div')
   section.className = 'radar-list'
 
-  const title = document.createElement('p')
-  title.className = 'radar-list__title'
-  title.textContent = t(titleKey)
-  section.appendChild(title)
+  if (titleKey) {
+    const title = document.createElement('p')
+    title.className = 'radar-list__title'
+    title.textContent = t(titleKey)
+    section.appendChild(title)
+  }
 
   const list = document.createElement('div')
   list.className = 'radar-list__items'

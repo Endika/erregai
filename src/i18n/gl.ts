@@ -22,6 +22,9 @@ export const gl: Record<string, string> = {
   'nav.map': 'Mapa',
   'nav.trip': 'Viaxe',
   'nav.settings': 'Axustes',
+  'nav.stations': 'Gasolineiras',
+  'pane.label': 'Amosar',
+  'pane.radars': 'Radares ({count})',
   'nav.close': 'Pechar',
 
   'sort.price': 'Prezo',
@@ -130,6 +133,7 @@ export const gl: Record<string, string> = {
   'fuel.alert.body': '{brand} na túa ruta',
   'radar.list.title': 'Radares diante',
   'radar.nearby.title': 'Radares próximos',
+  'radar.nearby.empty': 'Non hai radares a menos de {radius} km',
   'radar.toward.n': '{distance} ao norte',
   'radar.toward.ne': '{distance} ao nordés',
   'radar.toward.e': '{distance} ao leste',
