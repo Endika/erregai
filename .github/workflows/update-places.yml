@@ -1,0 +1,60 @@
+name: Update places
+
+on:
+  schedule:
+    # Day 5, offset from the radar (days 1 and 15) and service area (day 3)
+    # refreshes so two automated dataset PRs never land on top of each other.
+    - cron: '0 5 5 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout with the PAT so the branch push is authored by it and the
+      # opened PR triggers the required CI checks (a GITHUB_TOKEN push does not).
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Fetches the Ministerio's nationwide station listing. The local fallback
+      # under data/raw is gitignored and absent here, so a failed fetch yields
+      # zero places and the generator exits non-zero without writing anything.
+      - run: npm run data:places
+      - run: npm run type:check
+      - name: Open PR if the dataset changed
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if git diff --quiet -- src/core/places.data.ts; then
+            echo "Town list unchanged; nothing to do."
+            exit 0
+          fi
+          # Same floor as the generator: some 3,200 towns have a station, so
+          # under 2,000 rows means a partial response that must not overwrite
+          # what is committed.
+          count=$(grep -c '^  \["' src/core/places.data.ts || true)
+          if [ "${count:-0}" -lt 2000 ]; then
+            echo "Only ${count:-0} towns generated (<2000); refusing to overwrite the dataset." >&2
+            exit 1
+          fi
+          echo "Generated $count towns."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="chore/update-places-${GITHUB_RUN_ID}"
+          git checkout -b "$branch"
+          git add src/core/places.data.ts
+          git commit -m "chore(places): refresh the town list"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(places): refresh the town list" \
+            --body "Automated refresh of the bundled town list from the Ministerio para la Transición Ecológica station listing."
+          gh pr merge --rebase --auto "$branch"
