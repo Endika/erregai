@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.0](https://github.com/Endika/erregai/compare/v1.31.1...v1.32.0) (2026-10-02)
+
+
+### Features
+
+* merge List and Map on desktop and switch the map pane between stations and radars ([4ce9684](https://github.com/Endika/erregai/commit/4ce968475d7d01b13253349761a02aaf6e56085f))
+
 ## [1.31.1](https://github.com/Endika/erregai/compare/v1.31.0...v1.31.1) (2026-10-02)
 
 
