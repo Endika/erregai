@@ -1621,6 +1621,46 @@ body {
   white-space: nowrap;
 }
 
+/* Road, PK and direction share a line when it fits; otherwise a part wraps,
+   its dot clipped at the line start, and only the direction is cut short. */
+.radar-list__via--pk {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.9em;
+}
+
+.radar-list__road,
+.radar-list__pk {
+  flex: none;
+  white-space: nowrap;
+}
+
+.radar-list__pk,
+.radar-list__dir {
+  display: flex;
+}
+
+.radar-list__pk::before,
+.radar-list__dir::before {
+  content: '·';
+  content: '·' / '';
+  flex: none;
+  width: 0.9em;
+  margin-inline-start: -0.9em;
+  text-align: center;
+}
+
+.radar-list__dir {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.radar-list__dir-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .radar-list__distance {
   flex-shrink: 0;
   color: var(--color-muted);

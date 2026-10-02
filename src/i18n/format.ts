@@ -45,6 +45,11 @@ export function formatKm(km: number, locale: Locale = getLocale()): string {
   return `${n.format(km)} km`
 }
 
+// A kilometre point is a road label, not a quantity: never "1.106,2".
+export function formatPk(km: number, locale: Locale = getLocale()): string {
+  return numberFormat(locale, 'pk', { maximumFractionDigits: 1, useGrouping: false }).format(km)
+}
+
 // Ten-metre steps: a distance redrawn on every GPS fix would otherwise flicker
 // through every metre.
 export function formatDistance(km: number, locale: Locale = getLocale()): string {

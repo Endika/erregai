@@ -10,7 +10,7 @@ import {
   type TripUpdate,
 } from '../core/trip'
 import type { FixInfo } from '../core/heading'
-import { radarsAhead, nextRadarAlerts, type RadarHit } from '../core/radars'
+import { radarsAhead, nextRadarAlerts, type Radar, type RadarHit } from '../core/radars'
 import { nextProximityAlerts } from '../core/proximity'
 import { cheapAhead } from '../core/fuel-alert'
 import { RADARS, RADARS_DATASET_DATE } from '../core/radars.data'
@@ -39,7 +39,7 @@ import {
   slotId,
   type SlotAlert,
 } from './alert-slot'
-import { renderRadarList } from './radar-list'
+import { radarAlertLabel, renderRadarList } from './radar-list'
 import type { MapView } from './map'
 import type { Store } from '../app/store'
 import type { Announce } from './announcer'
@@ -71,7 +71,7 @@ type GpsLine = GpsStatus | 'heading'
 interface RadarAlert {
   id: string
   target: LatLon
-  via: string
+  radar: Radar
 }
 
 export class TripController {
@@ -241,7 +241,7 @@ export class TripController {
         this.radarBanner = {
           id: nearest.radar.id,
           target: { lat: nearest.radar.lat, lon: nearest.radar.lon },
-          via: nearest.radar.via,
+          radar: nearest.radar,
         }
         this.announce(`${radarKey(nearest.distanceKm)}. ${body}`, 'assertive')
         notify(t('radar.alert.title'), body)
@@ -401,7 +401,7 @@ export class TripController {
         kind: 'radar',
         id: this.radarBanner.id,
         key: radarKey(haversineKm(pos, this.radarBanner.target)),
-        label: t('radar.alert.body').replace('{via}', this.radarBanner.via),
+        label: radarAlertLabel(this.radarBanner.radar),
       })
     }
     if (this.tripFuel !== this.store.state.settings.fuel) return alerts
