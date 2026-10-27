@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.2](https://github.com/Endika/erregai/compare/v1.32.1...v1.32.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** declare @types/node instead of relying on a transitive peer ([37addb9](https://github.com/Endika/erregai/commit/37addb961a267be6dea8d589ef2c87c4176fd0a4))
+
 ## [1.32.1](https://github.com/Endika/erregai/compare/v1.32.0...v1.32.1) (2026-10-02)
 
 
