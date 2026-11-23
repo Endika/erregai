@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.32.3](https://github.com/Endika/erregai/compare/v1.32.2...v1.32.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* **pwa:** precache the app again so installed apps update ([e1497f5](https://github.com/Endika/erregai/commit/e1497f55538f339a1ce209388eff92ec96deba21))
+
 ## [1.32.2](https://github.com/Endika/erregai/compare/v1.32.1...v1.32.2) (2026-10-27)
 
 
