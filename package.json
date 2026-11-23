@@ -1,11 +1,11 @@
 {
   "name": "erregai",
   "version": "1.32.2",
-  "description": "Nearby Spanish fuel stations with prices — offline-first PWA.",
+  "description": "Nearby Spanish fuel stations with prices \u2014 offline-first PWA.",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/check-precache.mjs",
     "type:check": "tsc --noEmit",
     "format": "prettier --write \"{src,tests}/**/*.{ts,json,css}\"",
     "format:check": "prettier --check \"{src,tests}/**/*.{ts,json,css}\"",
@@ -43,6 +43,9 @@
     "vitest": "^5.1.0"
   },
   "overrides": {
-    "minimatch": "^11.0.1"
+    "minimatch": "^11.0.1",
+    "workbox-build": {
+      "glob": "^13.0.0"
+    }
   }
 }
